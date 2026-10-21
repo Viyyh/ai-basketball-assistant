@@ -20,6 +20,7 @@
 │   ├── scope-v1.1.md             本版要做的增量范围（与 prd 冲突处以此为准）
 │   ├── decisions.md              决策记录 ADR（含被否掉的方案与原因）
 │   ├── fiba-conformance.md       FIBA 规则符合性对照（场地尺寸、三分线、标线）
+│   ├── shooting-guide.md         素材怎么拍：机位、距离、设置、现场记录、拍完验收
 │   └── architecture.md           仓库结构与数据流
 ├── design/                       界面与架构设计稿（v0.1，参考）
 ├── contracts/                    报告契约 v1.1 + 零依赖校验器 + 样例
@@ -110,6 +111,9 @@ PYTHONPATH=packages/params:services/pipeline python3 -m basketball_pipeline rend
 
 注意：这一层**不做**篮球语义。没有标定就没有"三分线内/外"，没有篮筐位置就没有命中率。
 那些要等事件提取（下一步）。
+
+**自己拍素材之前，先读 [`docs/shooting-guide.md`](docs/shooting-guide.md)**：机位、距离、相机设置、
+现场要记的东西、拍完当场验收的 5 条。这条链路里最贵的一次错误是拍完 40 分钟才发现号码认不出来。
 
 ## 三层可信度
 
