@@ -1,0 +1,105 @@
+<view class="page">
+
+  <view wx:if="{{loading}}" class="pl-loading">加载球员…</view>
+
+  <block wx:else>
+
+    <!-- 搜索 + 排序 -->
+    <view class="pl-toolbar">
+      <view class="field pl-search">
+        <input class="field__input" value="{{keyword}}" bindinput="onSearchInput"
+               placeholder="🔍 搜索姓名 / 号码" placeholder-class="field__placeholder" />
+      </view>
+      <view class="btn btn--ghost btn--sm" bindtap="onToggleSortMenu">
+        排序{{showSortMenu ? ' ▴' : ' ▾'}}
+      </view>
+    </view>
+
+    <view wx:if="{{showSortMenu}}" class="pl-sortmenu">
+      <view
+        wx:for="{{sorts}}"
+        wx:key="key"
+        class="pl-sortmenu__item {{activeSort === item.key ? 'pl-sortmenu__item--on' : ''}}"
+        data-key="{{item.key}}"
+        bindtap="onTapSort"
+      >{{item.label}}</view>
+    </view>
+
+    <!-- 位置筛选 -->
+    <scroll-view class="pl-positions" scroll-x enable-flex>
+      <view
+        wx:for="{{positions}}"
+        wx:key="key"
+        class="fchip {{activePosition === item.key ? 'fchip--on' : ''}}"
+        data-key="{{item.key}}"
+        bindtap="onTapPosition"
+      >{{item.label}}{{item.key === 'ALL' ? ' ' + totalCount : ''}}</view>
+    </scroll-view>
+
+    <!-- 数据不完整提醒 -->
+    <view wx:if="{{incompleteCount && hasAnyData}}" class="alert alert--warn pl-warn" bindtap="onGoAttribution">
+      ⚠ {{incompleteCount}} 名球员数据不完整，补录后自动更新 · 点击去补录
+    </view>
+
+    <!-- 全新账号的空状态：引导录第一场比赛，而不是一堆「—」 -->
+    <block wx:if="{{!hasAnyData && !totalCount}}">
+      <empty-state scene="noPlayers" bind:action="onAddPlayer" />
+    </block>
+
+    <block wx:elif="{{!hasAnyData && totalCount}}">
+      <empty-state
+        icon="🏀"
+        title="还没有球员数据"
+        desc="名单里已有 {{totalCount}} 名球员，但还没有已完成补录的比赛。录一场并补录后，这里会显示每人的场均数据与投篮分布。"
+        action="开始新录制"
+        bind:action="onNewRecording"
+      />
+    </block>
+
+    <!-- 球员列表 -->
+    <view class="pl-list" wx:if="{{filtered.length}}">
+      <view
+        wx:for="{{filtered}}"
+        wx:key="id"
+        class="item {{item.incomplete ? 'item--dashed' : ''}} {{item.gamesPlayed ? '' : 'item--dim'}}"
+        data-id="{{item.id}}"
+        bindtap="onTapPlayer"
+      >
+        <view class="item__avatar {{item.incomplete ? 'item__avatar--warn' : 'item__avatar--accent'}}">
+          {{item.number}}
+        </view>
+        <view class="item__body">
+          <view class="item__nm">
+            {{item.number}}号 {{item.name}}
+            <text class="chip chip--player pl-pos">{{item.position}}</text>
+          </view>
+          <view class="item__sub {{item.incomplete ? 'pl-sub--warn' : ''}}">
+            <block wx:if="{{!item.gamesPlayed}}">本赛季未出场</block>
+            <block wx:elif="{{item.incomplete}}">{{item.gamesText}} · 数据不完整</block>
+            <block wx:else>{{item.gamesText}} · 命中率 {{item.fgPctText}}</block>
+          </view>
+        </view>
+        <view class="item__val">
+          <!-- 空数据显示「—」不显示 0 -->
+          <view class="item__val-n {{item.ppgText === '—' ? 'pl-na' : ''}}">{{item.ppgText}}</view>
+          <view class="item__val-l">场均得分</view>
+        </view>
+      </view>
+    </view>
+
+    <empty-state
+      wx:elif="{{totalCount}}"
+      scene="noResult"
+      bind:action="onTapPosition"
+      data-key="ALL"
+    />
+
+    <view class="pl-add" bindtap="onAddPlayer">+ 添加球员</view>
+
+    <view class="pl-note">
+      篮板、助攻、抢断需 AI 逐人识别，第一版不采集，显示为「—」而非估算值
+    </view>
+
+  </block>
+
+</view>

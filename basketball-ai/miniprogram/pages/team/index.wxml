@@ -1,0 +1,111 @@
+<view class="page">
+
+  <view wx:if="{{loading}}" class="tm-loading">加载球队数据…</view>
+
+  <block wx:else>
+
+    <!-- 球队头卡：身份锚点 + 默认参数标签 -->
+    <view class="card card--dark tm-head" wx:if="{{team}}">
+      <view class="tm-head__row">
+        <view class="tm-head__logo">{{team.logoText || '队'}}</view>
+        <view class="tm-head__main">
+          <view class="tm-head__name">{{team.name}}</view>
+          <view class="tm-head__sub">主教练 · {{team.coachName}} · {{team.playerCount || 0}} 名球员</view>
+          <!-- 默认年龄段与赛制：新建活动时自动带出（球队页设计 v0.2） -->
+          <view class="tm-head__tags" wx:if="{{defaultAgeLabel || defaultFormatLabel}}">
+            <text wx:if="{{defaultAgeLabel}}" class="tm-tag">默认 {{defaultAgeLabel}}</text>
+            <text wx:if="{{defaultFormatLabel}}" class="tm-tag">默认 {{defaultFormatLabel}}</text>
+          </view>
+        </view>
+        <view class="tm-head__edit" bindtap="onEditTeam">✎</view>
+      </view>
+
+      <view class="tm-head__stats" wx:if="{{seasonRecord.scopeLabel}}">
+        <view class="tm-hs">
+          <view class="tm-hs__n">{{seasonRecord.wins}}<text class="tm-hs__u">胜</text>{{seasonRecord.losses}}<text class="tm-hs__u">负</text></view>
+          <view class="tm-hs__l">{{seasonRecord.scopeLabel}}</view>
+        </view>
+        <view class="tm-hs">
+          <view class="tm-hs__n">{{seasonRecord.ppg}}</view>
+          <view class="tm-hs__l">场均得分</view>
+        </view>
+        <view class="tm-hs">
+          <view class="tm-hs__n">{{seasonRecord.fgPct}}</view>
+          <view class="tm-hs__l">命中率</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 待补录提醒：与首页同一逻辑，补录没完成球员数据就不准 -->
+    <view
+      wx:if="{{pending}}"
+      class="pending {{pendingOverdue ? 'pending--overdue' : ''}}"
+      bindtap="onGoPending"
+      hover-class="pending--hover"
+    >
+      <view class="pending__icon">{{pendingOverdue ? '!' : '⚠'}}</view>
+      <view class="pending__body">
+        <view class="pending__title">
+          <block wx:if="{{pendingOverdue}}">{{pendingCount}} 场严重逾期，数据未汇总</block>
+          <block wx:else>{{pendingCount}} 场待补录，数据未汇总</block>
+        </view>
+        <view class="pending__desc">
+          最旧：{{pending.dateText}} {{pending.name}} · 还差 {{pending.remaining}} 个事件
+        </view>
+      </view>
+      <view class="pending__arrow">›</view>
+    </view>
+
+    <!-- 四个模块入口：颜色即导航 -->
+    <view class="sec-label">球队资产</view>
+
+    <view class="tm-mods">
+      <view
+        wx:for="{{modules}}"
+        wx:key="key"
+        class="card mod-card mod-card--{{item.tone}}"
+        data-url="{{item.url}}"
+        bindtap="onTapModule"
+        hover-class="tm-mod--hover"
+      >
+        <view class="mod-card__icon">{{item.icon}}</view>
+        <view class="flex1">
+          <view class="card__title">{{item.title}}</view>
+          <view class="card__sub">{{item.sub}}{{item.extra}}</view>
+        </view>
+        <view class="mod-card__arrow">›</view>
+      </view>
+    </view>
+
+    <!-- 近期比赛 -->
+    <view class="sec-label">近期比赛</view>
+
+    <block wx:if="{{recent.length}}">
+      <view
+        wx:for="{{recent}}"
+        wx:key="id"
+        class="item"
+        data-id="{{item.id}}"
+        data-status="{{item.status}}"
+        bindtap="onTapActivity"
+      >
+        <view class="item__avatar {{item.hasScore ? (item.won ? 'item__avatar--ok' : 'item__avatar--err') : ''}}">
+          <block wx:if="{{!item.hasScore}}">·</block>
+          <block wx:elif="{{item.won}}">胜</block>
+          <block wx:else>负</block>
+        </view>
+        <view class="item__body">
+          <view class="item__nm">{{item.dateText}} · {{item.name}}</view>
+          <view class="item__sub">{{item.templateText}}</view>
+        </view>
+        <view class="item__val">
+          <view class="item__val-n" wx:if="{{item.hasScore}}">{{item.scoreText}}</view>
+        </view>
+      </view>
+    </block>
+
+    <empty-state wx:else scene="noGames" bind:action="onNewRecording" />
+
+  </block>
+
+</view>

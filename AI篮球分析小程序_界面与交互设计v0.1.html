@@ -1,0 +1,1657 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>AI 篮球分析小程序 · 界面与交互设计 v0.1</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  :root {
+    --ink: #1e293b;
+    --ink-2: #475569;
+    --ink-3: #94a3b8;
+    --line: #cbd5e1;
+    --line-2: #e2e8f0;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --fill: #f1f5f9;
+    --fill-2: #e2e8f0;
+    --accent: #2563eb;
+    --accent-2: #dbeafe;
+    --warn: #f59e0b;
+    --warn-2: #fef3c7;
+    --ok: #16a34a;
+    --ok-2: #dcfce7;
+    --err: #dc2626;
+    --err-2: #fee2e2;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    margin: 0;
+    padding: 0;
+    line-height: 1.7;
+    font-size: 14px;
+  }
+  .wrap { max-width: 1220px; margin: 0 auto; padding: 40px 32px 80px; }
+  header { border-bottom: 1px solid var(--line); padding-bottom: 20px; margin-bottom: 32px; }
+  header h1 { font-size: 26px; margin: 0 0 8px; font-weight: 600; letter-spacing: -0.01em; }
+  header .meta { color: var(--ink-2); font-size: 13px; }
+  header .meta span { margin-right: 16px; }
+
+  /* TOC */
+  .toc {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 40px;
+  }
+  .toc h3 { margin: 0 0 12px; font-size: 14px; color: var(--ink-2); font-weight: 600; letter-spacing: 0.02em; }
+  .toc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px 20px;
+    font-size: 13px;
+  }
+  .toc-grid a { color: var(--ink); text-decoration: none; padding: 4px 0; }
+  .toc-grid a:hover { color: var(--accent); }
+  .toc-num { display: inline-block; width: 24px; color: var(--ink-3); font-family: "SF Mono", Consolas, monospace; }
+
+  /* Section for each screen */
+  section.screen { margin-bottom: 60px; scroll-margin-top: 24px; }
+  section.screen > h2 {
+    font-size: 20px;
+    margin: 0 0 6px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .badge-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px; height: 28px;
+    background: var(--accent);
+    color: white;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .badge-num.gray { background: var(--ink-3); }
+  .badge-num.warn { background: var(--warn); }
+  .screen-desc { color: var(--ink-2); margin: 0 0 20px; font-size: 14px; padding-left: 38px; }
+
+  .grid { display: grid; grid-template-columns: 340px 1fr; gap: 32px; align-items: start; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+  /* Phone frame */
+  .phone {
+    width: 320px; height: 640px;
+    border: 2px solid var(--ink);
+    border-radius: 32px;
+    background: white;
+    padding: 12px 10px;
+    position: relative;
+    box-shadow: 0 4px 14px rgba(30, 41, 59, 0.06);
+    overflow: hidden;
+  }
+  .phone::before {
+    content: "";
+    position: absolute;
+    top: 6px; left: 50%; transform: translateX(-50%);
+    width: 60px; height: 5px; background: var(--ink);
+    border-radius: 3px;
+  }
+  .screen-body {
+    width: 100%; height: 100%;
+    background: white;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-radius: 22px;
+    position: relative;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  .screen-body::-webkit-scrollbar { width: 0; }
+
+  /* Annotations */
+  .notes h4 {
+    font-size: 13px;
+    margin: 16px 0 8px;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .notes h4:first-child { margin-top: 0; }
+  .notes ul { margin: 0 0 16px; padding-left: 20px; color: var(--ink-2); font-size: 13.5px; }
+  .notes li { margin-bottom: 6px; }
+  .callout {
+    background: var(--warn-2);
+    border-left: 3px solid var(--warn);
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #78350f;
+    margin: 8px 0 16px;
+    border-radius: 0 6px 6px 0;
+  }
+  .callout.info { background: var(--accent-2); border-color: var(--accent); color: #1e3a8a; }
+  .callout.risk { background: var(--err-2); border-color: var(--err); color: #7f1d1d; }
+  .callout.ok { background: var(--ok-2); border-color: var(--ok); color: #14532d; }
+  .callout b { font-weight: 600; }
+
+  /* Wireframe components */
+  .wf-top {
+    height: 28px;
+    background: var(--fill);
+    border-radius: 8px;
+    display: flex; align-items: center;
+    padding: 0 10px;
+    font-size: 11px;
+    color: var(--ink-3);
+    margin-bottom: 8px;
+  }
+  .wf-nav {
+    display: flex; justify-content: space-around;
+    padding: 8px 6px;
+    border-top: 1px solid var(--line-2);
+    background: white;
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    font-size: 10px;
+    color: var(--ink-3);
+  }
+  .wf-nav span { flex: 1; text-align: center; }
+  .wf-nav span.active { color: var(--accent); font-weight: 600; }
+  .wf-nav .nav-inner { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .wf-nav .nav-icon { width: 16px; height: 16px; background: currentColor; border-radius: 3px; opacity: 0.35; }
+  .wf-nav .nav-icon.circle { border-radius: 50%; }
+  .wf-nav .nav-icon.round { border-radius: 8px; }
+
+  .content { padding: 0 12px 60px; }
+
+  .card {
+    background: white;
+    border: 1.5px dashed var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+  }
+  .card.fill { background: var(--fill); border-style: solid; }
+  .card.accent { background: var(--accent-2); border-color: var(--accent); border-style: solid; }
+  .card.warn { background: var(--warn-2); border-color: var(--warn); border-style: solid; }
+  .card.dark { background: #0f172a; border-color: #0f172a; color: #cbd5e1; border-style: solid; }
+  .card-title { font-size: 12px; color: var(--ink); font-weight: 600; margin-bottom: 4px; }
+  .card-sub { font-size: 11px; color: var(--ink-3); }
+  .card-body { font-size: 11px; color: var(--ink-2); }
+
+  .btn {
+    display: inline-block;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    text-align: center;
+  }
+  .btn.primary { background: var(--accent); color: white; }
+  .btn.ghost { background: transparent; border: 1.5px solid var(--line); color: var(--ink-2); }
+  .btn.warn { background: var(--err); color: white; border-radius: 50%; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; padding: 0; }
+  .btn.block { display: block; width: 100%; }
+  .btn.small { padding: 4px 10px; font-size: 11px; }
+
+  .row { display: flex; gap: 8px; align-items: center; }
+  .row.space-between { justify-content: space-between; }
+  .col { display: flex; flex-direction: column; gap: 6px; }
+
+  .field {
+    border: 1.5px dashed var(--line);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 11px;
+    color: var(--ink-3);
+    margin-bottom: 8px;
+  }
+  .field label { display: block; font-size: 10px; color: var(--ink-3); margin-bottom: 2px; }
+
+  .chip {
+    display: inline-block;
+    padding: 2px 8px;
+    background: var(--fill);
+    border-radius: 10px;
+    font-size: 10px;
+    color: var(--ink-2);
+  }
+  .chip.accent { background: var(--accent-2); color: var(--accent); }
+  .chip.warn { background: var(--warn-2); color: #92400e; }
+  .chip.ok { background: var(--ok-2); color: #14532d; }
+  .chip.err { background: var(--err-2); color: #7f1d1d; }
+  .chip.gray { background: var(--fill); color: var(--ink-3); }
+
+  /* 选项格子：用于年龄段 / 赛制这类单选枚举 */
+  .opt-cell {
+    border: 1.5px solid var(--line);
+    border-radius: 6px;
+    padding: 5px 2px;
+    text-align: center;
+    font-size: 9.5px;
+    color: var(--ink-2);
+    background: white;
+    line-height: 1.3;
+  }
+  .opt-cell.sel { background: var(--accent); border-color: var(--accent); color: white; font-weight: 500; }
+  .opt-cell .sub-lbl { display: block; font-size: 8.5px; opacity: 0.75; margin-top: 1px; }
+  .opt-grid { display: grid; gap: 4px; margin-bottom: 4px; }
+  .opt-grid.c5 { grid-template-columns: repeat(5, 1fr); }
+  .opt-grid.c4 { grid-template-columns: repeat(4, 1fr); }
+  .req { color: var(--err); font-weight: 600; }
+  .hint-line {
+    font-size: 10px; color: var(--accent); background: var(--accent-2);
+    border-radius: 6px; padding: 5px 8px; margin: 6px 0 10px; line-height: 1.45;
+  }
+  .hint-line.warn { color: #92400e; background: var(--warn-2); }
+
+  .seg {
+    display: flex;
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  .seg span { flex: 1; text-align: center; padding: 6px; font-size: 11px; color: var(--ink-2); background: white; }
+  .seg span.active { background: var(--accent); color: white; font-weight: 500; }
+
+  .progress-ring {
+    width: 100px; height: 100px;
+    margin: 12px auto 8px;
+    position: relative;
+  }
+  .progress-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .progress-ring circle { fill: none; stroke-width: 8; }
+  .progress-ring .track { stroke: var(--line-2); }
+  .progress-ring .bar { stroke: var(--accent); stroke-linecap: round; }
+  .progress-ring .pct {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 600; color: var(--accent);
+  }
+
+  .stepper { padding: 0 4px; }
+  .step { display: flex; gap: 10px; padding: 6px 0; font-size: 11px; }
+  .step .dot { width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; color: white; }
+  .step.done .dot { background: var(--ok); }
+  .step.doing .dot { background: var(--accent); }
+  .step.todo .dot { background: var(--line-2); color: var(--ink-3); }
+  .step .label { color: var(--ink-2); padding-top: 1px; }
+  .step.done .label { color: var(--ink-3); text-decoration: line-through; }
+  .step.doing .label { color: var(--accent); font-weight: 500; }
+
+  /* Court SVG container */
+  .court {
+    background: var(--fill);
+    border: 1.5px solid var(--line);
+    border-radius: 6px;
+    padding: 6px;
+    text-align: center;
+  }
+  .court svg { width: 100%; height: auto; display: block; }
+
+  .event-list { display: flex; flex-direction: column; gap: 6px; }
+  .event {
+    display: flex; gap: 8px; align-items: center;
+    background: white;
+    border: 1.5px solid var(--line-2);
+    border-radius: 8px;
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+  .event .thumb { width: 48px; height: 32px; background: var(--fill-2); border-radius: 4px; flex-shrink: 0; }
+  .event .body { flex: 1; }
+  .event .type { color: var(--ink); font-weight: 500; }
+  .event .time { color: var(--ink-3); font-size: 10px; }
+  .event .who { color: var(--ink-2); font-size: 10px; margin-top: 2px; }
+  .event.pending { border-color: var(--warn); background: #fffbeb; }
+  .event.done { border-color: var(--line-2); }
+
+  .sheet {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    background: white;
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -6px 20px rgba(0,0,0,0.15);
+    padding: 12px;
+    max-height: 460px;
+    overflow-y: auto;
+  }
+  .sheet .handle { width: 36px; height: 4px; background: var(--line-2); border-radius: 2px; margin: 0 auto 10px; }
+  .sheet-title { font-size: 12px; font-weight: 600; margin-bottom: 8px; }
+
+  .player {
+    aspect-ratio: 16/9;
+    background: #0f172a;
+    border-radius: 8px;
+    position: relative;
+    margin-bottom: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: #64748b; font-size: 10px;
+  }
+  .player .play {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: rgba(255,255,255,0.9); color: var(--ink);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .player .timeline {
+    position: absolute; bottom: 8px; left: 8px; right: 8px;
+    height: 3px; background: rgba(255,255,255,0.3); border-radius: 2px;
+  }
+  .player .timeline .p { width: 40%; height: 100%; background: white; border-radius: 2px; }
+  .player .time-lbl {
+    position: absolute; bottom: 20px; right: 8px;
+    color: white; font-size: 9px; opacity: 0.7;
+  }
+
+  .person-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px; }
+  .person {
+    aspect-ratio: 1;
+    border: 1.5px dashed var(--line);
+    border-radius: 8px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 10px; color: var(--ink-3);
+    background: white;
+  }
+  .person .avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--fill); margin-bottom: 3px;
+  }
+  .person.selected { border-color: var(--accent); border-style: solid; background: var(--accent-2); color: var(--accent); font-weight: 500; }
+  .person.selected .avatar { background: var(--accent); opacity: 0.4; }
+
+  .scrubber { height: 20px; background: var(--fill); border-radius: 10px; position: relative; margin: 10px 0; }
+  .scrubber::after {
+    content: ""; position: absolute; top: 2px; left: 40%; width: 14px; height: 14px;
+    background: white; border: 2px solid var(--accent); border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  .scrubber-labels { display: flex; justify-content: space-between; font-size: 9px; color: var(--ink-3); }
+
+  .stat-tile {
+    background: white;
+    border: 1.5px solid var(--line-2);
+    border-radius: 8px;
+    padding: 6px 4px;
+    text-align: center;
+  }
+  .stat-tile .num { font-size: 16px; font-weight: 600; color: var(--ink); }
+  .stat-tile .lbl { font-size: 10px; color: var(--ink-3); margin-top: 1px; }
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px; }
+
+  .scorecard {
+    background: linear-gradient(90deg, #1e293b, #334155);
+    color: white;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-style: solid;
+  }
+  .scorecard .teams { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .scorecard .team { flex: 1; font-size: 11px; opacity: 0.9; }
+  .scorecard .score { font-size: 24px; font-weight: 600; }
+  .scorecard .vs { padding: 0 8px; opacity: 0.6; font-size: 12px; }
+  .scorecard .meta-row { font-size: 10px; opacity: 0.7; text-align: center; }
+
+  .empty {
+    padding: 40px 20px; text-align: center; color: var(--ink-3); font-size: 11px;
+  }
+  .empty .box { width: 48px; height: 48px; border: 1.5px dashed var(--line); border-radius: 12px; margin: 0 auto 10px; }
+
+  .rec-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: var(--err); color: white;
+    padding: 2px 8px; border-radius: 10px;
+    font-size: 10px; font-weight: 500;
+  }
+  .rec-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: white; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  .filter-chip {
+    display: inline-block; padding: 4px 10px; background: white; border: 1.5px solid var(--line);
+    border-radius: 12px; font-size: 11px; color: var(--ink-2);
+  }
+  .filter-chip.active { background: var(--ink); color: white; border-color: var(--ink); }
+
+  /* Design language */
+  section.design-lang { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--line); }
+  section.design-lang h2 { font-size: 20px; margin: 0 0 16px; font-weight: 600; }
+  .color-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+  .color-tile {
+    flex: 1; min-width: 120px;
+    padding: 10px 12px; border-radius: 8px;
+    font-size: 12px; font-weight: 500;
+  }
+  .color-tile small { display: block; font-weight: 400; font-size: 11px; opacity: 0.75; margin-top: 2px; }
+
+  .pattern-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .pattern {
+    background: white; border: 1px solid var(--line); border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .pattern h4 { font-size: 14px; margin: 0 0 4px; font-weight: 600; }
+  .pattern p { font-size: 12.5px; color: var(--ink-2); margin: 0; }
+
+  .callout.open-q { background: white; border: 1px solid var(--line); border-left: 3px solid var(--ink-3); border-radius: 0 6px 6px 0; padding: 12px 14px; margin-top: 8px; }
+  .callout.open-q ol { margin: 6px 0 0; padding-left: 20px; color: var(--ink-2); }
+  .callout.open-q li { margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>AI 篮球分析小程序 · 界面与交互设计</h1>
+  <div class="meta">
+    <span>版本 v0.1.1（中保真线框）</span>
+    <span>日期 2026-10-11</span>
+    <span>配套：AI篮球分析小程序_第一版范围确认.md · 架构图与流程图.html · 球队页设计v0.1.html</span>
+  </div>
+</header>
+
+<div class="toc">
+  <h3>10 张关键屏</h3>
+  <div class="toc-grid">
+    <a href="#s1"><span class="toc-num">01</span>首页 · 教练工作台</a>
+    <a href="#s2"><span class="toc-num">02</span>新建活动 · 模板/年龄段/赛制</a>
+    <a href="#s3"><span class="toc-num">03</span>录制页</a>
+    <a href="#s4"><span class="toc-num">04</span>上传中 · 断点续传</a>
+    <a href="#s5"><span class="toc-num">05</span>处理中 · AI Pipeline 状态</a>
+    <a href="#s6"><span class="toc-num">06</span>报告总览 · 比赛/团队对抗</a>
+    <a href="#s7"><span class="toc-num">07</span>事件列表 + 补录浮层</a>
+    <a href="#s8"><span class="toc-num">08</span>阵型快照</a>
+    <a href="#s9"><span class="toc-num">09</span>热图</a>
+    <a href="#s10"><span class="toc-num">10</span>套路演练专属报告</a>
+  </div>
+</div>
+
+<!-- ================================================== -->
+<section class="screen" id="s1">
+  <h2><span class="badge-num">01</span>首页 · 教练工作台</h2>
+  <p class="screen-desc">教练每天打开的第一个页面。目标：三秒内看到"该干什么"。</p>
+  <div class="grid">
+    <div class="phone">
+      <div class="screen-body">
+        <div class="wf-top">9:41 &nbsp;·&nbsp; 内测 v0.1</div>
+        <div class="content">
+          <div class="row space-between" style="margin-bottom:10px;">
+            <div>
+              <div style="font-size:14px;font-weight:600;">早安，李教练</div>
+              <div class="card-sub">本周已录 4 场</div>
+            </div>
+            <div style="width:32px;height:32px;border-radius:50%;background:var(--fill);"></div>
+          </div>
+
+          <div class="card accent" style="text-align:center;padding:18px 12px;">
+            <div style="font-size:15px;font-weight:600;color:var(--accent);">开始新录制</div>
+            <div class="card-sub">比赛 · 团队对抗 · 套路演练</div>
+          </div>
+
+          <div class="card warn">
+            <div class="card-title" style="color:#92400e;">⚠ 3 场报告待补录</div>
+            <div class="card-body">最长的一场已生成 6 天，去补录 →</div>
+          </div>
+
+          <div style="font-size:12px;color:var(--ink-3);margin:12px 0 6px;">最近活动</div>
+          <div class="card fill">
+            <div class="row space-between">
+              <div>
+                <div class="card-title">10/09 · 主场 vs 育才中学</div>
+                <div class="card-sub">比赛 · 45 分钟</div>
+              </div>
+              <span class="chip warn">待补录</span>
+            </div>
+          </div>
+          <div class="card fill">
+            <div class="row space-between">
+              <div>
+                <div class="card-title">10/07 · 挡拆套路训练</div>
+                <div class="card-sub">套路演练 · 32 分钟</div>
+              </div>
+              <span class="chip ok">已完成</span>
+            </div>
+          </div>
+          <div class="card fill">
+            <div class="row space-between">
+              <div>
+                <div class="card-title">10/05 · 红蓝对抗</div>
+                <div class="card-sub">团队对抗 · 28 分钟</div>
+              </div>
+              <span class="chip ok">已完成</span>
+            </div>
+          </div>
+        </div>
+        <div class="wf-nav">
+          <span class="active"><span class="nav-inner"><span class="nav-icon round"></span>首页</span></span>
+          <span><span class="nav-inner"><span class="nav-icon"></span>球队</span></span>
+          <span><span class="nav-inner"><span class="nav-icon"></span>历史</span></span>
+          <span><span class="nav-inner"><span class="nav-icon circle"></span>我的</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes">
+      <h4>页面结构</h4>
+      <ul>
+        <li>顶部问候与身份入口，不显眼</li>
+        <li><b>大按钮"开始新录制"</b>占据首屏 C 位——这是产品最高频动作</li>
+        <li><b>待补录提醒</b>：卡片橙色高亮，永远显示"最紧急那一场"，把教练往补录页推</li>
+        <li>最近活动列表：状态标签用颜色区分（橙=待补录，绿=已完成，蓝=处理中）</li>
+      </ul>
+
+      <h4>交互点</h4>
+      <ul>
+        <li>大按钮 → 屏 02 新建活动</li>
+        <li>待补录提醒 → 直接跳到最旧那一份未完成报告的屏 07</li>
+        <li>活动卡片 → 已完成跳屏 06；处理中跳屏 05</li>
+      </ul>
+
+      <div class="callout">
+        <b>待补录提醒不能藏。</b>这是产品能否闭环的核心机制。第一版把它做成"必须处理才能收键盘"的紧迫感——如果超过 7 天未补录，卡片会变红并置顶。
+      </div>
+
+      <div class="callout info">
+        <b>实时入口的位置。</b>用户已经确认"实时入口先占位"。方案是把"开始新录制"卡片右上角加一个灰色的"实时分析 · 内测中"小标；点开屏 02 时，比赛模板卡片右上角同样灰标。<b>不新开一屏</b>，避免视觉重量过高。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================== -->
+<section class="screen" id="s2">
+  <h2><span class="badge-num">02</span>新建活动 · 模板 / 年龄段 / 赛制 / 名单</h2>
+  <p class="screen-desc">一次配置好这场的所有元数据，之后不用回来改。<b>年龄段与赛制是 AI 分析参数的前置输入，必填。</b></p>
+  <div class="grid">
+    <div class="phone">
+      <div class="screen-body">
+        <div class="wf-top">‹ 返回 &nbsp;&nbsp;新建活动</div>
+        <div class="content">
+          <div style="font-size:12px;color:var(--ink-3);margin-bottom:6px;">选择模板</div>
+          <div class="seg">
+            <span class="active">比赛</span>
+            <span>团队对抗</span>
+            <span>套路演练</span>
+          </div>
+
+          <div class="field"><label>活动名称</label>主场 vs 育才中学</div>
+          <div class="field"><label>日期 · 时间</label>2026-10-11 · 14:30</div>
+          <div class="field"><label>场地</label>市体育中心 · 1 号场</div>
+          <div class="field"><label>对手</label>育才中学 U16</div>
+
+          <!-- 年龄段 -->
+          <div style="font-size:12px;color:var(--ink-3);margin:14px 0 6px;">年龄段 <span class="req">*</span></div>
+          <div class="opt-grid c5">
+            <div class="opt-cell">8岁以下</div>
+            <div class="opt-cell">12岁以下</div>
+            <div class="opt-cell sel">15岁以下</div>
+            <div class="opt-cell">18岁以下</div>
+            <div class="opt-cell">一线</div>
+          </div>
+          <div class="hint-line">
+            U15 · 默认 4 节 × 8 分钟 · 三分线 5.80 m<br>
+            <span style="opacity:0.75;">影响：节次切分、二分/三分判定、同年龄段数据基准</span>
+          </div>
+
+          <!-- 赛制 -->
+          <div style="font-size:12px;color:var(--ink-3);margin:14px 0 6px;">赛制 <span class="req">*</span></div>
+          <div class="opt-grid c4">
+            <div class="opt-cell sel">5 对 5</div>
+            <div class="opt-cell">4 对 4</div>
+            <div class="opt-cell">3 对 3</div>
+            <div class="opt-cell">自定义</div>
+          </div>
+          <div class="hint-line">
+            5 对 5 · 全场双框 · 28 × 15 m · 24 秒进攻时限<br>
+            <span style="opacity:0.75;">影响：场地标定、阵型点数、热图范围、快攻判定</span>
+          </div>
+
+          <div style="font-size:12px;color:var(--ink-3);margin:12px 0 6px;">首发名单（5 人 · 随赛制变化）</div>
+          <div class="person-grid" style="grid-template-columns:repeat(5,1fr);">
+            <div class="person selected"><div class="avatar"></div>4 号 王</div>
+            <div class="person selected"><div class="avatar"></div>7 号 李</div>
+            <div class="person selected"><div class="avatar"></div>11 号 张</div>
+            <div class="person selected"><div class="avatar"></div>23 号 陈</div>
+            <div class="person selected"><div class="avatar"></div>32 号 周</div>
+          </div>
+
+          <div style="font-size:12px;color:var(--ink-3);margin:12px 0 6px;">替补名单（可选）</div>
+          <div class="person-grid">
+            <div class="person"><div class="avatar"></div>2 号 赵</div>
+            <div class="person selected"><div class="avatar"></div>8 号 孙</div>
+            <div class="person"><div class="avatar"></div>15 号 吴</div>
+            <div class="person"><div class="avatar"></div>+ 更多</div>
+          </div>
+
+          <div class="callout" style="margin:12px 0;font-size:11px;">
+            <b>套路演练模板</b>会在此处多出一节"套路清单"，允许教练预先录入本次要练的套路名与预设次数。
+          </div>
+
+          <button class="btn primary block">下一步 · 开始录制</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes">
+      <h4>三种模板的差异</h4>
+      <ul>
+        <li><b>比赛</b>：需要对手 + 场地，首发人数随赛制，替补可选</li>
+        <li><b>团队对抗</b>：无对手，改为"分组"（红队 / 蓝队各按赛制人数）</li>
+        <li><b>套路演练</b>：分组可选，重点是"套路清单"——教练预先建 3-8 个套路标签</li>
+        <li><b>年龄段与赛制在三种模板下都是必填</b>，位置固定在基本信息之后、名单之前</li>
+      </ul>
+
+      <h4>新增字段一：年龄段（5 档 · 必填）</h4>
+      <ul>
+        <li>选项：<code>8岁以下</code> <code>12岁以下</code> <code>15岁以下</code> <code>18岁以下</code> <code>一线</code></li>
+        <li>内部存 U8 / U12 / U15 / U18 / SENIOR 五档枚举，界面显示中文</li>
+      </ul>
+      <p style="font-size:13.5px;color:var(--ink-2);margin:0 0 8px;">它不只是个标签，会直接改变 AI 的处理参数：</p>
+      <ul>
+        <li><b>三分线距离</b> —— 这是最硬的技术依赖。FIBA 成人是 6.75 m，但很多青少年联赛用 5.80 m 或 6.00 m。<b>如果 AI 用错三分线半径，二分/三分判定会整场全错</b>，而教练从报告上看不出来错在哪</li>
+        <li><b>节次时长默认值</b> —— U8/U12 常见 4×6~8 分钟，U15 约 4×8~10，U18/一线 4×10~12。决定"节次切分"算法的默认窗口（教练可改）</li>
+        <li><b>数据基准分组</b> —— 未来做"同年龄段横向对比"必须以这个字段分组。U12 的场均 15 分和一线的场均 15 分完全不是一回事，混在一起统计没有意义</li>
+        <li><b>合规等级</b> —— U15 及以下全部是未成年人，肖像与数据留存策略更严格（对应范围文档 7.3 节）</li>
+        <li><b>篮筐高度</b>（第二版）—— U12 以下常用 2.60 m / 2.80 m 低框，影响投篮轨迹与出手角度分析</li>
+      </ul>
+
+      <h4>新增字段二：赛制（必填）</h4>
+      <ul>
+        <li>选项：<code>5 对 5</code> <code>4 对 4</code> <code>3 对 3</code> <code>自定义</code></li>
+        <li>"自定义"用于非标准训练（2对2、6对6 全场对抗等），教练填人数 + 场地类型 + 单节时长</li>
+      </ul>
+      <table style="width:100%;border-collapse:collapse;font-size:12.5px;margin:8px 0 14px;">
+        <thead>
+          <tr style="background:#f8fafc;">
+            <th style="text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);">赛制</th>
+            <th style="text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);">场地</th>
+            <th style="text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);">篮框</th>
+            <th style="text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);">进攻时限</th>
+            <th style="text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);">首发人数</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:7px 8px;border-bottom:1px solid var(--line-2);">5 对 5</td><td style="padding:7px 8px;border-bottom:1px solid var(--line-2);">全场 28×15 m</td><td style="padding:7px 8px;border-bottom:1px solid var(--line-2);">双框</td><td style="padding:7px 8px;border-bottom:1px solid var(--line-2);">24 秒</td><td style="padding:7px 8px;border-bottom:1px solid var(--line-2);">5</td></tr>
+          <tr><td style="padding:7px 8px;border-bottom:1px solid var(--line-2);">4 对 4</td><td style="padding:7px 8px;border-bottom:1px solid var(--line-2);">全场或半场</td><td style="padding:7px 8px;border-bottom:1px solid var(--line-2);">需教练指定</td><td style="padding:7px 8px;border-bottom:1px solid var(--line-2);">无固定</td><td style="padding:7px 8px;border-bottom:1px solid var(--line-2);">4</td></tr>
+          <tr style="background:#fffbeb;"><td style="padding:7px 8px;border-bottom:1px solid var(--line-2);"><b>3 对 3</b></td><td style="padding:7px 8px;border-bottom:1px solid var(--line-2);"><b>半场 15×11 m</b></td><td style="padding:7px 8px;border-bottom:1px solid var(--line-2);"><b>单框</b></td><td style="padding:7px 8px;border-bottom:1px solid var(--line-2);"><b>12 秒</b></td><td style="padding:7px 8px;border-bottom:1px solid var(--line-2);"><b>3</b></td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout risk">
+        <b>3 对 3 不是"人数少一点的 5 对 5"，它是一套完全不同的规则，会连带改动 AI 与报告：</b>
+        <ul style="margin:6px 0 0;padding-left:18px;">
+          <li><b>场地标定模型不同</b>：半场单框，坐标系原点与 5对5 全场不一样</li>
+          <li><b>计分规则不同</b>：FIBA 3x3 是三分线内 1 分、线外 2 分。报告里如果还写"三分球"教练会困惑，必须改成<b>"远投（2 分）"</b></li>
+          <li><b>快攻判定不同</b>：12 秒进攻时限意味着整个回合本来就快，24 秒规则下的快攻阈值直接搬过来会误判一大堆</li>
+          <li><b>回合切分不同</b>：3x3 有"洗球"（check ball）机制，没有节次概念，通常是 10 分钟一局或先得 21 分</li>
+          <li><b>热图与阵型</b>：只有半场图，阵型是 3 个点不是 5 个点</li>
+        </ul>
+      </div>
+
+      <h4>联动规则（这一屏的交互重点）</h4>
+      <ul>
+        <li>选赛制 → <b>首发名单格子数自动变</b>：5对5 出 5 格，3对3 出 3 格 + 1 替补</li>
+        <li>选 3对3 → 名单下方出现橙色提示："半场赛制 · 报告只分析半场 · 热图为单框视角"</li>
+        <li>选年龄段 → 自动填入该年龄段的默认节次时长，教练可手动改</li>
+        <li><b>年龄段 + 赛制组合决定三分线半径</b>：如 U12 + 5对5 → 5.80 m；一线 + 5对5 → 6.75 m</li>
+        <li>切换赛制时若已选人数不匹配 → 提示"3 对 3 首发只需 3 人，已保留前 3 人，其余转入替补"，<b>不要静默丢弃教练已选的人</b></li>
+        <li>切换模板（比赛 / 团队对抗 / 套路演练）时，年龄段与赛制<b>保留不变</b></li>
+      </ul>
+
+      <div class="callout purple">
+        <b>为什么这两个字段必须"必填 + 显示后果"，不能"可选 + 默认值"？</b><br>
+        如果允许跳过，AI 会退回默认参数（全场、5对5、成人三分线）。一旦实际录的是 U12 的 3对3，整份报告的命中率、热图、快攻全是错的，<b>而且教练看不出来错在哪</b>——他只会觉得"这 AI 不准"，然后不再用。<br>
+        必填 + 选中后立刻显示"这会影响什么"，是让教练理解并信任产品参数设置的最便宜方式。
+      </div>
+
+      <h4>对其他屏的连带影响（需同步修改）</h4>
+      <ul>
+        <li><b>屏 03 录制页</b>：顶部信息条加赛制标识，如"3 对 3 · U15"</li>
+        <li><b>屏 06 报告总览</b>：3对3 时比分卡改为"21 分制 / 10 分钟单节"，时间轴不再分 4 节；三分相关指标改名"远投"</li>
+        <li><b>屏 08 阵型快照</b>：3对3 只渲染 3 个点，半场底图</li>
+        <li><b>屏 09 热图</b>：3对3 只有半场图，且不提供"全场/半场"切换</li>
+        <li><b>球队页 · 比赛数据</b>：<b>战绩与场均数据必须按赛制分组统计</b>。5对5 的 8胜4负 和 3对3 的 3胜1负 不能合并算胜率，否则数字没有意义。建议比赛数据页顶部加赛制筛选</li>
+        <li><b>球队页 · 球员详情</b>：投篮分布图需区分赛制（3对3 的出手点全在半场）</li>
+      </ul>
+
+      <h4>交互点</h4>
+      <ul>
+        <li>切换模板 tab → 表单动态变化，已填内容保留</li>
+        <li>点"人"格子 → 从"我的球队"名单里选；长按 → 快速建人</li>
+        <li>点"下一步" → 校验必填（含年龄段、赛制）→ 屏 03 录制页</li>
+      </ul>
+
+      <div class="callout">
+        <b>名单录入是最容易被忽略的痛点。</b>教练第一次用要录 10-15 个人名，会劝退。解决方案：新建活动时"从上一场复制名单"按钮常驻；球队页支持从微信通讯录批量导入（第一版可先做手动 + 复制）。<b>"复制上一场"时应同时复制年龄段与赛制</b>——同一支队通常这两个参数长期不变。
+      </div>
+
+      <div class="callout risk">
+        <b>不要给"开始录制"这一步加倒计时/预备时间。</b>手机已经在场边架好了，教练按下"下一步"应该立即看到 camera 预览并进入待录状态。任何"3-2-1 开始"都会打乱现场节奏。
+      </div>
+
+      <div class="callout info">
+        <b>球队档案层面应存默认值。</b>在球队页的球队资料里存"本队常用年龄段 + 常用赛制"，新建活动时自动带出，教练只需确认。青训队往往一整年都是 U15 打 5对5，不该每次都重选。
+      </div>
+    </div>
+  </div>
+
+  <!-- 变体 B：3 对 3 选中态 -->
+  <div style="margin-top:32px;padding-top:22px;border-top:1px dashed var(--line);">
+    <h3 style="font-size:16px;margin:0 0 4px;font-weight:600;">变体 B · 选中「3 对 3」后的表单状态</h3>
+    <p style="font-size:13px;color:var(--ink-2);margin:0 0 20px;">联动效果：名单变 3 格、提示语转橙、后果说明改写。这是本屏最需要提前验证的交互。</p>
+    <div class="grid">
+      <div class="phone">
+        <div class="screen-body">
+          <div class="wf-top">‹ 返回 &nbsp;&nbsp;新建活动</div>
+          <div class="content">
+            <div style="font-size:12px;color:var(--ink-3);margin-bottom:6px;">选择模板</div>
+            <div class="seg">
+              <span>比赛</span>
+              <span class="active">团队对抗</span>
+              <span>套路演练</span>
+            </div>
+
+            <div class="field"><label>活动名称</label>周三 3v3 对抗</div>
+            <div class="field"><label>日期 · 时间</label>2026-10-15 · 18:00</div>
+            <div class="field"><label>场地</label>校体育馆 · 半场</div>
+
+            <div style="font-size:12px;color:var(--ink-3);margin:14px 0 6px;">年龄段 <span class="req">*</span></div>
+            <div class="opt-grid c5">
+              <div class="opt-cell">8岁以下</div>
+              <div class="opt-cell">12岁以下</div>
+              <div class="opt-cell sel">15岁以下</div>
+              <div class="opt-cell">18岁以下</div>
+              <div class="opt-cell">一线</div>
+            </div>
+            <div class="hint-line">
+              U15 · 单节 10 分钟 · 三分线 5.80 m
+            </div>
+
+            <div style="font-size:12px;color:var(--ink-3);margin:14px 0 6px;">赛制 <span class="req">*</span></div>
+            <div class="opt-grid c4">
+              <div class="opt-cell">5 对 5</div>
+              <div class="opt-cell">4 对 4</div>
+              <div class="opt-cell sel">3 对 3</div>
+              <div class="opt-cell">自定义</div>
+            </div>
+            <div class="hint-line warn">
+              ⚠ 3 对 3 · <b>半场单框</b> 15 × 11 m · 12 秒进攻时限<br>
+              <span style="opacity:0.8;">线内 1 分 / 线外 2 分 · 报告用「远投」而非「三分」</span>
+            </div>
+
+            <div style="font-size:12px;color:var(--ink-3);margin:12px 0 6px;">红队首发（3 人）</div>
+            <div class="person-grid" style="grid-template-columns:repeat(3,1fr);">
+              <div class="person selected"><div class="avatar"></div>4 号 王</div>
+              <div class="person selected"><div class="avatar"></div>7 号 李</div>
+              <div class="person selected"><div class="avatar"></div>11 号 张</div>
+            </div>
+
+            <div style="font-size:12px;color:var(--ink-3);margin:12px 0 6px;">蓝队首发（3 人）</div>
+            <div class="person-grid" style="grid-template-columns:repeat(3,1fr);">
+              <div class="person selected"><div class="avatar"></div>23 号 陈</div>
+              <div class="person selected"><div class="avatar"></div>32 号 周</div>
+              <div class="person selected"><div class="avatar"></div>8 号 孙</div>
+            </div>
+
+            <div class="card warn" style="padding:7px 10px;margin-top:10px;">
+              <div class="card-body" style="color:#92400e;font-size:10.5px;">
+                已从原 5 人名单保留前 3 人，<b>15 号 吴、2 号 赵 转入替补</b>。<span style="text-decoration:underline;">撤销</span>
+              </div>
+            </div>
+
+            <button class="btn primary block" style="margin-top:12px;">下一步 · 开始录制</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes">
+        <h4>与变体 A（5 对 5）的差异</h4>
+        <ul>
+          <li>赛制提示由蓝转<b>橙</b>——因为 3对3 会实质改变报告口径，需要教练注意到</li>
+          <li>提示文案改写：明确"半场单框""12 秒""线内 1 分 / 线外 2 分""报告用远投而非三分"</li>
+          <li>名单从"首发 5 + 替补"<b>变成"红队 3 + 蓝队 3"</b>（团队对抗模板下的分组）</li>
+          <li>比赛模板下则是"我方首发 3 人 + 对方 3 人（可留空）"</li>
+          <li>节次时长默认值随赛制改：3对3 是单节 10 分钟或 21 分制，不再是 4 节</li>
+        </ul>
+
+        <div class="callout warn">
+          <b>"人数不匹配"的处理必须有撤销。</b>教练从 5对5 切到 3对3 时，多出来的 2 人不能静默消失。正确做法：自动转入替补 + 明确告知 + 给撤销入口。这个细节决定了教练会不会觉得"这软件在乱动我的数据"。
+        </div>
+
+        <div class="callout info">
+          <b>为什么 4 对 4 也要单独做一档？</b>4对4 在青训里很常见（人数不够、或刻意增加触球次数），但它没有统一规则——可能打全场也可能打半场，可能 3 秒区算 2 分也可能算 1 分。所以选中 4对4 时<b>必须追问一句"打全场还是半场"</b>，否则 AI 没法标定场地。
+        </div>
+
+        <div class="callout risk">
+          <b>第一版的建议做法：3 对 3 只做"能录、能出基础报告"，不追求规则完备。</b>
+          完整支持 3x3 规则（12 秒时限、21 分制、洗球回合切分、1分/2分计分）需要单独的事件识别逻辑，工作量不小。第一版可以：
+          <ul style="margin:6px 0 0;padding-left:18px;">
+            <li>场地标定按半场单框做（这个必须对）</li>
+            <li>出手点、命中/未中、热图正常出（复用 5对5 逻辑）</li>
+            <li>快攻识别<b>暂时关闭</b>，避免 12 秒规则下大量误判</li>
+            <li>报告口径明确标注"3x3 赛制 · 部分指标暂不适用"</li>
+          </ul>
+          这样教练不会拿到错数据，也知道自己买到了什么。
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================== -->
+<section class="screen" id="s3">
+  <h2><span class="badge-num">03</span>录制页</h2>
+  <p class="screen-desc">按下去之后教练就不该再操作手机。屏幕只做两件事：给你信心 + 让你能停。</p>
+  <div class="grid">
+    <div class="phone">
+      <div class="screen-body">
+        <div class="card dark" style="height:100%;border-radius:22px;padding:0;position:relative;">
+          <div style="padding:16px 14px 0;">
+            <div class="row space-between">
+              <span class="rec-badge"><span class="dot"></span>REC 00:14:32</span>
+              <span style="color:#94a3b8;font-size:10px;">电 84% · 4G</span>
+            </div>
+            <div style="color:#cbd5e1;font-size:11px;margin-top:4px;">主场 vs 育才中学 · 第 2 节进行中</div>
+          </div>
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;">
+            <div style="border:1.5px dashed rgba(255,255,255,0.25);color:#64748b;font-size:11px;padding:36px 60px;border-radius:6px;">Camera 预览</div>
+          </div>
+          <div style="position:absolute;bottom:22px;left:0;right:0;text-align:center;">
+            <div style="display:inline-flex;flex-direction:column;align-items:center;gap:8px;">
+              <div class="btn warn">■</div>
+              <div style="color:#94a3b8;font-size:10px;">点击结束</div>
+            </div>
+          </div>
+          <div style="position:absolute;top:44px;right:12px;color:#94a3b8;font-size:10px;">保持手机稳定</div>
+        </div>
+
+        <!-- First-entry overlay note -->
+        <div class="sheet" style="max-height:280px;background:#0f172a;color:#e2e8f0;">
+          <div class="handle" style="background:#475569;"></div>
+          <div class="sheet-title" style="color:white;">内测告知</div>
+          <div style="font-size:11px;line-height:1.55;color:#cbd5e1;margin-bottom:10px;">
+            本次录制的视频将上传至内测云端进行 AI 分析。<br>
+            · 录像不用于任何公开传播<br>
+            · 报告仅本人可见<br>
+            · 内测期数据保留 30 天<br>
+            · 后续商用前会另行征求授权
+          </div>
+          <div class="row" style="gap:6px;">
+            <button class="btn ghost small" style="flex:1;color:#94a3b8;border-color:#475569;">不同意</button>
+            <button class="btn primary small" style="flex:1;">同意并开始</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes">
+      <h4>页面元素</h4>
+      <ul>
+        <li>全屏 camera 预览（微信 <code>camera</code> 组件），背景即录像画面</li>
+        <li>左上：<b>REC 徽章 + 计时器</b>（时分秒，永远在跑）</li>
+        <li>右上：电量、网络（帮教练判断是否要换手机或接电源）</li>
+        <li>顶行第二层：当前活动名 + 比赛节次（可选：手动改）</li>
+        <li>底部中央：<b>大号红色"结束"按钮</b>——唯一允许的交互</li>
+      </ul>
+
+      <h4>首次进入弹层</h4>
+      <ul>
+        <li><b>《内测告知》</b>：勾选同意后才允许开始录制，同意状态存本地，不再弹</li>
+        <li>文案严格对应范围文档 7.3 节的最小合规闭环</li>
+      </ul>
+
+      <h4>边界情况</h4>
+      <ul>
+        <li>微信切后台：录制继续，但顶部提示"退出会中断，请尽快回来"</li>
+        <li>电量低于 20%：红色提示"电量偏低"</li>
+        <li>存储空间不足：直接拒绝开始</li>
+        <li>意外崩溃：下次进入询问"是否恢复上一段"</li>
+      </ul>
+
+      <div class="callout info">
+        <b>套路演练模板下，这里会多一个浮动小按钮："标记套路起止"。</b>每段套路开始时点一下，结束时再点一下，报告才能按套路分段。不点也能跑（AI 用启发式识别），但精度会下降。
+      </div>
+
+      <div class="callout risk">
+        <b>不要在录制页展示任何"看起来有用但会分心"的元素</b>——不要放实时分数、不要放热图、不要放"当前阵型"。教练此刻唯一要做的是<b>把手机架上、别动</b>。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================== -->
+<section class="screen" id="s4">
+  <h2><span class="badge-num">04</span>上传中 · 断点续传</h2>
+  <p class="screen-desc">教练按"结束"后立刻看到的一屏。目标：告诉他可以走了。</p>
+  <div class="grid">
+    <div class="phone">
+      <div class="screen-body">
+        <div class="wf-top">‹ 返回 &nbsp;&nbsp;上传中</div>
+        <div class="content">
+          <div style="font-size:12px;color:var(--ink-3);margin-top:8px;text-align:center;">主场 vs 育才中学 · 45:12 · 6.1 GB</div>
+
+          <div class="progress-ring">
+            <svg viewBox="0 0 100 100">
+              <circle class="track" cx="50" cy="50" r="42"/>
+              <circle class="bar" cx="50" cy="50" r="42"
+                      stroke-dasharray="264" stroke-dashoffset="85"/>
+            </svg>
+            <div class="pct">68%</div>
+          </div>
+          <div style="text-align:center;color:var(--ink-2);font-size:12px;margin-bottom:14px;">
+            已上传 4.2 GB / 6.1 GB<br>
+            <span style="color:var(--ink-3);">剩余约 12 分钟 · 4G 网络</span>
+          </div>
+
+          <div class="card ok">
+            <div class="card-title" style="color:#14532d;">✓ 可以放心离开小程序</div>
+            <div class="card-body">
+              上传会在后台继续。<br>
+              断网会自动重试，进度不会丢。<br>
+              完成后微信通知你。
+            </div>
+          </div>
+
+          <div class="field" style="font-size:11px;">
+            <label>上传网络偏好</label>
+            <div class="row space-between"><span>仅 Wi-Fi</span><span style="color:var(--ink-3);">关闭</span></div>
+          </div>
+
+          <button class="btn ghost block" style="margin-top:12px;color:var(--err);border-color:var(--err-2);">取消本场上传</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes">
+      <h4>核心信息优先级</h4>
+      <ul>
+        <li>第一：<b>进度百分比</b>（大号 + 环形）</li>
+        <li>第二：<b>剩余时间</b>（让教练知道能不能等）</li>
+        <li>第三：<b>"可以离开"</b>的绿色卡片（消除等待焦虑）</li>
+      </ul>
+
+      <h4>技术前提</h4>
+      <ul>
+        <li>断点续传：客户端分片上传（每片 8MB），记录已上传片索引，失败重传单片</li>
+        <li>后台上传：微信 <code>wx.getBackgroundAudioManager</code> 或 <code>requestSubscribeMessage</code> 保持小程序存活</li>
+        <li>直传 OSS：STS 临时凭证 + 分片上传，业务服务器只发凭证</li>
+      </ul>
+
+      <div class="callout risk">
+        <b>"取消"不是删除。</b>点了取消只中止上传，本地视频保留 24 小时。如果误点，教练还能从首页"未上传"入口找回。<b>绝对不能默默删除用户本地视频。</b>
+      </div>
+
+      <div class="callout">
+        <b>上传速度提示不能撒谎。</b>剩余时间用滚动 30 秒平均速率计算，不要用整体平均。4G 环境网络波动大，估算跳变时要在 UI 上标"网络波动中，估算可能不准"。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================== -->
+<section class="screen" id="s5">
+  <h2><span class="badge-num">05</span>处理中 · AI Pipeline 状态</h2>
+  <p class="screen-desc">上传完了但还没报告。这一屏解决两个问题：为什么这么慢、什么时候能好。</p>
+  <div class="grid">
+    <div class="phone">
+      <div class="screen-body">
+        <div class="wf-top">‹ 返回 &nbsp;&nbsp;处理中</div>
+        <div class="content">
+          <div style="font-size:12px;color:var(--ink-3);margin:8px 0 6px;text-align:center;">主场 vs 育才中学</div>
+
+          <div class="card accent">
+            <div class="card-title" style="color:var(--accent);">你前面还有 2 场</div>
+            <div class="card-body">预计 <b>32 分钟后</b>完成 · 约 10:47 生成</div>
+          </div>
+
+          <div style="font-size:12px;color:var(--ink-3);margin:12px 0 4px;">AI 处理进度</div>
+          <div class="stepper">
+            <div class="step done"><span class="dot">✓</span><span class="label">视频校验</span></div>
+            <div class="step done"><span class="dot">✓</span><span class="label">场地标定</span></div>
+            <div class="step doing"><span class="dot">3</span><span class="label">目标检测与跟踪 · 42%</span></div>
+            <div class="step todo"><span class="dot">4</span><span class="label">事件识别</span></div>
+            <div class="step todo"><span class="dot">5</span><span class="label">阵型采样</span></div>
+            <div class="step todo"><span class="dot">6</span><span class="label">视频切片</span></div>
+          </div>
+
+          <div class="callout info" style="margin:14px 0;font-size:11px;">
+            <b>为什么要 30-60 分钟？</b><br>
+            40 分钟 1080p 视频约 72 万帧，逐帧跑检测 + 跟踪 + 事件识别。内测期只有一台 GPU 服务器，队列串行。
+          </div>
+
+          <button class="btn primary block">开启微信订阅消息 · 完成后通知我</button>
+          <div style="text-align:center;color:var(--ink-3);font-size:11px;margin-top:8px;">
+            也可以离开小程序，稍后从首页回来
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes">
+      <h4>页面元素</h4>
+      <ul>
+        <li><b>队列位置</b>：诚实告诉教练前面还有几场，避免误以为"卡住了"</li>
+        <li><b>六步 stepper</b>：每一步的当前进度百分比</li>
+        <li>订阅消息按钮：走微信 <code>requestSubscribeMessage</code> API</li>
+        <li>"为什么这么慢"卡片：透明化处理时长，降低教练的心理阻力</li>
+      </ul>
+
+      <div class="callout risk">
+        <b>这一步是产品最危险的等待期。</b>内测期一台 GPU 服务器，如果同一时间有 5 场上传，最后一场要等 4-5 小时。<b>UI 必须诚实反映队列状态</b>，宁可显示"预计 3 小时"也不要给虚假的"30 分钟"。
+      </div>
+
+      <div class="callout">
+        <b>失败兜底：</b>如果 AI 处理超过 90 分钟无进展，或某一步骤抛异常，页面切到"处理异常"状态，展示"重试 / 联系客服"，同时后台保留原视频不删除。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================== -->
+<section class="screen" id="s6">
+  <h2><span class="badge-num">06</span>报告总览 · 比赛 / 团队对抗</h2>
+  <p class="screen-desc">报告页的入口屏。教练 80% 的时间会花在这页 + 屏 07。</p>
+  <div class="grid">
+    <div class="phone">
+      <div class="screen-body">
+        <div class="wf-top">‹ 返回 &nbsp;&nbsp;10/09 vs 育才中学</div>
+        <div class="content">
+          <div class="scorecard">
+            <div class="teams">
+              <div class="team" style="text-align:left;">雷霆 U16</div>
+              <div class="score">78</div>
+              <div class="vs">:</div>
+              <div class="score">65</div>
+              <div class="team" style="text-align:right;">育才中学</div>
+            </div>
+            <div class="meta-row">全场 4 节 · 45 分钟 · 2 月 1 号场</div>
+          </div>
+
+          <div style="font-size:11px;color:var(--ink-3);margin-bottom:4px;">全场时间轴</div>
+          <div style="background:var(--fill);border-radius:6px;height:36px;position:relative;padding:6px 4px;">
+            <div style="display:flex;gap:2px;height:100%;">
+              <div style="flex:1;background:#cbd5e1;border-radius:3px;position:relative;">
+                <div style="position:absolute;top:0;bottom:0;left:8%;width:2px;background:var(--ok);"></div>
+                <div style="position:absolute;top:0;bottom:0;left:20%;width:2px;background:var(--ok);"></div>
+                <div style="position:absolute;top:0;bottom:0;left:38%;width:2px;background:var(--err);"></div>
+                <div style="position:absolute;top:0;bottom:0;left:52%;width:2px;background:var(--ok);"></div>
+                <div style="position:absolute;top:0;bottom:0;left:66%;width:2px;background:var(--err);"></div>
+                <div style="position:absolute;top:0;bottom:0;left:82%;width:2px;background:var(--ok);"></div>
+                <div style="position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--ink-3);">Q1</div>
+              </div>
+              <div style="flex:1;background:#cbd5e1;border-radius:3px;position:relative;">
+                <div style="position:absolute;top:0;bottom:0;left:15%;width:2px;background:var(--ok);"></div>
+                <div style="position:absolute;top:0;bottom:0;left:40%;width:2px;background:var(--err);"></div>
+                <div style="position:absolute;top:0;bottom:0;left:70%;width:2px;background:var(--ok);"></div>
+                <div style="position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--ink-3);">Q2</div>
+              </div>
+              <div style="flex:1;background:#cbd5e1;border-radius:3px;position:relative;">
+                <div style="position:absolute;top:0;bottom:0;left:10%;width:2px;background:var(--ok);"></div>
+                <div style="position:absolute;top:0;bottom:0;left:32%;width:2px;background:var(--ok);"></div>
+                <div style="position:absolute;top:0;bottom:0;left:60%;width:2px;background:var(--err);"></div>
+                <div style="position:absolute;top:0;bottom:0;left:88%;width:2px;background:var(--ok);"></div>
+                <div style="position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--ink-3);">Q3</div>
+              </div>
+              <div style="flex:1;background:#cbd5e1;border-radius:3px;position:relative;">
+                <div style="position:absolute;top:0;bottom:0;left:22%;width:2px;background:var(--ok);"></div>
+                <div style="position:absolute;top:0;bottom:0;left:48%;width:2px;background:var(--err);"></div>
+                <div style="position:absolute;top:0;bottom:0;left:80%;width:2px;background:var(--ok);"></div>
+                <div style="position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--ink-3);">Q4</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="stat-grid" style="margin-top:24px;">
+            <div class="stat-tile"><div class="num">8/22</div><div class="lbl">三分</div></div>
+            <div class="stat-tile"><div class="num">34</div><div class="lbl">篮板</div></div>
+            <div class="stat-tile"><div class="num">12</div><div class="lbl">助攻</div></div>
+            <div class="stat-tile"><div class="num">7</div><div class="lbl">抢断</div></div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div class="card fill"><div class="card-title">🔥 投篮热图</div><div class="card-sub">按点 · 分区域</div></div>
+            <div class="card fill"><div class="card-title">📍 阵型快照</div><div class="card-sub">每 5 秒一次</div></div>
+            <div class="card warn"><div class="card-title" style="color:#92400e;">📝 事件列表 · 87</div><div class="card-sub" style="color:#92400e;">待补录 27</div></div>
+            <div class="card fill"><div class="card-title">🎬 精彩片段</div><div class="card-sub">按快攻/连中筛选</div></div>
+          </div>
+
+          <div class="card" style="background:var(--warn-2);border-color:var(--warn);border-style:solid;text-align:center;padding:8px;">
+            <div style="font-size:12px;color:#92400e;font-weight:500;">补录进度 60 / 87</div>
+            <div style="height:4px;background:white;border-radius:2px;overflow:hidden;margin-top:4px;">
+              <div style="width:69%;height:100%;background:var(--warn);"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes">
+      <h4>页面结构</h4>
+      <ul>
+        <li>顶部：比分卡（深色背景，视觉锚点）</li>
+        <li>时间轴：4 节色带，绿=我方进球，红=失分/失误；点节次可跳到该节首事件</li>
+        <li>关键指标 4 tile：三分、篮板、助攻、抢断（AI 只能给投篮、三分、快攻，其余先占位或教练补录）</li>
+        <li>2×2 入口卡：热图、阵型、事件列表、精彩片段</li>
+        <li>补录进度条常驻底部：<b>没补完就一直提醒</b></li>
+      </ul>
+
+      <div class="callout">
+        <b>关键指标里的"篮板 / 助攻 / 抢断"是 AI 无法自动识别的。</b>第一版做法：这三个数字先展示为"待补录 · 未采集"，让教练从屏 07 手动标注。等 B 级数据模型稳定后，第二版考虑用姿态估计自动判断。
+      </div>
+
+      <div class="callout info">
+        <b>入口卡的排序逻辑：</b>按教练使用频率排——事件列表 &gt; 热图 &gt; 精彩片段 &gt; 阵型。第一版把这个顺序固定，第二版根据教练行为数据做个性化。
+      </div>
+
+      <h4>关键交互</h4>
+      <ul>
+        <li>时间轴：双指缩放、长按拖动选择时段，事件列表跟着过滤</li>
+        <li>入口卡：点击进入对应屏（07 事件、08 阵型、09 热图）</li>
+        <li>补录进度条：点击直接跳到屏 07 的"未补录"筛选</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================== -->
+<section class="screen" id="s7">
+  <h2><span class="badge-num">07</span>事件列表 + 补录浮层 · 产品生死线</h2>
+  <p class="screen-desc">这一屏的补录效率，直接决定教练是否愿意坚持用下去。必须做到"顺手"。</p>
+  <div class="grid">
+    <div class="phone">
+      <div class="screen-body">
+        <div class="wf-top">‹ 返回 &nbsp;&nbsp;事件列表 · 87</div>
+        <div class="content">
+          <div class="row" style="gap:4px;margin-bottom:8px;">
+            <span class="filter-chip active">全部</span>
+            <span class="filter-chip">未补录 27</span>
+            <span class="filter-chip">三分 8</span>
+            <span class="filter-chip">快攻 6</span>
+          </div>
+
+          <div class="event-list">
+            <div class="event done">
+              <div class="thumb"></div>
+              <div class="body">
+                <div class="type">三分命中 · Q1 08:12</div>
+                <div class="who">7 号 李</div>
+              </div>
+              <span class="chip ok">✓</span>
+            </div>
+            <div class="event pending">
+              <div class="thumb"></div>
+              <div class="body">
+                <div class="type">三分命中 · Q1 07:44</div>
+                <div class="who">未补录</div>
+              </div>
+              <span class="chip warn">待录</span>
+            </div>
+            <div class="event pending">
+              <div class="thumb"></div>
+              <div class="body">
+                <div class="type">快攻上篮 · Q1 06:20</div>
+                <div class="who">未补录</div>
+              </div>
+              <span class="chip warn">待录</span>
+            </div>
+            <div class="event done">
+              <div class="thumb"></div>
+              <div class="body">
+                <div class="type">中距离命中 · Q1 05:11</div>
+                <div class="who">11 号 张</div>
+              </div>
+              <span class="chip ok">✓</span>
+            </div>
+            <div class="event done">
+              <div class="thumb"></div>
+              <div class="body">
+                <div class="type">失误 · 出界 · Q1 04:32</div>
+                <div class="who">23 号 陈</div>
+              </div>
+              <span class="chip ok">✓</span>
+            </div>
+          </div>
+
+          <div class="sheet">
+            <div class="handle"></div>
+            <div class="sheet-title">三分命中 · Q1 07:44</div>
+            <div class="player">
+              <div class="play">▶</div>
+              <div class="timeline"><div class="p"></div></div>
+              <div class="time-lbl">00:04 / 00:10</div>
+            </div>
+            <div style="font-size:11px;color:var(--ink-3);margin-bottom:4px;">出手位置：左侧 45 度底角 · 距篮 7.2 m</div>
+            <div style="font-size:12px;color:var(--ink);margin:8px 0 6px;font-weight:500;">谁投进的？</div>
+            <div class="person-grid">
+              <div class="person selected"><div class="avatar"></div>4 号 王</div>
+              <div class="person"><div class="avatar"></div>7 号 李</div>
+              <div class="person"><div class="avatar"></div>11 号 张</div>
+              <div class="person"><div class="avatar"></div>23 号 陈</div>
+              <div class="person"><div class="avatar"></div>32 号 周</div>
+              <div class="person"><div class="avatar"></div>8 号 孙</div>
+              <div class="person"><div class="avatar"></div>不是我方</div>
+              <div class="person"><div class="avatar"></div>看不清</div>
+            </div>
+            <div class="row" style="gap:6px;">
+              <button class="btn ghost small" style="flex:1;">跳过</button>
+              <button class="btn primary small" style="flex:2;">保存 · 下一个 →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes">
+      <h4>事件列表</h4>
+      <ul>
+        <li>顶部筛选：全部 / 未补录 / 三分 / 快攻 / 失误（第一版这 5 类）</li>
+        <li>每张卡片：缩略图 + 类型 + 时间戳 + 已归属球员（或"未补录"）</li>
+        <li>未补录卡片：橙色左边线 + 底色，一眼可见</li>
+        <li>点击卡片 → 从底部弹出补录浮层</li>
+      </ul>
+
+      <h4>补录浮层（重点）</h4>
+      <ul>
+        <li><b>视频自动播放 1.5 秒预览</b>：教练不需要按播放键</li>
+        <li>出手位置元数据一行显示</li>
+        <li>选人区：4×2 或 5×2 网格，含"不是我方"和"看不清"两个特殊选项</li>
+        <li>两个按钮：<b>跳过</b>（本场暂不处理）+ <b>保存 · 下一个 →</b>（保存并自动滚到下一个未补录事件）</li>
+      </ul>
+
+      <h4>为什么这么设计</h4>
+      <div class="callout ok">
+        <b>关键在"保存 → 下一个"这个动作。</b>教练选完一个人，一键就跳到下一个未补录事件——整个过程 <b>3-5 秒</b>。一场 87 个事件里 27 个未补录，理论上 3 分钟就能扫完。如果没这个"下一个"按钮，教练每次都要关浮层 → 找下一个橙色卡片 → 点开，一场要 15 分钟。<b>差 5 倍。</b>
+      </div>
+
+      <div class="callout">
+        <b>选人网格的排序不是随机的。</b>第一版按首发顺序固定显示前 5 个 + 已选替补，且<b>记住上一次选的人</b>——同一个人连投两个三分时，第二次直接放中间或高亮提示"刚刚是这个人"。
+      </div>
+
+      <div class="callout info">
+        <b>"看不清"这个选项必须有。</b>没有它，教练会被迫乱选一个人，脏数据比空数据更糟。选了"看不清"的事件在报告里显示为"—"而不是假数据。
+      </div>
+
+      <div class="callout risk">
+        <b>补录过程中不能出现"保存失败"。</b>选人即保存，网络断了本地缓存 + 恢复后重传，UI 上不弹任何"重试"提示。<b>每一次打断都是让教练放弃补录的临界点。</b>
+      </div>
+
+      <h4>进阶交互（第二版）</h4>
+      <ul>
+        <li>长按事件卡片 → 弹"批量选同一人"（教练知道这一节 4 号在场打了 6 分钟）</li>
+        <li>键盘快捷键：数字 1-8 对应球员编号（外接键盘或小程序键盘组件）</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================== -->
+<section class="screen" id="s8">
+  <h2><span class="badge-num">08</span>阵型快照</h2>
+  <p class="screen-desc">教练看"我们当时是怎么站位的"。B 级数据的核心可视化。</p>
+  <div class="grid">
+    <div class="phone">
+      <div class="screen-body">
+        <div class="wf-top">‹ 返回 &nbsp;&nbsp;阵型快照</div>
+        <div class="content">
+          <div class="seg">
+            <span class="active">本节 Q1</span>
+            <span>全场</span>
+            <span>进攻</span>
+            <span>防守</span>
+          </div>
+
+          <div class="court">
+            <svg viewBox="0 0 200 260">
+              <!-- 半场球场 -->
+              <rect x="4" y="4" width="192" height="252" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+              <!-- 中线半圆 -->
+              <path d="M 60 256 A 40 40 0 0 1 140 256" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+              <!-- 三分线 -->
+              <path d="M 20 4 L 20 40 M 180 4 L 180 40" stroke="#94a3b8" stroke-width="1.5" fill="none"/>
+              <path d="M 20 40 A 80 80 0 0 0 180 40" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+              <!-- 禁区 -->
+              <rect x="70" y="4" width="60" height="80" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+              <circle cx="100" cy="72" r="14" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+              <!-- 篮筐 -->
+              <circle cx="100" cy="18" r="6" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+              <!-- 5 个本方球员点 -->
+              <circle cx="55" cy="80" r="9" fill="#2563eb" stroke="white" stroke-width="1.5"/>
+              <text x="55" y="84" text-anchor="middle" fill="white" font-size="8" font-weight="600">4</text>
+              <circle cx="145" cy="80" r="9" fill="#2563eb" stroke="white" stroke-width="1.5"/>
+              <text x="145" y="84" text-anchor="middle" fill="white" font-size="8" font-weight="600">7</text>
+              <circle cx="100" cy="130" r="9" fill="#2563eb" stroke="white" stroke-width="1.5"/>
+              <text x="100" y="134" text-anchor="middle" fill="white" font-size="8" font-weight="600">11</text>
+              <circle cx="35" cy="170" r="9" fill="#2563eb" stroke="white" stroke-width="1.5"/>
+              <text x="35" y="174" text-anchor="middle" fill="white" font-size="8" font-weight="600">23</text>
+              <circle cx="165" cy="170" r="9" fill="#2563eb" stroke="white" stroke-width="1.5"/>
+              <text x="165" y="174" text-anchor="middle" fill="white" font-size="8" font-weight="600">32</text>
+              <!-- 篮球 -->
+              <circle cx="100" cy="130" r="3" fill="#f59e0b"/>
+            </svg>
+          </div>
+
+          <div class="card" style="text-align:center;padding:8px;margin-top:10px;background:var(--accent-2);border-color:var(--accent);border-style:solid;">
+            <div style="font-size:11px;color:var(--ink-2);">识别阵型</div>
+            <div style="font-size:14px;font-weight:600;color:var(--accent);">2-3 高位落位 · 进攻半场</div>
+          </div>
+
+          <div style="margin-top:10px;">
+            <div class="scrubber-labels"><span>Q1 00:00</span><span>12:00 · 当前</span><span>Q1 24:00</span></div>
+            <div class="scrubber"></div>
+            <div class="row" style="gap:6px;margin-top:8px;">
+              <button class="btn primary small" style="flex:1;">▶ 播放阵型演变</button>
+              <button class="btn ghost small">+ 收藏这一帧</button>
+            </div>
+          </div>
+
+          <div style="font-size:11px;color:var(--ink-3);margin-top:12px;">
+            拖动时间轴看每 5 秒的阵型变化 · 长按某帧可保存为截图
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes">
+      <h4>核心交互</h4>
+      <ul>
+        <li>顶部时段切换：本节 / 全场 / 进攻 / 防守</li>
+        <li>球场 SVG：5 个球员点用号码标注，篮球单独一个小点</li>
+        <li>阵型自动识别标签：从 8 种常见阵型里挑一个（2-3 高位、3-2 低位、1-4 box、菱形等）</li>
+        <li>底部时间滑动条：拖动切换阵型帧</li>
+        <li><b>"播放阵型演变"按钮</b>：5 秒一帧连续播放，让教练看到整段的战术移动轨迹</li>
+      </ul>
+
+      <div class="callout">
+        <b>阵型识别是 B 级数据里最容易做砸的一块。</b>第一版识别准确率可能只有 60-70%，教练会觉得"不准"。折中方案：<b>只显示"密集度"，不给具体阵型名</b>。阵型名作为可选标签，如果低于置信度就不显示，宁可少标不要标错。
+      </div>
+
+      <div class="callout info">
+        <b>"收藏这一帧"是教练的真实需求。</b>教练常常想截图发到群里讨论战术。第一版把它做成"截图保存到相册 + 复制链接"。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================== -->
+<section class="screen" id="s9">
+  <h2><span class="badge-num">09</span>热图</h2>
+  <p class="screen-desc">教练看"我们的火力在哪、跑位覆盖哪里"。</p>
+  <div class="grid">
+    <div class="phone">
+      <div class="screen-body">
+        <div class="wf-top">‹ 返回 &nbsp;&nbsp;投篮热图</div>
+        <div class="content">
+          <div class="seg">
+            <span class="active">投篮点</span>
+            <span>跑动热区</span>
+            <span>命中密度</span>
+          </div>
+
+          <div class="court">
+            <svg viewBox="0 0 200 260">
+              <defs>
+                <radialGradient id="h1"><stop offset="0%" stop-color="#ef4444" stop-opacity="0.7"/><stop offset="100%" stop-color="#ef4444" stop-opacity="0"/></radialGradient>
+                <radialGradient id="h2"><stop offset="0%" stop-color="#f59e0b" stop-opacity="0.6"/><stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/></radialGradient>
+                <radialGradient id="h3"><stop offset="0%" stop-color="#eab308" stop-opacity="0.4"/><stop offset="100%" stop-color="#eab308" stop-opacity="0"/></radialGradient>
+              </defs>
+              <rect x="4" y="4" width="192" height="252" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+              <path d="M 60 256 A 40 40 0 0 1 140 256" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+              <path d="M 20 4 L 20 40 M 180 4 L 180 40" stroke="#94a3b8" stroke-width="1.5" fill="none"/>
+              <path d="M 20 40 A 80 80 0 0 0 180 40" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+              <rect x="70" y="4" width="60" height="80" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+              <circle cx="100" cy="72" r="14" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+              <circle cx="100" cy="18" r="6" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+
+              <!-- heat blobs -->
+              <circle cx="30" cy="50" r="30" fill="url(#h1)"/>
+              <circle cx="170" cy="55" r="26" fill="url(#h1)"/>
+              <circle cx="100" cy="18" r="24" fill="url(#h2)"/>
+              <circle cx="60" cy="130" r="18" fill="url(#h3)"/>
+              <circle cx="145" cy="120" r="14" fill="url(#h3)"/>
+
+              <!-- shot dots (green=make, red=miss) -->
+              <circle cx="30" cy="46" r="2.5" fill="#16a34a" stroke="white" stroke-width="1"/>
+              <circle cx="24" cy="55" r="2.5" fill="#16a34a" stroke="white" stroke-width="1"/>
+              <circle cx="36" cy="52" r="2.5" fill="#dc2626" stroke="white" stroke-width="1"/>
+              <circle cx="168" cy="50" r="2.5" fill="#16a34a" stroke="white" stroke-width="1"/>
+              <circle cx="172" cy="60" r="2.5" fill="#16a34a" stroke="white" stroke-width="1"/>
+              <circle cx="164" cy="55" r="2.5" fill="#dc2626" stroke="white" stroke-width="1"/>
+              <circle cx="100" cy="18" r="2.5" fill="#16a34a" stroke="white" stroke-width="1"/>
+              <circle cx="102" cy="16" r="2.5" fill="#dc2626" stroke="white" stroke-width="1"/>
+              <circle cx="55" cy="130" r="2.5" fill="#16a34a" stroke="white" stroke-width="1"/>
+              <circle cx="150" cy="120" r="2.5" fill="#dc2626" stroke="white" stroke-width="1"/>
+            </svg>
+          </div>
+
+          <div class="row space-between" style="font-size:10px;color:var(--ink-3);margin-top:8px;padding:0 8px;">
+            <span>■ 冷</span>
+            <div style="flex:1;height:6px;border-radius:3px;margin:0 8px;background:linear-gradient(90deg,#eab308,#f59e0b,#ef4444);"></div>
+            <span>■ 热</span>
+          </div>
+
+          <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-top:12px;">
+            <div class="stat-tile"><div class="num" style="color:var(--ok);">5/7</div><div class="lbl">底角三分</div></div>
+            <div class="stat-tile"><div class="num" style="color:var(--warn);">2/6</div><div class="lbl">顶弧三分</div></div>
+            <div class="stat-tile"><div class="num">1/2</div><div class="lbl">罚球区</div></div>
+          </div>
+
+          <div class="row" style="gap:6px;margin-top:12px;">
+            <button class="btn ghost small">时段：全场</button>
+            <button class="btn ghost small">区域：三分线</button>
+            <button class="btn ghost small">球员：全部</button>
+          </div>
+
+          <div class="callout info" style="font-size:11px;margin-top:12px;">
+            长按任意点位 → 播放该次出手的 8 秒片段
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes">
+      <h4>三种热图</h4>
+      <ul>
+        <li><b>投篮点</b>：每个出手一个点，命中绿色、未中红色；叠加半透明热区表示密度</li>
+        <li><b>跑动热区</b>：不区分个人，全场球员出现过的区域做核密度估计</li>
+        <li><b>命中密度</b>：只显示命中的球，看真实火力</li>
+      </ul>
+
+      <h4>筛选与查看</h4>
+      <ul>
+        <li>三个筛选按钮：时段、区域、球员（球员需先补录，未补录的过滤不掉）</li>
+        <li>长按任意点位 → 触发事件片段播放（与屏 07 的补录浮层复用同一个组件）</li>
+        <li>三格小统计：底角 / 顶弧 / 罚球区的命中率（篮球战术分析的关键三分区）</li>
+      </ul>
+
+      <div class="callout">
+        <b>跑动热区是"看起来专业但价值可疑"的组件。</b>B 级数据下不区分个人，教练看到"全队一起跑动"的热图其实很难解读。建议：<b>第一版把跑动热区做成默认不显示</b>，只在教练主动切换时出现，避免报告页被无意义视觉填满。
+      </div>
+
+      <div class="callout info">
+        <b>热图需要能截图。</b>教练 60% 的实际使用是"截图发群里/发给球员看"。分享按钮直接调 <code>wxCanvasToTempFile</code> + 保存到相册。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================== -->
+<section class="screen" id="s10">
+  <h2><span class="badge-num warn">10</span>套路演练专属报告</h2>
+  <p class="screen-desc">第三种模板的专属报告页。跟比赛报告结构完全不同，单独列。</p>
+  <div class="grid">
+    <div class="phone">
+      <div class="screen-body">
+        <div class="wf-top">‹ 返回 &nbsp;&nbsp;挡拆套路 · 10/08</div>
+        <div class="content">
+          <div class="card fill" style="text-align:center;padding:14px;">
+            <div class="card-sub">套路总数 4 · 演练次数 19 · 成功 12 (63%)</div>
+          </div>
+
+          <div class="card warn">
+            <div class="row space-between" style="align-items:center;">
+              <div>
+                <div class="card-title" style="color:#92400e;">挡拆外弹</div>
+                <div class="card-sub">尝试 8 · 成功 6 · 平均耗时 7.2 秒</div>
+              </div>
+              <div style="text-align:right;">
+                <div class="scorecard" style="background:transparent;padding:0;margin:0;display:inline;">
+                  <span class="chip ok">75%</span>
+                </div>
+              </div>
+            </div>
+            <div class="court" style="margin-top:8px;padding:4px;">
+              <svg viewBox="0 0 200 60">
+                <rect x="2" y="2" width="196" height="56" fill="none" stroke="#94a3b8" stroke-width="1"/>
+                <circle cx="150" cy="30" r="18" fill="url(#mini1)" opacity="0.6"/>
+                <defs>
+                  <radialGradient id="mini1"><stop offset="0%" stop-color="#16a34a"/><stop offset="100%" stop-color="#16a34a" stop-opacity="0"/></radialGradient>
+                </defs>
+                <circle cx="148" cy="26" r="2" fill="#16a34a"/>
+                <circle cx="155" cy="35" r="2" fill="#16a34a"/>
+                <circle cx="152" cy="24" r="2" fill="#dc2626"/>
+                <circle cx="156" cy="30" r="2" fill="#16a34a"/>
+              </svg>
+            </div>
+            <button class="btn ghost small block" style="margin-top:6px;">▾ 展开 8 次演练片段</button>
+          </div>
+
+          <div class="card">
+            <div class="row space-between" style="align-items:center;">
+              <div>
+                <div class="card-title">底线交叉</div>
+                <div class="card-sub">尝试 5 · 成功 3 · 平均耗时 6.1 秒</div>
+              </div>
+              <span class="chip warn">60%</span>
+            </div>
+            <button class="btn ghost small block" style="margin-top:6px;">▸ 展开</button>
+          </div>
+
+          <div class="card">
+            <div class="row space-between" style="align-items:center;">
+              <div>
+                <div class="card-title">4-out 突分</div>
+                <div class="card-sub">尝试 4 · 成功 2 · 平均耗时 8.4 秒</div>
+              </div>
+              <span class="chip err">50%</span>
+            </div>
+            <button class="btn ghost small block" style="margin-top:6px;">▸ 展开</button>
+          </div>
+
+          <div class="card">
+            <div class="row space-between" style="align-items:center;">
+              <div>
+                <div class="card-title">高位手递手</div>
+                <div class="card-sub">尝试 2 · 成功 1</div>
+              </div>
+              <span class="chip">50%</span>
+            </div>
+            <button class="btn ghost small block" style="margin-top:6px;">▸ 展开</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes">
+      <h4>与比赛报告的差异</h4>
+      <ul>
+        <li>没有比分、没有时间轴、没有节次</li>
+        <li>核心是"每个套路一行"，展开看该套路的所有演练片段</li>
+        <li>每个套路右侧一个成功率徽章，颜色分级：<b>≥70% 绿 / 40-69% 橙 / &lt;40% 红</b></li>
+        <li>展开后是"该套路的小热图 + 8 段演练视频卡片"</li>
+      </ul>
+
+      <div class="callout">
+        <b>套路清单是教练在屏 02 建的。</b>第一版限制每场最多 8 个套路标签。如果教练中途忘了建，训练录完想补，可以让他在报告页"新增套路 + 手动框选时间范围"——这是补救路径，第一版可以做，工作量不大。
+      </div>
+
+      <div class="callout info">
+        <b>"平均耗时"是套路质量的重要指标。</b>7 秒内完成的挡拆比 12 秒的挡拆质量高得多。这个字段第一版就加上，教练会很在意。
+      </div>
+
+      <h4>边界情况</h4>
+      <ul>
+        <li>教练录了但没标套路起止 → 整段作为一个"未分类"套路，让他手动切</li>
+        <li>标了但次数不匹配（预设 8 次实际演练 6 次）→ 显示"实际演练 6 / 预设 8"，提醒教练</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================== -->
+<section class="design-lang">
+  <h2>设计规范 · 状态色系</h2>
+  <p style="color:var(--ink-2);font-size:13.5px;margin-bottom:14px;">整个产品用同一套语义色，教练形成条件反射：橙色就是"还没处理完"，绿色就是"这已完成"。</p>
+
+  <div class="color-row">
+    <div class="color-tile" style="background:var(--accent-2);color:var(--accent);border:1.5px solid var(--accent);">进行中<small>AI 处理中 · 主 CTA</small></div>
+    <div class="color-tile" style="background:var(--ok-2);color:#14532d;border:1.5px solid var(--ok);">已完成<small>已补录 · 成功</small></div>
+    <div class="color-tile" style="background:var(--warn-2);color:#92400e;border:1.5px solid var(--warn);">待处理<small>待补录 · 提醒</small></div>
+    <div class="color-tile" style="background:var(--err-2);color:#7f1d1d;border:1.5px solid var(--err);">异常<small>处理失败 · 严重逾期</small></div>
+    <div class="color-tile" style="background:var(--fill);color:var(--ink-3);border:1.5px solid var(--line);">占位 / 不可用<small>实时入口灰显</small></div>
+  </div>
+
+  <h2 style="margin-top:32px;">交互模式约定</h2>
+  <div class="pattern-grid">
+    <div class="pattern">
+      <h4>点事件卡 = 底部弹层</h4>
+      <p>所有视频片段回放都用底部浮层，不用新页面。教练保留时间轴上下文。</p>
+    </div>
+    <div class="pattern">
+      <h4>长按点位 = 触发片段</h4>
+      <p>热图、时间轴、阵型图上的可交互元素，长按 = 播放该时刻视频，与事件卡一致。</p>
+    </div>
+    <div class="pattern">
+      <h4>双指缩放 = 时间轴</h4>
+      <p>报告页顶部时间轴支持双指缩放看密集事件，不用做单独的筛选页。</p>
+    </div>
+    <div class="pattern">
+      <h4>保存后自动下一个</h4>
+      <p>补录、批注、任何"批量处理"类动作，保存后自动跳下一条。这是提效核心。</p>
+    </div>
+    <div class="pattern">
+      <h4>空状态永远有 CTA</h4>
+      <p>历史列表、待补录为空、无事件……每个空状态都要有下一步按钮。</p>
+    </div>
+    <div class="pattern">
+      <h4>异步任务永远可退出</h4>
+      <p>上传、处理、下载都明确"可以离开小程序"，用订阅消息回来。禁止阻塞式等待。</p>
+    </div>
+    <div class="pattern">
+      <h4>错误提示不阻塞</h4>
+      <p>Toast 提示 + 自动重试。教练永远不需要点"确定"来关闭一个错误提示。</p>
+    </div>
+    <div class="pattern">
+      <h4>组件复用清单</h4>
+      <p>球场 SVG 底图、片段播放器、选人浮层、状态标签——这 4 个组件必须抽象成公用的。</p>
+    </div>
+  </div>
+
+  <h2 style="margin-top:32px;">还需要教练确认的开放问题</h2>
+  <div class="callout open-q">
+    <b>以下 5 个问题需要拿这份线框去找 2-3 位教练朋友聊 30 分钟，边看边问：</b>
+    <ol>
+      <li><b>补录顺序</b>：教练更希望按时间顺序逐个补录，还是按类型（先把所有三分补完）？</li>
+      <li><b>阵型识别</b>：如果 60% 的阵型名不准，教练希望"宁可少标"还是"标错也没关系"？</li>
+      <li><b>报告默认落地页</b>：打开一场报告，教练最先想看到什么——比分？热图？还是事件列表？</li>
+      <li><b>套路标签</b>：教练更愿意录前建标签库，还是录完回来分堆？</li>
+      <li><b>截图分享</b>：报告页里哪几屏是教练一定会截图发群的？（决定分享按钮的位置）</li>
+    </ol>
+  </div>
+</section>
+
+<div class="footer" style="margin-top:60px;padding-top:20px;border-top:1px solid var(--line);color:var(--ink-2);font-size:13px;">
+  <div style="font-weight:600;color:var(--ink);margin-bottom:8px;">修订记录</div>
+  <div style="margin-bottom:6px;"><b>v0.1.1 · 2026-10-11</b> — 屏 02「新建活动」新增 <b>年龄段</b>（8岁以下 / 12岁以下 / 15岁以下 / 18岁以下 / 一线）与 <b>赛制</b>（5对5 / 4对4 / 3对3 / 自定义）两个必填字段；补充「3 对 3」选中态变体 B；记录两字段对 AI 参数（三分线半径、场地标定、进攻时限、节次时长）与其余各屏的连带影响。</div>
+  <div style="margin-bottom:14px;"><b>v0.1 · 2026-10-11</b> — 首版，10 张关键屏 + 设计规范。</div>
+  <div>下一步建议：拿这份文档去问 3 位教练开放问题，回来后我出 v0.2，同时可以进入可点击原型阶段。</div>
+  <div style="margin-top:6px;color:var(--ink-3);">待同步：<code>第一版范围确认.md</code> 与 <code>球队页设计v0.1.html</code> 需按 v0.1.1 的字段增补更新。</div>
+</div>
+
+</div>
+</body>
+</html>

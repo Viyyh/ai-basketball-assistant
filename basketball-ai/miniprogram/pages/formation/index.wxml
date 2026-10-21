@@ -1,0 +1,99 @@
+<view class="page">
+
+  <view wx:if="{{loading}}" class="fm-loading">加载阵型数据…</view>
+
+  <block wx:elif="{{loadError}}">
+    <empty-state title="暂无阵型数据" desc="{{loadError}}" action="返回报告" bind:action="onBack" />
+  </block>
+
+  <block wx:else>
+
+    <!-- 口径常驻 -->
+    <view class="fm-scope">
+      <scope-badge params="{{params}}" />
+    </view>
+
+    <!-- 时段筛选 -->
+    <scroll-view class="fm-scopes" scroll-x enable-flex>
+      <view
+        wx:for="{{scopes}}"
+        wx:key="key"
+        class="fchip {{activeScope === item.key ? 'fchip--on' : ''}}"
+        data-key="{{item.key}}"
+        bindtap="onTapScope"
+      >{{item.label}}</view>
+    </scroll-view>
+
+    <!-- 球场 + 阵型点位 -->
+    <view class="fm-court" wx:if="{{frames.length}}">
+      <court-svg
+        params="{{params}}"
+        formation="{{currentFrame}}"
+        numbers="{{numbers}}"
+        showScope="{{false}}"
+        height="{{760}}"
+        scale="{{26}}"
+      />
+    </view>
+
+    <!-- 阵型识别结果 -->
+    <view class="card fm-label" wx:if="{{frames.length}}">
+      <view class="fm-label__cap">识别阵型</view>
+      <block wx:if="{{currentLabel}}">
+        <view class="fm-label__name">{{currentLabel}}</view>
+        <view class="fm-label__conf">置信度 {{currentConfidence * 100}}%</view>
+      </block>
+      <block wx:else>
+        <!-- 置信度不足：宁可少标不要标错（PRD 3.3 屏 08） -->
+        <view class="fm-label__name fm-label__name--na">未识别</view>
+        <view class="fm-label__conf">
+          置信度 {{currentConfidence * 100}}% 偏低，不给出阵型名以免误导
+        </view>
+      </block>
+      <view class="fm-label__pts">
+        {{positions.length}} 个点位 · 每 {{sampleInterval}} 秒采样一次
+      </view>
+    </view>
+
+    <empty-state
+      wx:if="{{!frames.length}}"
+      title="该时段没有阵型数据"
+      desc="换一个时段试试。"
+      showAction="{{false}}"
+    />
+
+    <!-- 时间轴拖动 -->
+    <view class="fm-scrub" wx:if="{{frames.length}}">
+      <view class="fm-scrub__labels">
+        <text>{{frames[0] ? currentTimeText : ''}}</text>
+        <text class="fm-scrub__idx">{{frameIndex + 1}} / {{totalFrames}}</text>
+      </view>
+      <slider
+        min="0"
+        max="{{sliderMax}}"
+        value="{{frameIndex}}"
+        activeColor="#2563eb"
+        backgroundColor="#e2e8f0"
+        block-size="20"
+        bindchange="onSliderChange"
+        bindchanging="onSliderChange"
+      />
+      <view class="row row--gap2 fm-acts">
+        <view class="btn btn--ghost btn--sm" bindtap="onStepPrev">‹ 上一帧</view>
+        <view class="btn btn--primary btn--sm flex1" bindtap="onTogglePlay">
+          {{playing ? '⏸ 暂停演变' : '▶ 播放阵型演变'}}
+        </view>
+        <view class="btn btn--ghost btn--sm" bindtap="onStepNext">下一帧 ›</view>
+      </view>
+      <view class="btn btn--ghost btn--block fm-collect" bindtap="onCollect">
+        + 收藏这一帧{{collected.length ? '（已收藏 ' + collected.length + '）' : ''}}
+      </view>
+    </view>
+
+    <view class="fm-hint">
+      拖动时间轴看每 {{sampleInterval}} 秒的阵型变化 · 收藏后可截图分享到群
+    </view>
+
+  </block>
+
+</view>

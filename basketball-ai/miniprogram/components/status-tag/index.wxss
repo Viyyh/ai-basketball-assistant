@@ -1,0 +1,15 @@
+.tag {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--r-pill);
+  line-height: 1.6;
+  white-space: nowrap;
+}
+.tag--sm { font-size: var(--fs-xs); padding: 2rpx 14rpx; }
+.tag--md { font-size: var(--fs-sm); padding: 4rpx 18rpx; }
+
+.tag--accent { background: var(--accent-2); color: var(--accent); }
+.tag--ok     { background: var(--ok-2);     color: #14532d; }
+.tag--warn   { background: var(--warn-2);   color: var(--warn-ink); }
+.tag--err    { background: var(--err-2);    color: var(--err-ink); }
+.tag--muted  { background: var(--fill);     color: var(--ink-3); }

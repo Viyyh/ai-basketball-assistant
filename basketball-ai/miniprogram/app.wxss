@@ -1,0 +1,2 @@
+/* 全局样式：只引入设计系统，页面级样式各自维护 */
+@import "./styles/common.wxss";

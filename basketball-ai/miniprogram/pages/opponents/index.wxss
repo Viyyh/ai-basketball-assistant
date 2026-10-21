@@ -1,0 +1,30 @@
+.op-search { margin: var(--sp-2) var(--sp-3); padding: var(--sp-1) var(--sp-2); }
+.op-loading { padding: 120rpx 0; text-align: center; color: var(--ink-3); font-size: var(--fs-sm); }
+
+/* 下次对阵 */
+.op-next { margin: 0 var(--sp-3) var(--sp-2); padding: var(--sp-3); }
+.op-next__label {
+  font-size: var(--fs-xs); color: var(--warn-ink); opacity: 0.8;
+  letter-spacing: 0.05em;
+}
+.op-next__name { font-size: var(--fs-xl); font-weight: 600; color: var(--warn-ink); margin-top: 4rpx; }
+.op-next__meta { font-size: var(--fs-xs); color: var(--warn-ink); opacity: 0.85; margin-top: 6rpx; line-height: 1.6; }
+.op-next__cta {
+  font-size: var(--fs-sm); color: var(--warn-ink);
+  margin-top: var(--sp-2); text-decoration: underline;
+}
+
+.op-list { padding: 0 var(--sp-3); }
+.op-item__meta { margin-top: 2rpx; }
+.op-item__total { font-size: var(--fs-lg); }
+
+.op-add {
+  margin: var(--sp-3);
+  padding: var(--sp-2);
+  text-align: center;
+  border: 2rpx dashed var(--line);
+  border-radius: var(--r-md);
+  font-size: var(--fs-sm); color: var(--ink-2);
+}
+
+.op-note { margin: 0 var(--sp-3) var(--sp-6); line-height: 1.8; }

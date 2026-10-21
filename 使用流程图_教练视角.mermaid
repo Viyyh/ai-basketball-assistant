@@ -1,0 +1,37 @@
+sequenceDiagram
+    autonumber
+    actor Coach as 教练
+    participant MP as 微信小程序
+    participant SVC as 后端服务
+    participant GPU as AI Pipeline
+
+    Note over Coach,GPU: 阶段一 · 赛前准备
+    Coach->>MP: 新建活动 · 选模板（比赛 / 团队对抗 / 套路演练）
+    MP->>SVC: 创建活动 + 上传名单
+    Coach->>MP: 录入首发名单 / 分组 / 套路标签库
+
+    Note over Coach,GPU: 阶段二 · 现场录制
+    Coach->>MP: 架好手机 · 场边高处 · 点"开始录制"
+    MP->>MP: 本地录像 · 40 分钟连续
+    Coach->>MP: 结束 · 点"停止录制"
+
+    Note over Coach,GPU: 阶段三 · 上传与云端处理
+    MP->>SVC: 申请上传凭证（STS）
+    MP->>SVC: 直传对象存储（断点续传 · 可后台）
+    SVC->>SVC: 上传完成 · 任务入队
+    SVC->>GPU: 拉起处理任务
+    GPU->>GPU: 场地标定 → 检测 → 跟踪 → 事件识别 → 阵型采样
+    GPU->>GPU: 视频切片（每个事件 8-15 秒）
+    GPU->>SVC: 回写报告 JSON · 通知就绪
+
+    Note over Coach,GPU: 阶段四 · 报告与补录
+    SVC-->>Coach: 推送"报告已生成"
+    Coach->>MP: 打开报告 · 浏览热图 / 阵型 / 时间轴
+    loop 对每一个待补录事件
+      Coach->>MP: 点击事件卡片
+      MP->>SVC: 拉取 8-15 秒片段（CDN）
+      MP-->>Coach: 播放片段
+      Coach->>MP: 从名单选人 · 标注"这一分是谁"
+      MP->>SVC: 保存补录结果
+    end
+    Coach->>MP: 标记"本场完成" · 归档到历史

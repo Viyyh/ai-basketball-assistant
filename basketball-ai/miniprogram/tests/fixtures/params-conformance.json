@@ -1,0 +1,2295 @@
+{
+  "_generated_by": "scripts/gen_conformance_fixture.py",
+  "_note": "Python 参数层算出的基准值。JS 侧 courtGeometry.js 必须逐点一致。修改 packages/params 后必须重跑本脚本。",
+  "schema_version": "1.0",
+  "combos": [
+    {
+      "key": "5V5_U12",
+      "params": {
+        "format": "5V5",
+        "age_group": "U12",
+        "court_type": "FULL",
+        "court_length_m": 28.0,
+        "court_width_m": 15.0,
+        "baseline_to_hoop_m": 1.575,
+        "three_point_radius_m": 5.8,
+        "three_point_geometry": "PURE_ARC",
+        "corner_lateral_m": null,
+        "corner_junction_x_m": null,
+        "x_range_m": [
+          -1.575,
+          26.425
+        ],
+        "y_half_m": 7.5,
+        "hoop_count": 2,
+        "period_count": 4,
+        "period_minutes": 8.0,
+        "shot_clock_s": 24,
+        "inside_arc_points": 2,
+        "outside_arc_points": 3,
+        "fast_break_enabled": true,
+        "fast_break_max_possession_s": 8.0,
+        "win_score": null,
+        "players_per_team": 5,
+        "formation_points": 5,
+        "max_tracked_targets": 10,
+        "formation_sample_interval_s": 5.0
+      },
+      "validation_problems": [],
+      "probes": [
+        {
+          "label": "篮下正面",
+          "x_m": 2.0,
+          "y_m": 0.0,
+          "distance_m": 2.0,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "禁区边缘",
+          "x_m": 4.5,
+          "y_m": 0.0,
+          "distance_m": 4.5,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 5.7m",
+          "x_m": 5.7,
+          "y_m": 0.0,
+          "distance_m": 5.7,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 5.8m",
+          "x_m": 5.8,
+          "y_m": 0.0,
+          "distance_m": 5.8,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 5.9m",
+          "x_m": 5.9,
+          "y_m": 0.0,
+          "distance_m": 5.9,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 6.2m",
+          "x_m": 6.2,
+          "y_m": 0.0,
+          "distance_m": 6.2,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 6.7m",
+          "x_m": 6.7,
+          "y_m": 0.0,
+          "distance_m": 6.7,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 6.75m",
+          "x_m": 6.75,
+          "y_m": 0.0,
+          "distance_m": 6.75,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 6.8m",
+          "x_m": 6.8,
+          "y_m": 0.0,
+          "distance_m": 6.8,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 7.5m",
+          "x_m": 7.5,
+          "y_m": 0.0,
+          "distance_m": 7.5,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "翼侧45° 5.0m",
+          "x_m": 3.54,
+          "y_m": 3.54,
+          "distance_m": 5.006,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "翼侧45° 6.4m",
+          "x_m": 4.53,
+          "y_m": 4.53,
+          "distance_m": 6.406,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "翼侧45° 7.0m",
+          "x_m": 4.95,
+          "y_m": 4.95,
+          "distance_m": 7.0,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=5.0",
+          "x_m": 0.0,
+          "y_m": 5.0,
+          "distance_m": 5.0,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=5.5",
+          "x_m": 0.0,
+          "y_m": 5.5,
+          "distance_m": 5.5,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=6.0",
+          "x_m": 0.0,
+          "y_m": 6.0,
+          "distance_m": 6.0,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=6.6",
+          "x_m": 0.0,
+          "y_m": 6.6,
+          "distance_m": 6.6,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=7.0",
+          "x_m": 0.0,
+          "y_m": 7.0,
+          "distance_m": 7.0,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=7.5",
+          "x_m": 0.0,
+          "y_m": 7.5,
+          "distance_m": 7.5,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 x=-1.5 y=6",
+          "x_m": -1.5,
+          "y_m": 6.0,
+          "distance_m": 6.185,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "篮筐后方",
+          "x_m": -1.5,
+          "y_m": 0.0,
+          "distance_m": 1.5,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "交接点 x=1.415",
+          "x_m": 1.415,
+          "y_m": 6.6,
+          "distance_m": 6.75,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "中场附近",
+          "x_m": 12.0,
+          "y_m": 0.0,
+          "distance_m": 12.0,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "越界 y=8.0",
+          "x_m": 3.0,
+          "y_m": 8.0,
+          "distance_m": 8.544,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": false
+        },
+        {
+          "label": "越界 x=27.0",
+          "x_m": 27.0,
+          "y_m": 0.0,
+          "distance_m": 27.0,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": false
+        }
+      ]
+    },
+    {
+      "key": "5V5_U15",
+      "params": {
+        "format": "5V5",
+        "age_group": "U15",
+        "court_type": "FULL",
+        "court_length_m": 28.0,
+        "court_width_m": 15.0,
+        "baseline_to_hoop_m": 1.575,
+        "three_point_radius_m": 5.8,
+        "three_point_geometry": "PURE_ARC",
+        "corner_lateral_m": null,
+        "corner_junction_x_m": null,
+        "x_range_m": [
+          -1.575,
+          26.425
+        ],
+        "y_half_m": 7.5,
+        "hoop_count": 2,
+        "period_count": 4,
+        "period_minutes": 8.0,
+        "shot_clock_s": 24,
+        "inside_arc_points": 2,
+        "outside_arc_points": 3,
+        "fast_break_enabled": true,
+        "fast_break_max_possession_s": 8.0,
+        "win_score": null,
+        "players_per_team": 5,
+        "formation_points": 5,
+        "max_tracked_targets": 10,
+        "formation_sample_interval_s": 5.0
+      },
+      "validation_problems": [],
+      "probes": [
+        {
+          "label": "篮下正面",
+          "x_m": 2.0,
+          "y_m": 0.0,
+          "distance_m": 2.0,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "禁区边缘",
+          "x_m": 4.5,
+          "y_m": 0.0,
+          "distance_m": 4.5,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 5.7m",
+          "x_m": 5.7,
+          "y_m": 0.0,
+          "distance_m": 5.7,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 5.8m",
+          "x_m": 5.8,
+          "y_m": 0.0,
+          "distance_m": 5.8,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 5.9m",
+          "x_m": 5.9,
+          "y_m": 0.0,
+          "distance_m": 5.9,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 6.2m",
+          "x_m": 6.2,
+          "y_m": 0.0,
+          "distance_m": 6.2,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 6.7m",
+          "x_m": 6.7,
+          "y_m": 0.0,
+          "distance_m": 6.7,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 6.75m",
+          "x_m": 6.75,
+          "y_m": 0.0,
+          "distance_m": 6.75,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 6.8m",
+          "x_m": 6.8,
+          "y_m": 0.0,
+          "distance_m": 6.8,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 7.5m",
+          "x_m": 7.5,
+          "y_m": 0.0,
+          "distance_m": 7.5,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "翼侧45° 5.0m",
+          "x_m": 3.54,
+          "y_m": 3.54,
+          "distance_m": 5.006,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "翼侧45° 6.4m",
+          "x_m": 4.53,
+          "y_m": 4.53,
+          "distance_m": 6.406,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "翼侧45° 7.0m",
+          "x_m": 4.95,
+          "y_m": 4.95,
+          "distance_m": 7.0,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=5.0",
+          "x_m": 0.0,
+          "y_m": 5.0,
+          "distance_m": 5.0,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=5.5",
+          "x_m": 0.0,
+          "y_m": 5.5,
+          "distance_m": 5.5,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=6.0",
+          "x_m": 0.0,
+          "y_m": 6.0,
+          "distance_m": 6.0,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=6.6",
+          "x_m": 0.0,
+          "y_m": 6.6,
+          "distance_m": 6.6,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=7.0",
+          "x_m": 0.0,
+          "y_m": 7.0,
+          "distance_m": 7.0,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=7.5",
+          "x_m": 0.0,
+          "y_m": 7.5,
+          "distance_m": 7.5,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 x=-1.5 y=6",
+          "x_m": -1.5,
+          "y_m": 6.0,
+          "distance_m": 6.185,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "篮筐后方",
+          "x_m": -1.5,
+          "y_m": 0.0,
+          "distance_m": 1.5,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "交接点 x=1.415",
+          "x_m": 1.415,
+          "y_m": 6.6,
+          "distance_m": 6.75,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "中场附近",
+          "x_m": 12.0,
+          "y_m": 0.0,
+          "distance_m": 12.0,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "越界 y=8.0",
+          "x_m": 3.0,
+          "y_m": 8.0,
+          "distance_m": 8.544,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": false
+        },
+        {
+          "label": "越界 x=27.0",
+          "x_m": 27.0,
+          "y_m": 0.0,
+          "distance_m": 27.0,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": false
+        }
+      ]
+    },
+    {
+      "key": "5V5_U18",
+      "params": {
+        "format": "5V5",
+        "age_group": "U18",
+        "court_type": "FULL",
+        "court_length_m": 28.0,
+        "court_width_m": 15.0,
+        "baseline_to_hoop_m": 1.575,
+        "three_point_radius_m": 6.75,
+        "three_point_geometry": "ARC_AND_CORNERS",
+        "corner_lateral_m": 6.6,
+        "corner_junction_x_m": 1.415,
+        "x_range_m": [
+          -1.575,
+          26.425
+        ],
+        "y_half_m": 7.5,
+        "hoop_count": 2,
+        "period_count": 4,
+        "period_minutes": 10.0,
+        "shot_clock_s": 24,
+        "inside_arc_points": 2,
+        "outside_arc_points": 3,
+        "fast_break_enabled": true,
+        "fast_break_max_possession_s": 8.0,
+        "win_score": null,
+        "players_per_team": 5,
+        "formation_points": 5,
+        "max_tracked_targets": 10,
+        "formation_sample_interval_s": 5.0
+      },
+      "validation_problems": [],
+      "probes": [
+        {
+          "label": "篮下正面",
+          "x_m": 2.0,
+          "y_m": 0.0,
+          "distance_m": 2.0,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "禁区边缘",
+          "x_m": 4.5,
+          "y_m": 0.0,
+          "distance_m": 4.5,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 5.7m",
+          "x_m": 5.7,
+          "y_m": 0.0,
+          "distance_m": 5.7,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 5.8m",
+          "x_m": 5.8,
+          "y_m": 0.0,
+          "distance_m": 5.8,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 5.9m",
+          "x_m": 5.9,
+          "y_m": 0.0,
+          "distance_m": 5.9,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 6.2m",
+          "x_m": 6.2,
+          "y_m": 0.0,
+          "distance_m": 6.2,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 6.7m",
+          "x_m": 6.7,
+          "y_m": 0.0,
+          "distance_m": 6.7,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 6.75m",
+          "x_m": 6.75,
+          "y_m": 0.0,
+          "distance_m": 6.75,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 6.8m",
+          "x_m": 6.8,
+          "y_m": 0.0,
+          "distance_m": 6.8,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 7.5m",
+          "x_m": 7.5,
+          "y_m": 0.0,
+          "distance_m": 7.5,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "翼侧45° 5.0m",
+          "x_m": 3.54,
+          "y_m": 3.54,
+          "distance_m": 5.006,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "翼侧45° 6.4m",
+          "x_m": 4.53,
+          "y_m": 4.53,
+          "distance_m": 6.406,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "翼侧45° 7.0m",
+          "x_m": 4.95,
+          "y_m": 4.95,
+          "distance_m": 7.0,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=5.0",
+          "x_m": 0.0,
+          "y_m": 5.0,
+          "distance_m": 5.0,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=5.5",
+          "x_m": 0.0,
+          "y_m": 5.5,
+          "distance_m": 5.5,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=6.0",
+          "x_m": 0.0,
+          "y_m": 6.0,
+          "distance_m": 6.0,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=6.6",
+          "x_m": 0.0,
+          "y_m": 6.6,
+          "distance_m": 6.6,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=7.0",
+          "x_m": 0.0,
+          "y_m": 7.0,
+          "distance_m": 7.0,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=7.5",
+          "x_m": 0.0,
+          "y_m": 7.5,
+          "distance_m": 7.5,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 x=-1.5 y=6",
+          "x_m": -1.5,
+          "y_m": 6.0,
+          "distance_m": 6.185,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "篮筐后方",
+          "x_m": -1.5,
+          "y_m": 0.0,
+          "distance_m": 1.5,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "交接点 x=1.415",
+          "x_m": 1.415,
+          "y_m": 6.6,
+          "distance_m": 6.75,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "中场附近",
+          "x_m": 12.0,
+          "y_m": 0.0,
+          "distance_m": 12.0,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "越界 y=8.0",
+          "x_m": 3.0,
+          "y_m": 8.0,
+          "distance_m": 8.544,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": false
+        },
+        {
+          "label": "越界 x=27.0",
+          "x_m": 27.0,
+          "y_m": 0.0,
+          "distance_m": 27.0,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": false
+        }
+      ]
+    },
+    {
+      "key": "5V5_SENIOR",
+      "params": {
+        "format": "5V5",
+        "age_group": "SENIOR",
+        "court_type": "FULL",
+        "court_length_m": 28.0,
+        "court_width_m": 15.0,
+        "baseline_to_hoop_m": 1.575,
+        "three_point_radius_m": 6.75,
+        "three_point_geometry": "ARC_AND_CORNERS",
+        "corner_lateral_m": 6.6,
+        "corner_junction_x_m": 1.415,
+        "x_range_m": [
+          -1.575,
+          26.425
+        ],
+        "y_half_m": 7.5,
+        "hoop_count": 2,
+        "period_count": 4,
+        "period_minutes": 10.0,
+        "shot_clock_s": 24,
+        "inside_arc_points": 2,
+        "outside_arc_points": 3,
+        "fast_break_enabled": true,
+        "fast_break_max_possession_s": 8.0,
+        "win_score": null,
+        "players_per_team": 5,
+        "formation_points": 5,
+        "max_tracked_targets": 10,
+        "formation_sample_interval_s": 5.0
+      },
+      "validation_problems": [],
+      "probes": [
+        {
+          "label": "篮下正面",
+          "x_m": 2.0,
+          "y_m": 0.0,
+          "distance_m": 2.0,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "禁区边缘",
+          "x_m": 4.5,
+          "y_m": 0.0,
+          "distance_m": 4.5,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 5.7m",
+          "x_m": 5.7,
+          "y_m": 0.0,
+          "distance_m": 5.7,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 5.8m",
+          "x_m": 5.8,
+          "y_m": 0.0,
+          "distance_m": 5.8,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 5.9m",
+          "x_m": 5.9,
+          "y_m": 0.0,
+          "distance_m": 5.9,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 6.2m",
+          "x_m": 6.2,
+          "y_m": 0.0,
+          "distance_m": 6.2,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 6.7m",
+          "x_m": 6.7,
+          "y_m": 0.0,
+          "distance_m": 6.7,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 6.75m",
+          "x_m": 6.75,
+          "y_m": 0.0,
+          "distance_m": 6.75,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 6.8m",
+          "x_m": 6.8,
+          "y_m": 0.0,
+          "distance_m": 6.8,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 7.5m",
+          "x_m": 7.5,
+          "y_m": 0.0,
+          "distance_m": 7.5,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "翼侧45° 5.0m",
+          "x_m": 3.54,
+          "y_m": 3.54,
+          "distance_m": 5.006,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "翼侧45° 6.4m",
+          "x_m": 4.53,
+          "y_m": 4.53,
+          "distance_m": 6.406,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "翼侧45° 7.0m",
+          "x_m": 4.95,
+          "y_m": 4.95,
+          "distance_m": 7.0,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=5.0",
+          "x_m": 0.0,
+          "y_m": 5.0,
+          "distance_m": 5.0,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=5.5",
+          "x_m": 0.0,
+          "y_m": 5.5,
+          "distance_m": 5.5,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=6.0",
+          "x_m": 0.0,
+          "y_m": 6.0,
+          "distance_m": 6.0,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=6.6",
+          "x_m": 0.0,
+          "y_m": 6.6,
+          "distance_m": 6.6,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=7.0",
+          "x_m": 0.0,
+          "y_m": 7.0,
+          "distance_m": 7.0,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=7.5",
+          "x_m": 0.0,
+          "y_m": 7.5,
+          "distance_m": 7.5,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 x=-1.5 y=6",
+          "x_m": -1.5,
+          "y_m": 6.0,
+          "distance_m": 6.185,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "篮筐后方",
+          "x_m": -1.5,
+          "y_m": 0.0,
+          "distance_m": 1.5,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "交接点 x=1.415",
+          "x_m": 1.415,
+          "y_m": 6.6,
+          "distance_m": 6.75,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "中场附近",
+          "x_m": 12.0,
+          "y_m": 0.0,
+          "distance_m": 12.0,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "越界 y=8.0",
+          "x_m": 3.0,
+          "y_m": 8.0,
+          "distance_m": 8.544,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": false
+        },
+        {
+          "label": "越界 x=27.0",
+          "x_m": 27.0,
+          "y_m": 0.0,
+          "distance_m": 27.0,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": false
+        }
+      ]
+    },
+    {
+      "key": "3V3_U15",
+      "params": {
+        "format": "3V3",
+        "age_group": "U15",
+        "court_type": "HALF",
+        "court_length_m": 15.0,
+        "court_width_m": 11.0,
+        "baseline_to_hoop_m": 1.575,
+        "three_point_radius_m": 6.75,
+        "three_point_geometry": "PURE_ARC",
+        "corner_lateral_m": null,
+        "corner_junction_x_m": null,
+        "x_range_m": [
+          -1.575,
+          13.425
+        ],
+        "y_half_m": 5.5,
+        "hoop_count": 1,
+        "period_count": 1,
+        "period_minutes": 10.0,
+        "shot_clock_s": 12,
+        "inside_arc_points": 1,
+        "outside_arc_points": 2,
+        "fast_break_enabled": false,
+        "fast_break_max_possession_s": null,
+        "win_score": 21,
+        "players_per_team": 3,
+        "formation_points": 3,
+        "max_tracked_targets": 6,
+        "formation_sample_interval_s": 5.0
+      },
+      "validation_problems": [],
+      "probes": [
+        {
+          "label": "篮下正面",
+          "x_m": 2.0,
+          "y_m": 0.0,
+          "distance_m": 2.0,
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
+          "in_bounds": true
+        },
+        {
+          "label": "禁区边缘",
+          "x_m": 4.5,
+          "y_m": 0.0,
+          "distance_m": 4.5,
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 5.7m",
+          "x_m": 5.7,
+          "y_m": 0.0,
+          "distance_m": 5.7,
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 5.8m",
+          "x_m": 5.8,
+          "y_m": 0.0,
+          "distance_m": 5.8,
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 5.9m",
+          "x_m": 5.9,
+          "y_m": 0.0,
+          "distance_m": 5.9,
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 6.2m",
+          "x_m": 6.2,
+          "y_m": 0.0,
+          "distance_m": 6.2,
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 6.7m",
+          "x_m": 6.7,
+          "y_m": 0.0,
+          "distance_m": 6.7,
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 6.75m",
+          "x_m": 6.75,
+          "y_m": 0.0,
+          "distance_m": 6.75,
+          "behind": true,
+          "points": 2,
+          "label_zh": "远投(2分)",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 6.8m",
+          "x_m": 6.8,
+          "y_m": 0.0,
+          "distance_m": 6.8,
+          "behind": true,
+          "points": 2,
+          "label_zh": "远投(2分)",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 7.5m",
+          "x_m": 7.5,
+          "y_m": 0.0,
+          "distance_m": 7.5,
+          "behind": true,
+          "points": 2,
+          "label_zh": "远投(2分)",
+          "in_bounds": true
+        },
+        {
+          "label": "翼侧45° 5.0m",
+          "x_m": 3.54,
+          "y_m": 3.54,
+          "distance_m": 5.006,
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
+          "in_bounds": true
+        },
+        {
+          "label": "翼侧45° 6.4m",
+          "x_m": 4.53,
+          "y_m": 4.53,
+          "distance_m": 6.406,
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
+          "in_bounds": true
+        },
+        {
+          "label": "翼侧45° 7.0m",
+          "x_m": 4.95,
+          "y_m": 4.95,
+          "distance_m": 7.0,
+          "behind": true,
+          "points": 2,
+          "label_zh": "远投(2分)",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=5.0",
+          "x_m": 0.0,
+          "y_m": 5.0,
+          "distance_m": 5.0,
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=5.5",
+          "x_m": 0.0,
+          "y_m": 5.5,
+          "distance_m": 5.5,
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=6.0",
+          "x_m": 0.0,
+          "y_m": 6.0,
+          "distance_m": 6.0,
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
+          "in_bounds": false
+        },
+        {
+          "label": "底角 y=6.6",
+          "x_m": 0.0,
+          "y_m": 6.6,
+          "distance_m": 6.6,
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
+          "in_bounds": false
+        },
+        {
+          "label": "底角 y=7.0",
+          "x_m": 0.0,
+          "y_m": 7.0,
+          "distance_m": 7.0,
+          "behind": true,
+          "points": 2,
+          "label_zh": "远投(2分)",
+          "in_bounds": false
+        },
+        {
+          "label": "底角 y=7.5",
+          "x_m": 0.0,
+          "y_m": 7.5,
+          "distance_m": 7.5,
+          "behind": true,
+          "points": 2,
+          "label_zh": "远投(2分)",
+          "in_bounds": false
+        },
+        {
+          "label": "底角 x=-1.5 y=6",
+          "x_m": -1.5,
+          "y_m": 6.0,
+          "distance_m": 6.185,
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
+          "in_bounds": false
+        },
+        {
+          "label": "篮筐后方",
+          "x_m": -1.5,
+          "y_m": 0.0,
+          "distance_m": 1.5,
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
+          "in_bounds": true
+        },
+        {
+          "label": "交接点 x=1.415",
+          "x_m": 1.415,
+          "y_m": 6.6,
+          "distance_m": 6.75,
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
+          "in_bounds": false
+        },
+        {
+          "label": "中场附近",
+          "x_m": 12.0,
+          "y_m": 0.0,
+          "distance_m": 12.0,
+          "behind": true,
+          "points": 2,
+          "label_zh": "远投(2分)",
+          "in_bounds": true
+        },
+        {
+          "label": "越界 y=8.0",
+          "x_m": 3.0,
+          "y_m": 8.0,
+          "distance_m": 8.544,
+          "behind": true,
+          "points": 2,
+          "label_zh": "远投(2分)",
+          "in_bounds": false
+        },
+        {
+          "label": "越界 x=27.0",
+          "x_m": 27.0,
+          "y_m": 0.0,
+          "distance_m": 27.0,
+          "behind": true,
+          "points": 2,
+          "label_zh": "远投(2分)",
+          "in_bounds": false
+        }
+      ]
+    },
+    {
+      "key": "3V3_SENIOR",
+      "params": {
+        "format": "3V3",
+        "age_group": "SENIOR",
+        "court_type": "HALF",
+        "court_length_m": 15.0,
+        "court_width_m": 11.0,
+        "baseline_to_hoop_m": 1.575,
+        "three_point_radius_m": 6.75,
+        "three_point_geometry": "PURE_ARC",
+        "corner_lateral_m": null,
+        "corner_junction_x_m": null,
+        "x_range_m": [
+          -1.575,
+          13.425
+        ],
+        "y_half_m": 5.5,
+        "hoop_count": 1,
+        "period_count": 1,
+        "period_minutes": 10.0,
+        "shot_clock_s": 12,
+        "inside_arc_points": 1,
+        "outside_arc_points": 2,
+        "fast_break_enabled": false,
+        "fast_break_max_possession_s": null,
+        "win_score": 21,
+        "players_per_team": 3,
+        "formation_points": 3,
+        "max_tracked_targets": 6,
+        "formation_sample_interval_s": 5.0
+      },
+      "validation_problems": [],
+      "probes": [
+        {
+          "label": "篮下正面",
+          "x_m": 2.0,
+          "y_m": 0.0,
+          "distance_m": 2.0,
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
+          "in_bounds": true
+        },
+        {
+          "label": "禁区边缘",
+          "x_m": 4.5,
+          "y_m": 0.0,
+          "distance_m": 4.5,
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 5.7m",
+          "x_m": 5.7,
+          "y_m": 0.0,
+          "distance_m": 5.7,
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 5.8m",
+          "x_m": 5.8,
+          "y_m": 0.0,
+          "distance_m": 5.8,
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 5.9m",
+          "x_m": 5.9,
+          "y_m": 0.0,
+          "distance_m": 5.9,
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 6.2m",
+          "x_m": 6.2,
+          "y_m": 0.0,
+          "distance_m": 6.2,
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 6.7m",
+          "x_m": 6.7,
+          "y_m": 0.0,
+          "distance_m": 6.7,
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 6.75m",
+          "x_m": 6.75,
+          "y_m": 0.0,
+          "distance_m": 6.75,
+          "behind": true,
+          "points": 2,
+          "label_zh": "远投(2分)",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 6.8m",
+          "x_m": 6.8,
+          "y_m": 0.0,
+          "distance_m": 6.8,
+          "behind": true,
+          "points": 2,
+          "label_zh": "远投(2分)",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 7.5m",
+          "x_m": 7.5,
+          "y_m": 0.0,
+          "distance_m": 7.5,
+          "behind": true,
+          "points": 2,
+          "label_zh": "远投(2分)",
+          "in_bounds": true
+        },
+        {
+          "label": "翼侧45° 5.0m",
+          "x_m": 3.54,
+          "y_m": 3.54,
+          "distance_m": 5.006,
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
+          "in_bounds": true
+        },
+        {
+          "label": "翼侧45° 6.4m",
+          "x_m": 4.53,
+          "y_m": 4.53,
+          "distance_m": 6.406,
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
+          "in_bounds": true
+        },
+        {
+          "label": "翼侧45° 7.0m",
+          "x_m": 4.95,
+          "y_m": 4.95,
+          "distance_m": 7.0,
+          "behind": true,
+          "points": 2,
+          "label_zh": "远投(2分)",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=5.0",
+          "x_m": 0.0,
+          "y_m": 5.0,
+          "distance_m": 5.0,
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=5.5",
+          "x_m": 0.0,
+          "y_m": 5.5,
+          "distance_m": 5.5,
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=6.0",
+          "x_m": 0.0,
+          "y_m": 6.0,
+          "distance_m": 6.0,
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
+          "in_bounds": false
+        },
+        {
+          "label": "底角 y=6.6",
+          "x_m": 0.0,
+          "y_m": 6.6,
+          "distance_m": 6.6,
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
+          "in_bounds": false
+        },
+        {
+          "label": "底角 y=7.0",
+          "x_m": 0.0,
+          "y_m": 7.0,
+          "distance_m": 7.0,
+          "behind": true,
+          "points": 2,
+          "label_zh": "远投(2分)",
+          "in_bounds": false
+        },
+        {
+          "label": "底角 y=7.5",
+          "x_m": 0.0,
+          "y_m": 7.5,
+          "distance_m": 7.5,
+          "behind": true,
+          "points": 2,
+          "label_zh": "远投(2分)",
+          "in_bounds": false
+        },
+        {
+          "label": "底角 x=-1.5 y=6",
+          "x_m": -1.5,
+          "y_m": 6.0,
+          "distance_m": 6.185,
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
+          "in_bounds": false
+        },
+        {
+          "label": "篮筐后方",
+          "x_m": -1.5,
+          "y_m": 0.0,
+          "distance_m": 1.5,
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
+          "in_bounds": true
+        },
+        {
+          "label": "交接点 x=1.415",
+          "x_m": 1.415,
+          "y_m": 6.6,
+          "distance_m": 6.75,
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
+          "in_bounds": false
+        },
+        {
+          "label": "中场附近",
+          "x_m": 12.0,
+          "y_m": 0.0,
+          "distance_m": 12.0,
+          "behind": true,
+          "points": 2,
+          "label_zh": "远投(2分)",
+          "in_bounds": true
+        },
+        {
+          "label": "越界 y=8.0",
+          "x_m": 3.0,
+          "y_m": 8.0,
+          "distance_m": 8.544,
+          "behind": true,
+          "points": 2,
+          "label_zh": "远投(2分)",
+          "in_bounds": false
+        },
+        {
+          "label": "越界 x=27.0",
+          "x_m": 27.0,
+          "y_m": 0.0,
+          "distance_m": 27.0,
+          "behind": true,
+          "points": 2,
+          "label_zh": "远投(2分)",
+          "in_bounds": false
+        }
+      ]
+    },
+    {
+      "key": "4V4_U15_FULL",
+      "params": {
+        "format": "4V4",
+        "age_group": "U15",
+        "court_type": "FULL",
+        "court_length_m": 28.0,
+        "court_width_m": 15.0,
+        "baseline_to_hoop_m": 1.575,
+        "three_point_radius_m": 5.8,
+        "three_point_geometry": "PURE_ARC",
+        "corner_lateral_m": null,
+        "corner_junction_x_m": null,
+        "x_range_m": [
+          -1.575,
+          26.425
+        ],
+        "y_half_m": 7.5,
+        "hoop_count": 2,
+        "period_count": 4,
+        "period_minutes": 8.0,
+        "shot_clock_s": 24,
+        "inside_arc_points": 2,
+        "outside_arc_points": 3,
+        "fast_break_enabled": true,
+        "fast_break_max_possession_s": 8.0,
+        "win_score": null,
+        "players_per_team": 4,
+        "formation_points": 4,
+        "max_tracked_targets": 8,
+        "formation_sample_interval_s": 5.0
+      },
+      "validation_problems": [],
+      "probes": [
+        {
+          "label": "篮下正面",
+          "x_m": 2.0,
+          "y_m": 0.0,
+          "distance_m": 2.0,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "禁区边缘",
+          "x_m": 4.5,
+          "y_m": 0.0,
+          "distance_m": 4.5,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 5.7m",
+          "x_m": 5.7,
+          "y_m": 0.0,
+          "distance_m": 5.7,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 5.8m",
+          "x_m": 5.8,
+          "y_m": 0.0,
+          "distance_m": 5.8,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 5.9m",
+          "x_m": 5.9,
+          "y_m": 0.0,
+          "distance_m": 5.9,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 6.2m",
+          "x_m": 6.2,
+          "y_m": 0.0,
+          "distance_m": 6.2,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 6.7m",
+          "x_m": 6.7,
+          "y_m": 0.0,
+          "distance_m": 6.7,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 6.75m",
+          "x_m": 6.75,
+          "y_m": 0.0,
+          "distance_m": 6.75,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 6.8m",
+          "x_m": 6.8,
+          "y_m": 0.0,
+          "distance_m": 6.8,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 7.5m",
+          "x_m": 7.5,
+          "y_m": 0.0,
+          "distance_m": 7.5,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "翼侧45° 5.0m",
+          "x_m": 3.54,
+          "y_m": 3.54,
+          "distance_m": 5.006,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "翼侧45° 6.4m",
+          "x_m": 4.53,
+          "y_m": 4.53,
+          "distance_m": 6.406,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "翼侧45° 7.0m",
+          "x_m": 4.95,
+          "y_m": 4.95,
+          "distance_m": 7.0,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=5.0",
+          "x_m": 0.0,
+          "y_m": 5.0,
+          "distance_m": 5.0,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=5.5",
+          "x_m": 0.0,
+          "y_m": 5.5,
+          "distance_m": 5.5,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=6.0",
+          "x_m": 0.0,
+          "y_m": 6.0,
+          "distance_m": 6.0,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=6.6",
+          "x_m": 0.0,
+          "y_m": 6.6,
+          "distance_m": 6.6,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=7.0",
+          "x_m": 0.0,
+          "y_m": 7.0,
+          "distance_m": 7.0,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=7.5",
+          "x_m": 0.0,
+          "y_m": 7.5,
+          "distance_m": 7.5,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 x=-1.5 y=6",
+          "x_m": -1.5,
+          "y_m": 6.0,
+          "distance_m": 6.185,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "篮筐后方",
+          "x_m": -1.5,
+          "y_m": 0.0,
+          "distance_m": 1.5,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "交接点 x=1.415",
+          "x_m": 1.415,
+          "y_m": 6.6,
+          "distance_m": 6.75,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "中场附近",
+          "x_m": 12.0,
+          "y_m": 0.0,
+          "distance_m": 12.0,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "越界 y=8.0",
+          "x_m": 3.0,
+          "y_m": 8.0,
+          "distance_m": 8.544,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": false
+        },
+        {
+          "label": "越界 x=27.0",
+          "x_m": 27.0,
+          "y_m": 0.0,
+          "distance_m": 27.0,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": false
+        }
+      ]
+    },
+    {
+      "key": "4V4_U15_HALF",
+      "params": {
+        "format": "4V4",
+        "age_group": "U15",
+        "court_type": "HALF",
+        "court_length_m": 14.0,
+        "court_width_m": 15.0,
+        "baseline_to_hoop_m": 1.575,
+        "three_point_radius_m": 5.8,
+        "three_point_geometry": "PURE_ARC",
+        "corner_lateral_m": null,
+        "corner_junction_x_m": null,
+        "x_range_m": [
+          -1.575,
+          12.425
+        ],
+        "y_half_m": 7.5,
+        "hoop_count": 1,
+        "period_count": 4,
+        "period_minutes": 8.0,
+        "shot_clock_s": 24,
+        "inside_arc_points": 2,
+        "outside_arc_points": 3,
+        "fast_break_enabled": true,
+        "fast_break_max_possession_s": 8.0,
+        "win_score": null,
+        "players_per_team": 4,
+        "formation_points": 4,
+        "max_tracked_targets": 8,
+        "formation_sample_interval_s": 5.0
+      },
+      "validation_problems": [],
+      "probes": [
+        {
+          "label": "篮下正面",
+          "x_m": 2.0,
+          "y_m": 0.0,
+          "distance_m": 2.0,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "禁区边缘",
+          "x_m": 4.5,
+          "y_m": 0.0,
+          "distance_m": 4.5,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 5.7m",
+          "x_m": 5.7,
+          "y_m": 0.0,
+          "distance_m": 5.7,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 5.8m",
+          "x_m": 5.8,
+          "y_m": 0.0,
+          "distance_m": 5.8,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 5.9m",
+          "x_m": 5.9,
+          "y_m": 0.0,
+          "distance_m": 5.9,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 6.2m",
+          "x_m": 6.2,
+          "y_m": 0.0,
+          "distance_m": 6.2,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 6.7m",
+          "x_m": 6.7,
+          "y_m": 0.0,
+          "distance_m": 6.7,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 6.75m",
+          "x_m": 6.75,
+          "y_m": 0.0,
+          "distance_m": 6.75,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 6.8m",
+          "x_m": 6.8,
+          "y_m": 0.0,
+          "distance_m": 6.8,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "弧顶 7.5m",
+          "x_m": 7.5,
+          "y_m": 0.0,
+          "distance_m": 7.5,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "翼侧45° 5.0m",
+          "x_m": 3.54,
+          "y_m": 3.54,
+          "distance_m": 5.006,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "翼侧45° 6.4m",
+          "x_m": 4.53,
+          "y_m": 4.53,
+          "distance_m": 6.406,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "翼侧45° 7.0m",
+          "x_m": 4.95,
+          "y_m": 4.95,
+          "distance_m": 7.0,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=5.0",
+          "x_m": 0.0,
+          "y_m": 5.0,
+          "distance_m": 5.0,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=5.5",
+          "x_m": 0.0,
+          "y_m": 5.5,
+          "distance_m": 5.5,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=6.0",
+          "x_m": 0.0,
+          "y_m": 6.0,
+          "distance_m": 6.0,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=6.6",
+          "x_m": 0.0,
+          "y_m": 6.6,
+          "distance_m": 6.6,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=7.0",
+          "x_m": 0.0,
+          "y_m": 7.0,
+          "distance_m": 7.0,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 y=7.5",
+          "x_m": 0.0,
+          "y_m": 7.5,
+          "distance_m": 7.5,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "底角 x=-1.5 y=6",
+          "x_m": -1.5,
+          "y_m": 6.0,
+          "distance_m": 6.185,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "篮筐后方",
+          "x_m": -1.5,
+          "y_m": 0.0,
+          "distance_m": 1.5,
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
+          "in_bounds": true
+        },
+        {
+          "label": "交接点 x=1.415",
+          "x_m": 1.415,
+          "y_m": 6.6,
+          "distance_m": 6.75,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "中场附近",
+          "x_m": 12.0,
+          "y_m": 0.0,
+          "distance_m": 12.0,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": true
+        },
+        {
+          "label": "越界 y=8.0",
+          "x_m": 3.0,
+          "y_m": 8.0,
+          "distance_m": 8.544,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": false
+        },
+        {
+          "label": "越界 x=27.0",
+          "x_m": 27.0,
+          "y_m": 0.0,
+          "distance_m": 27.0,
+          "behind": true,
+          "points": 3,
+          "label_zh": "三分",
+          "in_bounds": false
+        }
+      ]
+    }
+  ]
+}

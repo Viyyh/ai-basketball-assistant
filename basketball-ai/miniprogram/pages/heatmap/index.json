@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "投篮热图",
+  "usingComponents": {
+    "court-svg": "/components/court-svg/index",
+    "scope-badge": "/components/scope-badge/index",
+    "empty-state": "/components/empty-state/index"
+  }
+}

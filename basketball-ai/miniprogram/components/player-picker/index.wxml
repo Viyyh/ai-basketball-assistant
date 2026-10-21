@@ -1,0 +1,34 @@
+<view class="picker {{disabled ? 'picker--disabled' : ''}}">
+
+  <view class="picker__grid" style="{{gridStyle}}">
+    <view
+      wx:for="{{items}}"
+      wx:key="id"
+      class="pp {{selected === item.id ? 'pp--on' : ''}} {{item.kind === 'special' ? 'pp--special' : ''}} {{item.isLast ? 'pp--last' : ''}}"
+      data-id="{{item.id}}"
+      bindtap="onPick"
+    >
+      <!-- 上一次选过的人：高亮提示"刚刚是这个人" -->
+      <view wx:if="{{item.isLast}}" class="pp__last-badge">刚选</view>
+
+      <view class="pp__avatar">
+        <block wx:if="{{item.kind === 'player'}}">{{item.number}}</block>
+        <block wx:elif="{{item.id === SPECIAL_NOT_OUR_TEAM}}">✕</block>
+        <block wx:else>?</block>
+      </view>
+
+      <view class="pp__name">
+        <block wx:if="{{item.kind === 'player'}}">{{item.number}}号 {{item.name}}</block>
+        <block wx:else>{{item.label}}</block>
+      </view>
+
+      <view wx:if="{{item.kind === 'player' && item.position}}" class="pp__pos">{{item.position}}</view>
+    </view>
+  </view>
+
+  <!-- 「看不清」的说明：PRD 屏 07 硬性要求，避免教练被迫乱选 -->
+  <view class="picker__note">
+    选「看不清」不会填入任何球员，报告里显示为「—」。宁可留空也不要猜。
+  </view>
+
+</view>

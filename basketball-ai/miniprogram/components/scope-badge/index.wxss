@@ -1,0 +1,27 @@
+.scope {
+  font-size: var(--fs-xs);
+  color: var(--ink-3);
+  background: var(--fill);
+  border-radius: var(--r-sm);
+  padding: 6rpx var(--sp-2);
+  margin-bottom: var(--sp-2);
+  line-height: 1.6;
+}
+.scope--compact { padding: 2rpx 12rpx; margin-bottom: 0; display: inline-block; }
+.scope--incomplete { background: var(--warn-2); color: var(--warn-ink); }
+
+.scope__main { display: flex; align-items: center; flex-wrap: wrap; gap: 6rpx; }
+.scope__text { font-weight: 500; color: inherit; }
+.scope__sep { opacity: 0.5; }
+.scope__dim { opacity: 0.85; }
+
+/* 3x3 的计分口径必须显式写出，否则教练会以为弧外是 3 分 */
+.scope__tag3v3 {
+  background: var(--warn-2);
+  color: var(--warn-ink);
+  padding: 0 10rpx;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-xs);
+}
+
+.scope__warn { margin-top: 4rpx; font-size: var(--fs-xs); }

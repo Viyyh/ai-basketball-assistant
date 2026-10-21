@@ -1,0 +1,89 @@
+/**
+ * 设计系统 · 变量层 —— P1-F01
+ *
+ * 对应 PRD 3.5「状态色系」：语义固定，教练形成条件反射。
+ * 橙 = 待处理，绿 = 已完成，蓝 = 进行中，红 = 异常。
+ *
+ * 对应 PRD 3.1「模块颜色即导航」：
+ *   蓝 → 球队比赛数据   青 → 球员数据库
+ *   紫 → 球队战术板     橙 → 对手记录
+ */
+
+page {
+  /* ---------- 中性色 ---------- */
+  --ink:        #1e293b;
+  --ink-2:      #475569;
+  --ink-3:      #94a3b8;
+  --line:       #cbd5e1;
+  --line-2:     #e2e8f0;
+  --bg:         #f8fafc;
+  --card:       #ffffff;
+  --fill:       #f1f5f9;
+  --fill-2:     #e2e8f0;
+
+  /* ---------- 状态色（语义固定，不得挪作他用） ---------- */
+  /* 进行中 / 主 CTA */
+  --accent:     #2563eb;
+  --accent-2:   #dbeafe;
+  /* 已完成 / 成功 / 命中 */
+  --ok:         #16a34a;
+  --ok-2:       #dcfce7;
+  /* 待处理 / 待补录 / 提醒 */
+  --warn:       #f59e0b;
+  --warn-2:     #fef3c7;
+  --warn-ink:   #92400e;
+  /* 异常 / 严重逾期 / 未命中 */
+  --err:        #dc2626;
+  --err-2:      #fee2e2;
+  --err-ink:    #7f1d1d;
+
+  /* ---------- 模块专属色 ---------- */
+  --mod-stats:    #2563eb;   /* 球队比赛数据 */
+  --mod-stats-2:  #dbeafe;
+  --mod-player:   #0d9488;   /* 球员数据库 */
+  --mod-player-2: #ccfbf1;
+  --mod-tactic:   #7c3aed;   /* 球队战术板 */
+  --mod-tactic-2: #ede9fe;
+  --mod-opponent: #f59e0b;   /* 对手记录 */
+  --mod-opponent-2:#fef3c7;
+
+  /* ---------- 数据来源徽章（PRD 4.x 数据来源标注） ---------- */
+  --src-ai:       #3730a3;
+  --src-ai-2:     #e0e7ff;
+  --src-manual:   #9d174d;
+  --src-manual-2: #fce7f3;
+  --src-mixed:    #92400e;
+  --src-mixed-2:  #fef3c7;
+
+  /* ---------- 圆角 ---------- */
+  --r-sm: 6rpx;
+  --r-md: 12rpx;
+  --r-lg: 20rpx;
+  --r-xl: 32rpx;
+  --r-pill: 999rpx;
+
+  /* ---------- 间距（8rpx 基准） ---------- */
+  --sp-1: 8rpx;
+  --sp-2: 16rpx;
+  --sp-3: 24rpx;
+  --sp-4: 32rpx;
+  --sp-5: 40rpx;
+  --sp-6: 48rpx;
+
+  /* ---------- 字号 ---------- */
+  --fs-xs:  20rpx;   /* 徽章、辅助说明 */
+  --fs-sm:  22rpx;   /* 副标题、时间戳 */
+  --fs-md:  24rpx;   /* 正文 */
+  --fs-lg:  28rpx;   /* 卡片标题 */
+  --fs-xl:  32rpx;   /* 页面标题 */
+  --fs-num: 40rpx;   /* 大数字（比分、进度） */
+
+  /* ---------- 阴影 ---------- */
+  --sh-1: 0 2rpx 8rpx rgba(30, 41, 59, 0.06);
+  --sh-2: 0 8rpx 24rpx rgba(30, 41, 59, 0.10);
+  --sh-sheet: 0 -12rpx 40rpx rgba(0, 0, 0, 0.15);
+
+  /* ---------- 布局 ---------- */
+  --nav-h: 100rpx;
+  --safe-bottom: env(safe-area-inset-bottom);
+}

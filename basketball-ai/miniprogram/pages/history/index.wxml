@@ -1,0 +1,94 @@
+<view class="page">
+
+  <!-- 搜索 -->
+  <view class="field hs-search">
+    <input class="field__input" value="{{keyword}}" bindinput="onSearchInput"
+           placeholder="🔍 搜索名称 / 对手 / 日期" placeholder-class="field__placeholder" />
+  </view>
+
+  <!-- 类型筛选 -->
+  <scroll-view class="hs-frow" scroll-x enable-flex>
+    <view
+      wx:for="{{templates}}"
+      wx:key="key"
+      class="fchip {{activeTemplate === item.key ? 'fchip--on' : ''}}"
+      data-key="{{item.key}}"
+      bindtap="onTapTemplate"
+    >{{item.label}}</view>
+  </scroll-view>
+
+  <!-- 赛制与年龄段筛选：数据不可跨赛制合并，检索也要能按口径过滤 -->
+  <view class="hs-pickers">
+    <picker mode="selector" range="{{formats}}" range-key="label" bindchange="onFormatChange">
+      <view class="fchip hs-picker {{activeFormat !== 'ALL' ? 'fchip--on' : ''}}">
+        {{activeFormat === 'ALL' ? '全部赛制' : formats[0].label}}
+        <block wx:if="{{activeFormat !== 'ALL'}}">
+          {{activeFormat === '5V5' ? '5 对 5' : (activeFormat === '3V3' ? '3 对 3' : activeFormat)}}
+        </block>
+        ▾
+      </view>
+    </picker>
+    <picker mode="selector" range="{{ages}}" range-key="label" bindchange="onAgeChange">
+      <view class="fchip hs-picker {{activeAge !== 'ALL' ? 'fchip--on' : ''}}">
+        {{activeAge === 'ALL' ? '全部年龄段' : (activeAge === 'SENIOR' ? '一线' : activeAge)}} ▾
+      </view>
+    </picker>
+    <view wx:if="{{activeFilterCount}}" class="hs-reset" bindtap="onResetFilter">清空筛选</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="hs-loading">加载历史…</view>
+
+  <block wx:elif="{{!filtered.length}}">
+    <empty-state
+      scene="{{totalCount ? 'noResult' : 'noGames'}}"
+      bind:action="{{totalCount ? 'onResetFilter' : 'onNewRecording'}}"
+    />
+  </block>
+
+  <block wx:else>
+    <view class="hs-count">共 {{filtered.length}} 条{{activeFilterCount ? '（已筛选）' : ''}}</view>
+
+    <view class="hs-list">
+      <view
+        wx:for="{{filtered}}"
+        wx:key="id"
+        class="item hs-item"
+        data-id="{{item.id}}"
+        data-status="{{item.status}}"
+        bindtap="onTapActivity"
+      >
+        <view class="item__avatar {{item.hasScore ? (item.won ? 'item__avatar--ok' : 'item__avatar--err') : ''}}">
+          <block wx:if="{{!item.hasScore}}">·</block>
+          <block wx:elif="{{item.won}}">胜</block>
+          <block wx:else>负</block>
+        </view>
+
+        <view class="item__body">
+          <view class="item__nm">{{item.dateText}} · {{item.name}}</view>
+          <view class="item__sub">
+            {{item.templateText}} · {{item.formatText}} · {{item.ageText}}
+          </view>
+          <view class="item__sub hs-item__meta">
+            {{item.durationText}}
+            <text wx:if="{{item.isPending}}" class="hs-warn"> · {{item.pendingCount}} 个待补录</text>
+          </view>
+        </view>
+
+        <view class="item__val">
+          <view class="item__val-n" wx:if="{{item.hasScore}}">{{item.scoreText}}</view>
+          <status-tag
+            wx:if="{{item.isPending}}" status="pending"
+          />
+          <status-tag wx:elif="{{item.isProcessing}}" status="processing" />
+          <status-tag wx:elif="{{item.isComplete}}" status="done" />
+        </view>
+      </view>
+    </view>
+
+    <view class="hs-note">
+      赛制与年龄段可作为筛选维度。不同赛制的数据不可合并统计，
+      列表里的比分与时长仅供参考。
+    </view>
+  </block>
+
+</view>

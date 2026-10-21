@@ -1,0 +1,80 @@
+{
+  "description": "AI 篮球训练/比赛数据采集与分析小程序",
+  "appid": "",
+  "projectname": "basketball-ai-miniprogram",
+  "compileType": "miniprogram",
+  "libVersion": "3.5.0",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "coverView": true,
+    "showShadowRootInWxmlPanel": true,
+    "useCompilerPlugins": false,
+    "babelSetting": { "ignore": [], "disablePlugins": [], "outputPath": "" }
+  },
+  "packOptions": {
+    "ignore": [
+      { "type": "folder", "value": "tests" },
+      { "type": "folder", "value": "preview" }
+    ],
+    "include": []
+  },
+  "condition": {
+    "miniprogram": {
+      "list": [
+        {
+          "name": "首页",
+          "pathName": "pages/home/index",
+          "query": "",
+          "scene": null
+        },
+        {
+          "name": "报告总览（Mock）",
+          "pathName": "pages/report/index",
+          "query": "activityId=act_1009",
+          "scene": null
+        },
+        {
+          "name": "事件补录（Mock）",
+          "pathName": "pages/events/index",
+          "query": "activityId=act_1009&filter=PENDING",
+          "scene": null
+        },
+        {
+          "name": "投篮热图（Mock）",
+          "pathName": "pages/heatmap/index",
+          "query": "activityId=act_1009",
+          "scene": null
+        },
+        {
+          "name": "阵型快照（Mock）",
+          "pathName": "pages/formation/index",
+          "query": "activityId=act_1009",
+          "scene": null
+        },
+        {
+          "name": "3对3 报告（验证参数降级）",
+          "pathName": "pages/report/index",
+          "query": "activityId=act_0928",
+          "scene": null
+        },
+        {
+          "name": "套路演练报告",
+          "pathName": "pages/routine-report/index",
+          "query": "activityId=act_1007",
+          "scene": null
+        },
+        {
+          "name": "新建活动",
+          "pathName": "pages/activity-new/index",
+          "query": "",
+          "scene": null
+        }
+      ]
+    }
+  },
+  "editorSetting": { "tabIndent": "insertSpaces", "tabSize": 2 }
+}

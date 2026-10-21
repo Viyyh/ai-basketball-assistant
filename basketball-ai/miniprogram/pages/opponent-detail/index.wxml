@@ -1,0 +1,199 @@
+<view class="page">
+
+  <view wx:if="{{loading}}" class="od-loading">加载对手档案…</view>
+
+  <block wx:elif="{{notFound}}">
+    <empty-state title="找不到该对手" desc="对手档案可能已被删除。" action="返回对手列表" bind:action="onBack" />
+  </block>
+
+  <block wx:else>
+
+    <!-- 赛制口径切换：四个 tab 的数据都跟着口径走 -->
+    <block wx:if="{{scopes.length > 1}}">
+      <view class="od-scope-hd">
+        <text>赛制口径</text>
+        <text class="od-scope-hd__warn">不可合并</text>
+      </view>
+      <view class="od-scopes">
+        <view
+          wx:for="{{scopes}}"
+          wx:key="label"
+          class="fchip {{activeScope.label === item.label ? 'fchip--on' : ''}}"
+          data-index="{{index}}"
+          bindtap="onTapScope"
+        >{{item.label}} · {{item.wins}}胜{{item.losses}}负</view>
+      </view>
+    </block>
+
+    <view wx:if="{{scopeText}}" class="scope scope--strong od-scope">当前口径：{{scopeText}}</view>
+
+    <!-- 四个 tab -->
+    <view class="od-tabs">
+      <view
+        wx:for="{{tabs}}"
+        wx:key="key"
+        class="od-tab {{activeTab === item.key ? 'od-tab--on' : ''}}"
+        data-key="{{item.key}}"
+        bindtap="onTapTab"
+      >{{item.label}}</view>
+    </view>
+
+    <!-- ============ Tab 1 · 使用阵型 ============ -->
+    <block wx:if="{{activeTab === 'formation'}}">
+      <view wx:if="{{!formations.length}}" class="od-empty">
+        <empty-state
+          title="还没有阵型数据"
+          desc="录一场与该对手的比赛，AI 会从交手录像里聚合对手的常用阵型。"
+          action="去录一场"
+          bind:action="onNewRecording"
+        />
+      </view>
+      <block wx:else>
+        <view class="sec-label">常用阵型分布</view>
+        <view class="od-forms">
+          <view wx:for="{{formations}}" wx:key="label" class="prog">
+            <view class="prog__name">{{item.label}}</view>
+            <view class="prog__track">
+              <view class="prog__fill prog__fill--warn" style="width:{{item.barWidth}}%"></view>
+            </view>
+            <view class="prog__v">{{item.pctText}}</view>
+          </view>
+        </view>
+
+        <view class="sec-label">倾向洞察</view>
+        <view class="card card--fill od-insight" wx:if="{{offensePreference}}">
+          <view class="od-insight__cap">进攻端</view>
+          <view class="od-insight__body">{{offensePreference}}</view>
+        </view>
+        <view class="card card--fill od-insight" wx:if="{{defensePreference}}">
+          <view class="od-insight__cap">防守端</view>
+          <view class="od-insight__body">{{defensePreference}}</view>
+        </view>
+
+        <view class="od-note">
+          阵型分布由 AI 从交手录像聚合。识别置信度不足时不会硬给阵型名，
+          因此各项占比之和可能小于 100%。
+        </view>
+      </block>
+    </block>
+
+    <!-- ============ Tab 2 · 球队数据 ============ -->
+    <block wx:elif="{{activeTab === 'stats'}}">
+      <block wx:if="{{stats}}">
+        <view class="sec-label">交手聚合（我校视角）</view>
+        <view class="statgrid statgrid--3 od-stats">
+          <view class="stat"><view class="stat__n">{{stats.ppg}}</view><view class="stat__l">对手场均</view></view>
+          <view class="stat"><view class="stat__n">{{stats.ppgAgainst}}</view><view class="stat__l">我校场均</view></view>
+          <view class="stat"><view class="stat__n">{{stats.wins}}:{{stats.losses}}</view><view class="stat__l">我校战绩</view></view>
+        </view>
+        <view class="od-note">{{statsNote}}</view>
+      </block>
+      <view wx:else class="od-empty">
+        <empty-state title="暂无数据" desc="{{statsNote}}" action="去录一场" bind:action="onNewRecording" />
+      </view>
+
+      <view class="sec-label">交手明细</view>
+      <view class="od-h2h" wx:if="{{headToHead.length}}">
+        <view wx:for="{{headToHead}}" wx:key="label" class="item">
+          <view class="item__body">
+            <view class="item__nm">{{item.label}}</view>
+            <view class="item__sub">
+              交手 {{item.played}} 次 · {{item.wins}}胜{{item.losses}}负
+              <text wx:if="{{item.lastPlayedAt}}"> · 最近 {{item.lastPlayedAt}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view wx:else class="od-note">尚无交手记录。5对5 与 3对3 的战绩分开统计，不合并。</view>
+    </block>
+
+    <!-- ============ Tab 3 · 重点球员 ============ -->
+    <block wx:elif="{{activeTab === 'players'}}">
+      <view class="row row--between od-kp-hd">
+        <text class="sec-label" style="margin:0">重点球员 {{keyPlayers.length}} 人</text>
+        <text class="chip chip--warn">手动标记</text>
+      </view>
+
+      <view class="od-kps" wx:if="{{keyPlayers.length}}">
+        <view
+          wx:for="{{keyPlayers}}"
+          wx:key="id"
+          class="card od-kp"
+          data-id="{{item.id}}"
+          bindlongpress="onLongPressPlayer"
+        >
+          <view class="od-kp__row">
+            <view class="od-kp__num od-kp__num--{{item.threatTone}}">{{item.number}}</view>
+            <view class="od-kp__main">
+              <view class="od-kp__name">
+                {{item.name}}
+                <text wx:if="{{item.position}}" class="od-kp__pos">{{item.position}}</text>
+              </view>
+              <view wx:if="{{item.traits}}" class="od-kp__traits">{{item.traits}}</view>
+            </view>
+            <view class="chip chip--{{item.threatTone}}">{{item.threatLabel}}</view>
+          </view>
+          <view wx:if="{{item.statsText}}" class="od-kp__stats">{{item.statsText}}</view>
+          <view wx:if="{{item.note}}" class="od-kp__note">备注：{{item.note}}</view>
+        </view>
+      </view>
+
+      <empty-state
+        wx:else
+        title="还没有标记重点球员"
+        desc="看过交手录像后，把对方最能打的几个人标出来，赛前 30 分钟扫一眼就够。长按可改威胁等级与备注。"
+        showAction="{{false}}"
+      />
+
+      <view class="btn btn--ghost btn--block od-add" bindtap="onAddKeyPlayer">+ 添加重点球员</view>
+
+      <!-- ⚠️ 免责提示必须常驻：诚实让产品更可信 -->
+      <view class="alert alert--warn od-disclaimer">⚠ {{disclaimer}}</view>
+    </block>
+
+    <!-- ============ Tab 4 · 对手战术板 ============ -->
+    <block wx:else>
+      <view class="row row--between od-kp-hd">
+        <text class="sec-label" style="margin:0">对手战术 {{tactics.length}} 张</text>
+        <view class="btn btn--primary btn--sm" bindtap="onNewOpponentTactic">+ 剪辑</view>
+      </view>
+
+      <view class="od-tactics" wx:if="{{tactics.length}}">
+        <view
+          wx:for="{{tactics}}"
+          wx:key="id"
+          class="tc-card"
+          data-id="{{item.id}}"
+          bindtap="onTapTactic"
+        >
+          <view class="vcard vcard--16x9">
+            <view class="vcard__play">▶</view>
+            <view class="vcard__tag">{{item.source}}</view>
+            <view class="vcard__dur">{{item.durationText}}</view>
+          </view>
+          <view class="tc-card__body">
+            <view class="tc-card__name">{{item.name}}</view>
+            <view class="tc-card__meta">
+              <text class="chip chip--warn">{{item.tag}}</text>
+              <text class="tc-card__at">{{item.at}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <empty-state
+        wx:else
+        title="还没有对手战术"
+        desc="从与该对手的交手录像里剪一段，命名后就能在这里随时调出来看。第一版靠手动剪辑，后期 AI 会自动提取。"
+        action="剪辑对手战术"
+        bind:action="onNewOpponentTactic"
+      />
+
+      <view class="alert alert--info od-future">
+        后期将支持 AI 自动从交手录像中提取对手战术
+      </view>
+    </block>
+
+  </block>
+
+</view>

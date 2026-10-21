@@ -1,0 +1,110 @@
+<!--
+  屏 03 · 录制页
+  全屏 camera 预览，只有 REC 徽章、计时器、设备状态、结束按钮。
+  禁止一切分心元素：不放实时分数、不放热图、不放当前阵型。
+-->
+<view class="rec-page">
+
+  <camera
+    wx:if="{{!showConsent}}"
+    class="rec-cam"
+    device-position="back"
+    flash="off"
+    resolution="high"
+    frame-size="large"
+    binderror="onCameraError"
+  />
+  <view wx:else class="rec-cam rec-cam--placeholder"></view>
+
+  <!-- 顶部信息条 -->
+  <view class="rec-top">
+    <view class="row row--gap2">
+      <view wx:if="{{recording}}" class="rec">
+        <view class="rec__dot rec__dot--blink"></view>
+        <text>REC {{elapsedText}}</text>
+      </view>
+      <view wx:else class="rec-idle">待录制</view>
+    </view>
+    <view class="rec-dev">
+      <text class="{{lowBattery ? 'rec-dev--low' : ''}}">电 {{battery}}%</text>
+      <text wx:if="{{networkType}}" class="rec-dev__sep">·</text>
+      <text wx:if="{{networkType}}">{{networkType}}</text>
+    </view>
+  </view>
+
+  <view class="rec-meta">
+    <view class="rec-meta__name">{{activityLabel}}</view>
+    <view wx:if="{{scopeText}}" class="rec-meta__scope">{{scopeText}}</view>
+  </view>
+
+  <!-- 切后台提示 -->
+  <view wx:if="{{hidden}}" class="rec-alert rec-alert--warn">
+    小程序已切到后台，录制可能中断，请尽快回来
+  </view>
+
+  <!-- 低电量提示 -->
+  <view wx:if="{{lowBattery && recording}}" class="rec-alert rec-alert--err">
+    电量偏低（{{battery}}%），建议接电源，避免中途断电丢失录像
+  </view>
+
+  <!-- 稳定性提示：录制前显示，录制后淡出 -->
+  <view wx:if="{{!recording}}" class="rec-tip">
+    <view class="rec-tip__main">保持手机稳定</view>
+    <view class="rec-tip__sub">架在场边高处，画面需覆盖整块球场</view>
+  </view>
+
+  <!-- 套路演练的标记按钮 -->
+  <view wx:if="{{isRoutine && recording}}" class="rec-mark" bindtap="onMarkRoutine">
+    <view class="rec-mark__btn {{marking ? 'rec-mark__btn--on' : ''}}">
+      {{marking ? '结束本段' : '标记开始'}}
+    </view>
+    <view class="rec-mark__count">已标 {{routineMarks.length}} 段</view>
+  </view>
+
+  <!-- 底部：唯一允许的交互 -->
+  <view class="rec-bottom">
+    <block wx:if="{{!recording}}">
+      <view class="btn btn--primary rec-start" bindtap="onStart">开始录制</view>
+      <view class="rec-hint">按下后立即开始，不会有倒计时</view>
+    </block>
+    <block wx:else>
+      <view class="btn--rec rec-stop {{stopping ? 'rec-stop--busy' : ''}}" bindtap="onStop">
+        {{stopping ? '…' : '■'}}
+      </view>
+      <view class="rec-hint">{{stopping ? '正在保存录像…' : '点击结束'}}</view>
+    </block>
+  </view>
+
+  <!-- 可恢复的上一段 -->
+  <view wx:if="{{recoverable && !recording}}" class="rec-recover">
+    <view class="rec-recover__text">
+      发现上次未完成的录制（{{recoverable.activityName}}，已录 {{recoverable.elapsedS}} 秒）
+    </view>
+    <view class="row row--gap2">
+      <view class="linkbtn" bindtap="onRestoreRecoverable">处理</view>
+      <view class="linkbtn linkbtn--dim" bindtap="onDismissRecoverable">忽略</view>
+    </view>
+  </view>
+
+  <!-- 内测告知浮层（PRD 3.7 / 9.4 #4.10） -->
+  <view wx:if="{{showConsent}}" class="sheet-mask" bindtap="onConsentDecline"></view>
+  <view wx:if="{{showConsent}}" class="sheet consent">
+    <view class="sheet__handle"></view>
+    <view class="sheet__title">内测告知</view>
+    <view class="consent__body">
+      <view class="consent__lead">本次录制的视频将上传至内测云端进行 AI 分析。</view>
+      <view class="consent__item">· 录像不用于任何公开传播</view>
+      <view class="consent__item">· 报告仅本人可见</view>
+      <view class="consent__item">· 内测期数据保留 30 天</view>
+      <view class="consent__item">· 后续商用前会另行征求授权</view>
+      <view class="consent__item consent__item--dim">
+        · 录像可能包含对手球员与观众，请确认在允许的场合录制
+      </view>
+    </view>
+    <view class="row row--gap2">
+      <view class="btn btn--ghost flex1" bindtap="onConsentDecline">不同意</view>
+      <view class="btn btn--primary flex1" bindtap="onConsentAgree">同意并开始</view>
+    </view>
+  </view>
+
+</view>

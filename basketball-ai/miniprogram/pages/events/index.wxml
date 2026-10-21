@@ -1,0 +1,143 @@
+<view class="page">
+
+  <view wx:if="{{loading}}" class="ev-loading">加载事件列表…</view>
+
+  <block wx:elif="{{loadError}}">
+    <empty-state title="无法加载" desc="{{loadError}}" action="返回报告" bind:action="onGoReport" />
+  </block>
+
+  <block wx:else>
+
+    <!-- 口径标识常驻（PRD 9.4 #4.8） -->
+    <view class="ev-scope">
+      <scope-badge params="{{params}}" showRadius="{{true}}" />
+    </view>
+
+    <!-- 补录进度：实时反映（checklist #13） -->
+    <view class="ev-prog {{progress.complete ? 'ev-prog--done' : ''}}">
+      <view class="ev-prog__row">
+        <text class="ev-prog__text">
+          {{progress.complete ? '✓ 本场补录已完成' : '补录进度 ' + progress.resolved + ' / ' + progress.total}}
+        </text>
+        <text wx:if="{{!progress.complete}}" class="ev-prog__pct">{{progress.percent}}%</text>
+      </view>
+      <view class="ev-prog__track">
+        <view class="ev-prog__fill" style="width:{{progress.percent}}%"></view>
+      </view>
+      <view wx:if="{{!progress.complete}}" class="ev-prog__note">
+        还有 {{progress.pending}} 个事件待处理 · 单个约 3-5 秒
+      </view>
+    </view>
+
+    <!-- 筛选器（checklist #3）。3x3 下"三分"自动变"远投"，快攻禁用 -->
+    <scroll-view class="ev-filters" scroll-x enable-flex>
+      <view
+        wx:for="{{filters}}"
+        wx:key="key"
+        class="fchip {{activeFilter === item.key ? 'fchip--on' : ''}} {{item.disabled ? 'fchip--disabled' : ''}} {{item.highlight && activeFilter !== item.key ? 'fchip--warn' : ''}}"
+        data-key="{{item.key}}"
+        bindtap="onTapFilter"
+      >{{item.label}}</view>
+    </scroll-view>
+
+    <view wx:if="{{periodFilter}}" class="ev-period">
+      只看第 {{periodFilter}} 节
+      <text class="linkbtn linkbtn--inline" bindtap="onClearPeriod">清除</text>
+    </view>
+
+    <!-- 事件卡片流（checklist #1 #2） -->
+    <view class="ev-list" wx:if="{{events.length}}">
+      <event-card
+        wx:for="{{events}}"
+        wx:key="id"
+        event="{{item}}"
+        playerName="{{item.playerName}}"
+        timeText="{{item.timeText}}"
+        thumb=""
+        data-id="{{item.id}}"
+        bindtap="onTapEvent"
+        bind:openevent="onTapEvent"
+      />
+    </view>
+
+    <empty-state
+      wx:else
+      scene="noResult"
+      title="这个筛选下没有事件"
+      desc="换个筛选条件，或清除节次过滤试试。"
+      action="显示全部"
+      bind:action="onTapFilter"
+      data-key="ALL"
+    />
+
+    <!-- 底部工具条：撤销 + 批量 -->
+    <view class="ev-toolbar">
+      <view class="ev-toolbar__btn {{canUndo ? '' : 'ev-toolbar__btn--off'}}" bindtap="onUndo">
+        ↶ 撤销{{undoDepth ? ' (' + undoDepth + ')' : ''}}
+      </view>
+      <view class="ev-toolbar__btn" bindtap="onBatchAttribute">批量归属</view>
+    </view>
+
+  </block>
+
+  <!-- ============================================================
+       补录浮层（checklist #4 ~ #11）
+       PRD 3.4：点事件卡 = 底部弹层，不用新页面，保留列表上下文
+       ============================================================ -->
+  <view wx:if="{{sheetOpen}}" class="sheet-mask" bindtap="onCloseSheet"></view>
+
+  <view wx:if="{{sheetOpen}}" class="sheet ev-sheet" catchtap="noop">
+    <view class="sheet__handle"></view>
+
+    <view class="ev-sheet__hd">
+      <view class="ev-sheet__title">
+        {{currentEvent.scoreText}}{{currentEvent.madeText ? ' · ' + currentEvent.madeText : ''}}
+      </view>
+      <view class="ev-sheet__time">{{currentTimeText}}</view>
+    </view>
+
+    <!-- 视频自动播放预览，无需按播放键（checklist #4） -->
+    <clip-player
+      id="clip"
+      src="{{currentClipSrc}}"
+      duration="{{currentClipDuration}}"
+      autoplay="{{true}}"
+      loop="{{true}}"
+      sourceTag="事件片段"
+    />
+
+    <!-- 出手位置元数据一行显示（checklist #5） -->
+    <view class="ev-sheet__meta" wx:if="{{currentMetaText}}">{{currentMetaText}}</view>
+
+    <!-- 越界告警：说明标定可能有问题，不能静默当成正常数据 -->
+    <view wx:if="{{currentEvent.oob}}" class="alert alert--err ev-sheet__oob">
+      ⚠ 该事件坐标落在场地范围外，可能是标定偏移。归属仍可补录，但位置数据不可信。
+    </view>
+
+    <view class="ev-sheet__q">谁{{currentEvent.kind === 'TURNOVER' ? '失误' : '投的'}}？</view>
+
+    <!-- 选人网格（checklist #6 #7） -->
+    <player-picker
+      items="{{pickerItems}}"
+      selected="{{pickerSelected}}"
+      columns="{{4}}"
+      bind:pick="onPick"
+    />
+
+    <!-- 保存 · 下一个 →（checklist #8，提效核心） -->
+    <view class="ev-sheet__acts">
+      <view class="btn btn--ghost ev-sheet__skip" bindtap="onSkip">跳过</view>
+      <view class="btn btn--ghost ev-sheet__undo {{canUndo ? '' : 'btn--disabled'}}" bindtap="onUndo">
+        撤销
+      </view>
+      <view class="btn btn--primary ev-sheet__save" bindtap="onPick" data-id="{{pickerSelected}}">
+        {{hasNext ? '保存 · 下一个 →' : '保存'}}
+      </view>
+    </view>
+
+    <view class="ev-sheet__hint">
+      {{hasNext ? nextHint : '本场已无待补录事件'}} · 点球员头像即直接保存并跳转
+    </view>
+  </view>
+
+</view>

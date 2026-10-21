@@ -1,0 +1,124 @@
+<view class="page">
+
+  <!-- 教练身份 -->
+  <view class="card card--dark pf-head">
+    <view class="pf-head__row">
+      <view class="pf-head__avatar">{{coachName[0] || '教'}}</view>
+      <view class="pf-head__main">
+        <view class="pf-head__name">{{coachName}}</view>
+        <view class="pf-head__sub">{{team.name || '未设置球队'}}</view>
+      </view>
+      <view class="pf-head__edit" bindtap="onEditTeamName">✎</view>
+    </view>
+  </view>
+
+  <!-- 待办提醒 -->
+  <view wx:if="{{pendingAttributionCount}}" class="card card--warn pf-todo" bindtap="onGoPending">
+    <view class="card__title" style="color:var(--warn-ink)">{{pendingAttributionCount}} 场报告待补录</view>
+    <view class="card__body" style="color:var(--warn-ink)">补录完成后球员与球队数据才会更新 ›</view>
+  </view>
+
+  <!-- 球队默认参数：新建活动时自动带出 -->
+  <view class="sec-label">球队默认参数</view>
+  <view class="pf-group">
+    <picker mode="selector" range="{{ageOptions}}" range-key="label" value="{{ageIndex}}" bindchange="onAgeChange">
+      <view class="pf-row">
+        <view class="pf-row__label">默认年龄段</view>
+        <view class="pf-row__val">{{ageOptions[ageIndex].label}} ›</view>
+      </view>
+    </picker>
+    <picker mode="selector" range="{{formatOptions}}" range-key="label" value="{{formatIndex}}" bindchange="onFormatChange">
+      <view class="pf-row">
+        <view class="pf-row__label">默认赛制</view>
+        <view class="pf-row__val">{{formatOptions[formatIndex].label}} ›</view>
+      </view>
+    </picker>
+  </view>
+  <view class="pf-hint">
+    新建活动时会自动带出这两项，只需确认。青训队一整年往往都是同一套参数。
+  </view>
+
+  <!-- 待核实数值：主动请内测教练核对 -->
+  <view class="sec-label">帮我们核对参数</view>
+  <view class="card card--warn pf-verify" bindtap="onFeedbackParams">
+    <view class="card__title" style="color:var(--warn-ink)">⚠ 两个数值待核实</view>
+    <view class="pf-verify__list">
+      <view wx:for="{{unverifiedNotices}}" wx:key="*this" class="pf-verify__item">· {{item}}</view>
+    </view>
+    <view class="card__body" style="color:var(--warn-ink)">
+      数值错了会导致整份报告的分值判定系统性偏差，而且从报告上看不出来 · 点击反馈 ›
+    </view>
+  </view>
+
+  <!-- 通知与合规 -->
+  <view class="sec-label">通知与合规</view>
+  <view class="pf-group">
+    <view class="pf-row">
+      <view class="pf-row__label">
+        报告生成后推送通知
+        <view class="pf-row__sub">走微信订阅消息</view>
+      </view>
+      <switch checked="{{subscribed}}" color="#2563eb" bindchange="onToggleSubscribe" />
+    </view>
+    <view class="pf-row" bindtap="onViewConsent">
+      <view class="pf-row__label">
+        内测告知
+        <view class="pf-row__sub" wx:if="{{consentedAt}}">已于 {{consentedAt}} 同意</view>
+        <view class="pf-row__sub" wx:else>未同意，录制前需同意</view>
+      </view>
+      <view class="pf-row__val">查看 ›</view>
+    </view>
+    <view class="pf-row">
+      <view class="pf-row__label">
+        数据保留期
+        <view class="pf-row__sub">原始录像与切片默认 {{retentionDays}} 天后清理，补录数据不删</view>
+      </view>
+      <view class="pf-row__val">{{retentionDays}} 天</view>
+    </view>
+  </view>
+
+  <!-- 本地数据 -->
+  <view class="sec-label">本地数据</view>
+  <view class="pf-group">
+    <view class="pf-row">
+      <view class="pf-row__label">
+        缓存占用
+        <view class="pf-row__sub">补录进度、上传断点、草稿</view>
+      </view>
+      <view class="pf-row__val">{{storageUsedText}}</view>
+    </view>
+
+    <view wx:if="{{pendingLocalCount}}" class="pf-row pf-row--col">
+      <view class="pf-row__label">
+        未上传录像 {{pendingLocalCount}} 段
+        <view class="pf-row__sub">取消上传不会删除本地文件，保留 24 小时</view>
+      </view>
+      <view class="pf-local">
+        <view wx:for="{{pendingLocal}}" wx:key="filePath" class="pf-local__item">
+          <text class="pf-local__name">{{item.activityName || '未命名录像'}}</text>
+          <text class="pf-local__act" data-path="{{item.filePath}}" data-activityid="{{item.activityId}}" bindtap="onResumeLocal">继续上传</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="pf-row" bindtap="onClearLocal">
+      <view class="pf-row__label pf-row__label--danger">清理未上传登记</view>
+      <view class="pf-row__val">›</view>
+    </view>
+  </view>
+
+  <!-- 关于 -->
+  <view class="sec-label">关于</view>
+  <view class="pf-group">
+    <view class="pf-row" bindtap="onAbout">
+      <view class="pf-row__label">版本信息</view>
+      <view class="pf-row__val">v{{version}}{{isMock ? ' · Mock' : ''}} ›</view>
+    </view>
+  </view>
+
+  <view class="pf-footer">
+    第一版仅用于自用与熟人内测，不商用、不上架、不做支付。<br />
+    数据范围 B 级：技术统计 + 位置热图 + 阵型，不做逐人身份识别。
+  </view>
+
+</view>

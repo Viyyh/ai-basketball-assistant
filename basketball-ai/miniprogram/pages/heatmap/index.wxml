@@ -1,0 +1,154 @@
+<view class="page">
+
+  <view wx:if="{{loading}}" class="hm-loading">加载热图…</view>
+
+  <block wx:elif="{{loadError}}">
+    <empty-state title="暂无热图数据" desc="{{loadError}}" action="返回报告" bind:action="onBack" />
+  </block>
+
+  <block wx:else>
+
+    <!-- 口径常驻（PRD 9.4 #4.8） -->
+    <view class="hm-scope">
+      <scope-badge params="{{params}}" showRadius="{{true}}" />
+    </view>
+
+    <!-- 三种热图切换 -->
+    <view class="seg hm-modes">
+      <view
+        wx:for="{{modes}}"
+        wx:key="key"
+        class="seg__item {{activeMode === item.key ? 'seg__item--on' : ''}}"
+        data-key="{{item.key}}"
+        bindtap="onTapMode"
+      >{{item.label}}</view>
+    </view>
+
+    <!-- 跑动热区的说明：默认折叠，主动切换才出现（PRD 3.3 屏 09） -->
+    <view wx:if="{{activeMode === 'MOVEMENT'}}" class="alert alert--info hm-note">
+      B 级数据不区分个人，这是全队跑动密集度。看整体压迫范围可以，
+      用于评估单个球员的跑动需要第二版的逐人追踪。
+    </view>
+
+    <!-- 球场热图 -->
+    <view class="hm-court" bindtap="onCourtTap">
+      <court-svg
+        params="{{params}}"
+        shots="{{shots}}"
+        heat="{{heat}}"
+        showScope="{{false}}"
+        height="{{activeMode === 'MOVEMENT' ? 700 : 760}}"
+        scale="{{26}}"
+        bind:render="onCourtRender"
+      />
+    </view>
+
+    <!-- 图例 -->
+    <view class="hm-legend">
+      <block wx:if="{{activeMode !== 'MOVEMENT'}}">
+        <view class="hm-legend__item"><view class="hm-dot hm-dot--made"></view>命中 {{summary.made}}</view>
+        <view class="hm-legend__item"><view class="hm-dot hm-dot--miss"></view>未中 {{summary.att - summary.made}}</view>
+      </block>
+      <block wx:else>
+        <view class="hm-legend__item">冷</view>
+        <view class="hm-legend__bar"></view>
+        <view class="hm-legend__item">热</view>
+      </block>
+      <view class="hm-legend__spacer"></view>
+      <view class="hm-legend__item hm-legend__item--btn" bindtap="onShare">分享/截图</view>
+    </view>
+
+    <!-- 越界告警：说明标定可能有问题 -->
+    <view wx:if="{{summary.oobCount}}" class="alert alert--err hm-alert">
+      ⚠ {{summary.oobCount}} 个出手点落在场地范围外，可能是标定偏移（PRD 9.2 #2.10），
+      这些点已用空心标记，位置数据不可信。
+    </view>
+
+    <!-- 分区统计 -->
+    <view class="sec-label">分区命中</view>
+    <view class="hm-zones">
+      <view
+        wx:for="{{zoneStats}}"
+        wx:key="key"
+        class="hm-zone {{activeZone === item.key ? 'hm-zone--on' : ''}} {{item.empty ? 'hm-zone--empty' : ''}}"
+        data-key="{{item.key}}"
+        bindtap="onTapZone"
+      >
+        <view class="hm-zone__label">{{item.label}}</view>
+        <view class="hm-zone__val">{{item.empty ? '—' : item.text}}</view>
+        <view class="hm-zone__rate">{{item.empty ? '—' : item.rateText}}</view>
+      </view>
+    </view>
+    <view class="hm-zone-hint">点分区可只看该区域的出手点 · 空数据显示「—」而不是 0</view>
+
+    <!-- 汇总 -->
+    <view class="statgrid statgrid--3 hm-summary">
+      <view class="stat">
+        <view class="stat__n">{{summary.fgText}}</view>
+        <view class="stat__l">总出手</view>
+        <view class="stat__sub">{{summary.fgRate}}</view>
+      </view>
+      <view class="stat">
+        <view class="stat__n">{{summary.arcOutText}}</view>
+        <view class="stat__l">{{arcOutsideLabel}}</view>
+        <view class="stat__sub">{{summary.arcOutRate}}</view>
+      </view>
+      <view class="stat">
+        <view class="stat__n">{{shots.length}}</view>
+        <view class="stat__l">当前筛选</view>
+        <view class="stat__sub">个点</view>
+      </view>
+    </view>
+
+    <!-- 筛选 -->
+    <view class="sec-label">筛选</view>
+    <view class="hm-filters">
+      <scroll-view class="hm-frow" scroll-x enable-flex>
+        <view
+          wx:for="{{periodOptions}}"
+          wx:key="key"
+          class="fchip {{activePeriod === item.key ? 'fchip--on' : ''}}"
+          data-key="{{item.key}}"
+          bindtap="onTapPeriod"
+        >{{item.label}}</view>
+      </scroll-view>
+
+      <view class="hm-frow hm-frow--static">
+        <view class="fchip {{activeZone === 'ALL' ? 'fchip--on' : ''}}" data-key="ALL" bindtap="onTapZone">全部区域</view>
+        <view class="hm-switch">
+          <text>只看命中</text>
+          <switch checked="{{onlyMade}}" color="#2563eb" bindchange="onToggleOnlyMade" />
+        </view>
+      </view>
+    </view>
+
+    <view class="hm-tip">长按球场任意位置 → 找出该点附近的事件并播放片段</view>
+
+  </block>
+
+  <!-- 长按取点结果 -->
+  <view wx:if="{{showPicked}}" class="sheet-mask" bindtap="onClosePicked"></view>
+  <view wx:if="{{showPicked}}" class="sheet hm-sheet" catchtap="noop">
+    <view class="sheet__handle"></view>
+    <view class="sheet__title">
+      该位置附近（{{pickedPoint.x_m}}, {{pickedPoint.y_m}}）
+    </view>
+    <block wx:if="{{pickedEvents.length}}">
+      <view
+        wx:for="{{pickedEvents}}"
+        wx:key="id"
+        class="item"
+        data-id="{{item.id}}"
+        bindtap="onTapPickedEvent"
+      >
+        <view class="item__body">
+          <view class="item__nm">{{item.label_zh || '事件'}}{{item.made === false ? ' · 未中' : (item.made ? ' · 命中' : '')}}</view>
+          <view class="item__sub">点击去补录页查看片段</view>
+        </view>
+        <view class="item__val"><view class="item__val-n">›</view></view>
+      </view>
+    </block>
+    <view wx:else class="hm-sheet__empty">该位置 1.5 米内没有识别到事件</view>
+  </view>
+
+</view>

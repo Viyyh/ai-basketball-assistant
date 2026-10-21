@@ -1,0 +1,66 @@
+.up-hd { padding: var(--sp-4) var(--sp-3) var(--sp-2); text-align: center; }
+.up-hd__name { font-size: var(--fs-md); color: var(--ink-2); }
+.up-hd__meta { font-size: var(--fs-xs); color: var(--ink-3); margin-top: 4rpx; }
+
+/* 进度环 */
+.ring { display: flex; justify-content: center; padding: var(--sp-4) 0 var(--sp-2); }
+.ring__circle {
+  width: 260rpx; height: 260rpx; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.ring__inner {
+  width: 216rpx; height: 216rpx; border-radius: 50%;
+  background: var(--card);
+  display: flex; align-items: center; justify-content: center;
+}
+.ring__pct { font-size: 56rpx; font-weight: 600; color: var(--accent); }
+
+.up-eta { text-align: center; padding: 0 var(--sp-4) var(--sp-4); }
+.up-eta__main { font-size: var(--fs-md); color: var(--ink-2); }
+.up-eta__sub { font-size: var(--fs-sm); color: var(--ink-3); margin-top: 6rpx; }
+.up-eta__rate { color: var(--ink-3); }
+.up-eta__warn {
+  font-size: var(--fs-xs); color: var(--warn-ink);
+  margin-top: 6rpx;
+}
+
+.up-safe { margin: 0 var(--sp-3) var(--sp-3); }
+
+.up-opt { margin: 0 var(--sp-3) var(--sp-2); }
+
+.up-chunks {
+  text-align: center;
+  font-size: var(--fs-xs); color: var(--ink-3);
+  padding: 0 var(--sp-3) var(--sp-3);
+}
+
+.up-acts { padding: 0 var(--sp-3) var(--sp-2); }
+
+.up-note {
+  font-size: var(--fs-xs); color: var(--ink-3);
+  text-align: center; line-height: 1.6;
+  padding: 0 var(--sp-4) var(--sp-4);
+}
+
+/* 完成 / 失败 / 取消 */
+.up-done, .up-fail {
+  padding: 120rpx var(--sp-5) 0;
+  text-align: center;
+}
+.up-done__icon, .up-fail__icon {
+  width: 120rpx; height: 120rpx; margin: 0 auto var(--sp-3);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 56rpx; font-weight: 600;
+}
+.up-done__icon { background: var(--ok-2); color: var(--ok); }
+.up-fail__icon { background: var(--err-2); color: var(--err); }
+.up-fail__icon--muted { background: var(--fill); color: var(--ink-3); }
+.up-done__title, .up-fail__title {
+  font-size: var(--fs-xl); font-weight: 600; color: var(--ink); margin-bottom: var(--sp-1);
+}
+.up-done__desc, .up-fail__desc {
+  font-size: var(--fs-sm); color: var(--ink-3); line-height: 1.7;
+}
+
+.up-loading { padding: 160rpx 0; text-align: center; color: var(--ink-3); font-size: var(--fs-sm); }

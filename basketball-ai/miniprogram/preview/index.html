@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>AI 篮球分析小程序 · F 轨实时预览</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* ===== 预览外壳（不属于小程序，仅承载展示） ===== */
+  :root {
+    --sh-ink: #1e293b;
+    --sh-ink2: #475569;
+    --sh-ink3: #94a3b8;
+    --sh-line: #e2e8f0;
+    --sh-bg: #f1f5f9;
+    --sh-accent: #2563eb;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0;
+    background: var(--sh-bg);
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+    color: var(--sh-ink);
+    line-height: 1.6;
+  }
+  .shell { max-width: 1320px; margin: 0 auto; padding: 28px 24px 80px; }
+  .shell-hd { border-bottom: 1px solid #cbd5e1; padding-bottom: 16px; margin-bottom: 20px; }
+  .shell-hd h1 { font-size: 22px; margin: 0 0 6px; font-weight: 600; }
+  .shell-hd p { margin: 0; font-size: 13px; color: var(--sh-ink2); }
+  .shell-hd .live {
+    display: inline-block; margin-top: 8px;
+    background: #dcfce7; color: #14532d;
+    font-size: 12px; padding: 3px 10px; border-radius: 999px;
+  }
+
+  .layout { display: grid; grid-template-columns: 300px 400px 1fr; gap: 22px; align-items: start; }
+  @media (max-width: 1180px) { .layout { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: #fff; border: 1px solid var(--sh-line);
+    border-radius: 12px; padding: 16px;
+  }
+  .panel h3 {
+    font-size: 12px; margin: 0 0 10px; color: var(--sh-ink3);
+    text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600;
+  }
+  .panel h3:not(:first-child) { margin-top: 20px; }
+
+  /* 参数组合切换 */
+  .combo { display: flex; flex-direction: column; gap: 6px; }
+  .combo button {
+    text-align: left; padding: 9px 11px; border-radius: 8px;
+    border: 1.5px solid var(--sh-line); background: #fff;
+    font-size: 12.5px; color: var(--sh-ink2); cursor: pointer;
+    font-family: inherit; line-height: 1.45;
+  }
+  .combo button:hover { border-color: #94a3b8; }
+  .combo button.on {
+    border-color: var(--sh-accent); background: #dbeafe; color: #1e3a8a; font-weight: 600;
+  }
+  .combo button small { display: block; font-size: 11px; opacity: 0.72; font-weight: 400; margin-top: 2px; }
+
+  /* 屏幕导航 */
+  .nav { display: flex; flex-direction: column; gap: 3px; }
+  .nav button {
+    text-align: left; padding: 7px 10px; border-radius: 6px;
+    border: none; background: transparent;
+    font-size: 12.5px; color: var(--sh-ink2); cursor: pointer; font-family: inherit;
+  }
+  .nav button:hover { background: var(--sh-bg); }
+  .nav button.on { background: var(--sh-ink); color: #fff; font-weight: 500; }
+  .nav button .n { display: inline-block; width: 22px; color: inherit; opacity: 0.55; font-family: "SF Mono", Consolas, monospace; font-size: 11px; }
+
+  /* 手机框 */
+  .phone-col { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .phone {
+    width: 375px; height: 720px;
+    border: 8px solid #0f172a; border-radius: 40px;
+    background: #fff; overflow: hidden; position: relative;
+    box-shadow: 0 12px 32px rgba(15,23,42,0.18);
+  }
+  .phone__notch {
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 130px; height: 22px; background: #0f172a;
+    border-radius: 0 0 14px 14px; z-index: 20;
+  }
+  .phone__navbar {
+    height: 44px; padding-top: 22px;
+    background: #fff; border-bottom: 1px solid var(--sh-line);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 600; color: var(--sh-ink);
+    position: relative; z-index: 10;
+  }
+  .phone__navbar .back { position: absolute; left: 12px; color: var(--sh-ink3); font-weight: 400; }
+  .phone__body { height: calc(100% - 67px); overflow-y: auto; overflow-x: hidden; }
+  .phone__body::-webkit-scrollbar { width: 0; }
+  .phone-cap { font-size: 12px; color: var(--sh-ink2); text-align: center; }
+
+  /* 右侧说明 */
+  .notes { font-size: 13px; color: var(--sh-ink2); }
+  .notes h4 { font-size: 13px; margin: 18px 0 6px; color: var(--sh-ink); font-weight: 600; }
+  .notes h4:first-child { margin-top: 0; }
+  .notes ul { margin: 0 0 12px; padding-left: 18px; }
+  .notes li { margin-bottom: 5px; }
+  .notes code {
+    background: #f1f5f9; padding: 1px 5px; border-radius: 4px;
+    font-family: "SF Mono", Consolas, monospace; font-size: 11.5px; color: #334155;
+  }
+  .callout {
+    border-left: 3px solid var(--sh-accent); background: #dbeafe;
+    padding: 9px 12px; border-radius: 0 6px 6px 0;
+    font-size: 12.5px; color: #1e3a8a; margin: 10px 0;
+  }
+  .callout.warn { border-color: #f59e0b; background: #fef3c7; color: #78350f; }
+  .callout.ok { border-color: #16a34a; background: #dcfce7; color: #14532d; }
+  .callout b { font-weight: 600; }
+
+  .srcbox {
+    background: #0f172a; color: #e2e8f0; border-radius: 8px;
+    padding: 11px 13px; font-family: "SF Mono", Consolas, monospace;
+    font-size: 11px; line-height: 1.65; overflow-x: auto; margin: 8px 0;
+  }
+  .srcbox .k { color: #7dd3fc; }
+  .srcbox .s { color: #86efac; }
+  .srcbox .c { color: #64748b; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 40px; transform: translateX(-50%);
+    background: rgba(15,23,42,0.92); color: #fff;
+    padding: 9px 18px; border-radius: 999px; font-size: 13px;
+    opacity: 0; pointer-events: none; transition: opacity 0.22s; z-index: 999;
+  }
+  .toast.on { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="shell-hd">
+    <h1>AI 篮球分析小程序 · F 轨实时预览</h1>
+    <p>
+      下面每一屏都由 <b>真实生产代码</b>渲染：<code>utils/courtGeometry.js</code> 算几何、
+      <code>utils/svgBuilder.js</code> 出 SVG、<code>mock/report.js</code> 造报告、
+      <code>utils/attribution.js</code> 跑补录状态机、<code>utils/scope.js</code> 守口径。
+      样式直接编译自 <code>styles/*.wxss</code>（rpx→px 换算），不是另画的一套假图。
+    </p>
+    <span class="live">● 由 scripts/build-preview.js 打包的 10 个真实模块驱动</span>
+  </div>
+
+  <div class="layout">
+
+    <!-- ============ 左：控制面板 ============ -->
+    <div>
+      <div class="panel">
+        <h3>参数组合</h3>
+        <div class="combo" id="comboBox"></div>
+        <div class="callout warn" style="margin-top:12px">
+          切换组合，<b>所有屏会重新渲染</b>。重点看 3 对 3 与 U12：
+          计分口径、三分弧线、球场范围、事件文案全部会变 ——
+          这就是 Mock「真实响应 params」的意义。
+        </div>
+
+        <h3>屏幕</h3>
+        <div class="nav" id="navBox"></div>
+      </div>
+    </div>
+
+    <!-- ============ 中：手机 ============ -->
+    <div class="phone-col">
+      <div class="phone">
+        <div class="phone__notch"></div>
+        <div class="phone__navbar">
+          <span class="back">‹</span>
+          <span id="navTitle">首页</span>
+        </div>
+        <div class="phone__body mp-page" id="screen"></div>
+      </div>
+      <div class="phone-cap" id="phoneCap"></div>
+    </div>
+
+    <!-- ============ 右：说明 ============ -->
+    <div class="panel notes" id="notes"></div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="bundle.js"></script>
+<script>
+/* ==========================================================================
+   预览运行时
+   ========================================================================== */
+
+const BB = window.BB;
+const {
+  params: P, courtGeometry: CG, svgBuilder: SV, attribution: AT,
+  scope: SC, format: F, paramsMirror: PM, mockReport: MR, mockData: MD,
+} = BB;
+
+// ---------- 参数组合 ----------
+const COMBOS = [
+  { key: '5V5_U15',    fmt: '5V5', age: 'U15',    court: null,   name: 'U15 · 5 对 5 全场',
+    desc: '青训主流场景。三分线 5.80 m（纯弧线几何）' },
+  { key: '5V5_U12',    fmt: '5V5', age: 'U12',    court: null,   name: 'U12 · 5 对 5 全场',
+    desc: '验证小半径下的分值判定' },
+  { key: '5V5_SENIOR', fmt: '5V5', age: 'SENIOR', court: null,   name: '一线 · 5 对 5 全场',
+    desc: '三分线 6.75 m + 底角直线段（两段几何）' },
+  { key: '3V3_U15',    fmt: '3V3', age: 'U15',    court: null,   name: 'U15 · 3 对 3 半场',
+    desc: '完全不同的规则集：单框 / 12 秒 / 弧内 1 分弧外 2 分' },
+  { key: '4V4_U15_HALF', fmt: '4V4', age: 'U15',  court: 'HALF', name: 'U15 · 4 对 4 半场',
+    desc: '4 对 4 必须显式指定全场/半场，否则 AI 无法标定' },
+];
+
+let currentCombo = COMBOS[0];
+let currentScreen = 'home';
+
+// ---------- 当前组合的 params 与报告 ----------
+let PARAMS = null;
+let REPORT = null;
+let SESSION = null;      // 补录会话
+let ROSTER = MD.ROSTER;
+
+function rebuildData() {
+  PARAMS = PM.resolveParams(currentCombo.fmt, currentCombo.age, currentCombo.court);
+  const res = MR.generateMockReport({
+    format: currentCombo.fmt,
+    ageGroup: currentCombo.age,
+    courtType: currentCombo.court,
+    activityId: 'act_preview',
+    durationS: currentCombo.fmt === '3V3' ? 600 : 2712,
+    seed: 20261015,
+    eventCount: currentCombo.fmt === '3V3' ? 22 : 34,
+  });
+  REPORT = res.report;
+  SESSION = AT.createAttributionSession({
+    events: REPORT.events,
+    roster: ROSTER,
+    format: currentCombo.fmt,
+  });
+}
+
+// ---------- 工具 ----------
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('on');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('on'), 1800);
+}
+
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function courtSvgHtml(layers, opts) {
+  const r = SV.buildFullSvg(PARAMS, layers || {}, Object.assign({ scale: 11, padding: 8 }, opts || {}));
+  return { html: r.svg.replace('<svg ', '<svg style="width:100%;height:auto;display:block" '), warnings: r.warnings };
+}
+
+// ==========================================================================
+// 各屏渲染 —— 每个函数返回 wxml 等价的内联结构
+// ==========================================================================
+
+const SCREENS = {};
+
+// ---------- 屏 01 首页 ----------
+SCREENS.home = {
+  title: '首页',
+  cap: '教练工作台 · 三秒内看到该干什么',
+  render() {
+    const prog = SESSION.progress();
+    const overdue = false;
+    return `
+      <div style="padding:12px 12px 4px">
+        <div class="row row--between">
+          <div>
+            <div style="font-size:17px;font-weight:600">早安，${esc(MD.TEAM.coachName)}</div>
+            <div class="t-sub">本周已录 4 场</div>
+          </div>
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--fill);display:flex;align-items:center;justify-content:center;color:var(--ink-2);font-size:12px">队</div>
+        </div>
+      </div>
+
+      <div class="cta-home" onclick="toast('跳新建活动页')"
+           style="position:relative;margin:8px 12px;padding:20px 16px;background:var(--accent);border-radius:16px;color:#fff;cursor:pointer;box-shadow:var(--sh-2)">
+        <div style="font-size:18px;font-weight:600">开始新录制</div>
+        <div style="font-size:11px;opacity:.85;margin-top:3px">比赛 · 团队对抗 · 套路演练</div>
+        <div onclick="event.stopPropagation();go('realtime')"
+             style="position:absolute;right:12px;top:12px;font-size:9px;padding:1px 7px;border-radius:999px;background:rgba(255,255,255,.18);color:rgba(255,255,255,.72);cursor:pointer">
+          实时分析 · 内测中
+        </div>
+      </div>
+
+      ${prog.pending > 0 ? `
+      <div onclick="go('events')"
+           class="${overdue ? '' : ''}"
+           style="display:flex;align-items:center;gap:8px;margin:0 12px 8px;padding:12px;background:var(--warn-2);border:1px solid var(--warn);border-radius:14px;cursor:pointer">
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--warn);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0">⚠</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:600;color:var(--warn-ink)">1 场报告待补录</div>
+          <div style="font-size:10px;color:var(--warn-ink);opacity:.85;margin-top:2px">
+            10/09 主场 vs 育才中学 · 还差 ${prog.pending} 个事件
+          </div>
+        </div>
+        <div style="color:var(--warn-ink);font-size:18px;opacity:.6">›</div>
+      </div>` : `
+      <div class="card card--ok" style="margin:0 12px 8px">
+        <div class="card__body" style="color:#14532d">✓ 全部报告已补录完成</div>
+      </div>`}
+
+      <div class="sec-label" style="padding:0 12px">最近活动</div>
+      ${MD.ACTIVITIES.slice(0, 4).map((a) => {
+        const pend = a.status === 'report_ready' && a.attributedCount < a.eventCount;
+        return `
+        <div class="item" onclick="go('${a.template === 'ROUTINE' ? 'routine' : 'report'}')" style="margin:0 12px 4px;cursor:pointer">
+          <div class="item__avatar ${Number.isFinite(a.scoreFor) ? (a.won ? 'item__avatar--ok' : 'item__avatar--err') : ''}">
+            ${Number.isFinite(a.scoreFor) ? (a.won ? '胜' : '负') : '·'}
+          </div>
+          <div class="item__body">
+            <div class="item__nm">${esc(F.shortDate(a.playedAt))} · ${esc(a.name)}</div>
+            <div class="item__sub">${esc(F.templateLabel(a.template))} · ${a.durationS ? Math.round(a.durationS / 60) + ' 分钟' : '—'}${Number.isFinite(a.scoreFor) ? ' · ' + a.scoreFor + ':' + a.scoreAgainst : ''}</div>
+          </div>
+          ${pend ? '<span class="chip chip--warn">待补录</span>'
+                 : a.status === 'complete' ? '<span class="chip chip--ok">已完成</span>'
+                 : a.status === 'processing' ? '<span class="chip chip--accent">处理中</span>' : ''}
+        </div>`;
+      }).join('')}
+      <div style="height:20px"></div>`;
+  },
+  notes: `
+    <h4>这一屏的设计要点</h4>
+    <ul>
+      <li>大按钮「开始新录制」占首屏 C 位 —— 产品最高频动作</li>
+      <li><b>待补录提醒</b>永远显示最紧急那一场，把教练往补录页推。超 7 天未补录会变红</li>
+      <li>实时分析入口做成<b>角标</b>而不是独立屏，灰显 + 「内测中」，视觉重量压低</li>
+    </ul>
+    <div class="callout">
+      上面那个待补录卡片里的「还差 N 个事件」是<b>真实数字</b> ——
+      来自 <code>attribution.progress()</code>。你在「事件补录」屏里点掉几个，
+      回首页这个数字就会变。
+    </div>
+    <h4>试试</h4>
+    <ul>
+      <li>切到「事件补录」屏，随便点几个人补录</li>
+      <li>再切回首页 —— 待补录数字会跟着变；全部补完会变成绿色的「已完成」卡</li>
+    </ul>`
+};
+
+// ---------- 屏 02 新建活动 ----------
+SCREENS.activityNew = {
+  title: '新建活动',
+  cap: '年龄段与赛制必填 · 选中后立刻显示后果',
+  render() {
+    const is3v3 = currentCombo.fmt === '3V3';
+    const need = PARAMS.players_per_team;
+    const ageHint = `${P.AGE_GROUP_LABEL[currentCombo.age]} · ${is3v3 ? '单节 10 分钟或先得 21 分' : '默认 ' + PARAMS.period_count + ' 节 × ' + PARAMS.period_minutes + ' 分钟'} · 三分线 ${PARAMS.three_point_radius_m} m`;
+    const fmtHint = is3v3
+      ? `3 对 3 · 半场单框 ${PARAMS.court_length_m} × ${PARAMS.court_width_m} m · ${PARAMS.shot_clock_s} 秒进攻时限\n线内 ${P.arcInsideLabel(currentCombo.fmt)} / 线外 ${P.arcOutsideLabel(currentCombo.fmt)} · 报告用「远投」而非「三分」`
+      : currentCombo.fmt === '4V4'
+        ? `4 对 4 · ${PARAMS.court_type === 'FULL' ? '全场双框' : '半场单框'} · 无固定进攻时限`
+        : `5 对 5 · 全场双框 ${PARAMS.court_length_m} × ${PARAMS.court_width_m} m · ${PARAMS.shot_clock_s} 秒进攻时限\n弧内 2 分 / 弧外 3 分`;
+
+    return `
+      <div style="padding:12px">
+        <div class="sec-label" style="padding:0;margin:0 0 6px">选择模板</div>
+        <div class="seg">
+          <div class="seg__item seg__item--on">比赛</div>
+          <div class="seg__item">团队对抗</div>
+          <div class="seg__item">套路演练</div>
+        </div>
+
+        <div class="field"><div class="field__label">活动名称</div><div class="field__input">主场 vs 育才中学</div></div>
+        <div class="field"><div class="field__label">日期</div><div class="field__input">2026-10-16</div></div>
+        <div class="field"><div class="field__label">场地</div><div class="field__input">市体育中心 · 1 号场</div></div>
+        <div class="field"><div class="field__label">对手</div><div class="field__input">育才中学 U16</div></div>
+
+        <div class="sec-label" style="padding:0;margin:16px 0 6px">年龄段 <span class="req">*</span></div>
+        <div class="optgrid optgrid--5">
+          ${Object.values(P.AGE_GROUP).map((k) => `
+            <div class="opt ${k === currentCombo.age ? 'opt--on' : ''}" onclick="switchAge('${k}')">${esc(P.AGE_GROUP_LABEL[k])}</div>
+          `).join('')}
+        </div>
+        <div class="hint">${esc(ageHint)}<br><span class="hint__sub">影响：节次切分、二分/三分判定、同年龄段数据基准</span></div>
+
+        <div class="sec-label" style="padding:0;margin:16px 0 6px">赛制 <span class="req">*</span></div>
+        <div class="optgrid optgrid--4">
+          ${[['5V5','5 对 5'],['4V4','4 对 4'],['3V3','3 对 3'],['CUSTOM','自定义']].map(([k, l]) => `
+            <div class="opt ${k === currentCombo.fmt ? 'opt--on' : ''}" onclick="switchFormat('${k}')">${l}</div>
+          `).join('')}
+        </div>
+        <div class="hint ${is3v3 || currentCombo.fmt === '4V4' ? 'hint--warn' : ''}" style="white-space:pre-line">${esc(fmtHint)}<br><span class="hint__sub">影响：场地标定、阵型点数、热图范围、快攻判定</span></div>
+
+        <div class="sec-label" style="padding:0;margin:16px 0 6px">首发名单（${ROSTER.filter(r=>r.isStarter).length}/${need} 人 · 随赛制变化）</div>
+        <div style="display:grid;grid-template-columns:repeat(${need},1fr);gap:4px;margin-bottom:8px">
+          ${ROSTER.filter(r => r.isStarter).slice(0, need).map(p => `
+            <div class="pcell" style="border:1px solid var(--accent);border-radius:8px;background:var(--accent-2);padding:5px 2px;text-align:center">
+              <div style="font-size:12px;font-weight:600;color:var(--accent)">${p.number}</div>
+              <div style="font-size:9px;color:var(--accent)">${esc(p.name)}</div>
+            </div>`).join('')}
+        </div>
+        ${ROSTER.filter(r=>r.isStarter).length > need ? `
+        <div class="alert alert--warn" style="font-size:10px">
+          已按 ${need} 人赛制保留前 ${need} 人，
+          ${ROSTER.filter(r=>r.isStarter).slice(need).map(p=>p.number+'号 '+p.name).join('、')} 转入替补
+          <span style="text-decoration:underline;cursor:pointer" onclick="toast('已撤销')">撤销</span>
+        </div>` : ''}
+
+        <div class="btn btn--primary btn--block" style="margin-top:14px" onclick="toast('校验通过 → 进入录制页')">下一步 · 开始录制</div>
+        <div style="font-size:10px;color:var(--ink-3);text-align:center;margin-top:6px;line-height:1.5">
+          年龄段与赛制必填，它们决定 AI 的场地标定与计分口径
+        </div>
+      </div>`;
+  },
+  notes: `
+    <h4>为什么这两个字段必填、不给默认值</h4>
+    <p style="margin:0 0 10px">它们不是给报告贴的标签，而是 <b>AI 处理参数的前置输入</b>。
+    如果允许跳过、系统退回默认值（全场 / 5对5 / 成人三分线），一旦实际录的是 U12 的 3对3，
+    整份报告的命中率、热区、快攻会全部算错，<b>且教练无法从报告上察觉</b>。</p>
+    <div class="callout ok">
+      <b>PoC 已实证</b>：在 5.8~6.7 m 出手区用成人半径判 U12 比赛，
+      命中三分从 15 个漏判到 3 个（漏 80%），而报告看起来完全正常。
+    </div>
+    <h4>选中后立刻显示后果</h4>
+    <p style="margin:0 0 10px">上面那两行蓝色/橙色提示里的数字（三分线半径、节次时长、场地尺寸、进攻时限）
+    全部由 <code>paramsMirror.resolveParams()</code> 实时算出，<b>没有一个是写死的</b>。
+    你点上面的年龄段和赛制试试，提示文案和名单格子数会同步变。</p>
+    <h4>3 对 3 的提示为什么转橙</h4>
+    <p style="margin:0">它会实质改变报告口径（1/2 分、无节次、快攻关闭），需要教练注意到。
+    5 对 5 是常规情况，用蓝色即可。</p>`
+};
+
+// ---------- 屏 06 报告总览 ----------
+SCREENS.report = {
+  title: '报告总览',
+  cap: '口径常驻 · 告警条 · 补录进度',
+  render() {
+    const s = REPORT.team_stats;
+    const prog = SESSION.progress();
+    const is3v3 = currentCombo.fmt === '3V3';
+    const scopeText = P.scopeLabelFromParams(PARAMS);
+
+    // 时间轴
+    const periods = REPORT.periods || [];
+    const tlHtml = periods.map((p) => {
+      const inP = REPORT.events.filter(e => e.timestamp_s >= p.start_s && e.timestamp_s < p.end_s);
+      const span = Math.max(1, p.end_s - p.start_s);
+      return `<div style="flex:1">
+        <div style="position:relative;height:32px;background:var(--fill-2);border-radius:3px;overflow:hidden">
+          ${inP.map(e => {
+            const pos = ((e.timestamp_s - p.start_s) / span) * 100;
+            const tone = e.kind === 'SHOT' ? (e.made ? 'var(--ok)' : 'var(--err)')
+                       : e.kind === 'FAST_BREAK' ? 'var(--ok)' : 'var(--err)';
+            return `<div style="position:absolute;top:0;bottom:0;left:${pos.toFixed(1)}%;width:2px;background:${tone}"></div>`;
+          }).join('')}
+        </div>
+        <div style="text-align:center;font-size:9px;color:var(--ink-3);margin-top:3px">${is3v3 ? '单节' : 'Q' + p.index}</div>
+        <div style="text-align:center;font-size:8px;color:var(--ink-3);opacity:.7">${inP.length}</div>
+      </div>`;
+    }).join('');
+
+    return `
+      <div style="padding:8px 12px 0">
+        <div class="scope scope--strong">${esc(scopeText)} · 三分线 ${PARAMS.three_point_radius_m} m</div>
+      </div>
+
+      ${REPORT.warnings.length ? `
+      <div class="alert alert--warn" style="margin:0 12px 8px">
+        ${REPORT.warnings.map(w => `<div style="line-height:1.7">⚠ ${esc(w)}</div>`).join('')}
+      </div>` : ''}
+
+      <div class="scorecard" style="margin:0 12px 8px;padding:14px 12px;background:linear-gradient(90deg,#1e293b,#334155);color:#fff;border-radius:12px;text-align:center">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="flex:1;font-size:11px;opacity:.85;text-align:left">我方</div>
+          <div style="font-size:28px;font-weight:600;padding:0 4px">${is3v3 ? 21 : 78}</div>
+          <div style="opacity:.5;font-size:12px">:</div>
+          <div style="font-size:28px;font-weight:600;padding:0 4px">${is3v3 ? 18 : 65}</div>
+          <div style="flex:1;font-size:11px;opacity:.85;text-align:right">育才中学</div>
+        </div>
+        <div style="font-size:10px;opacity:.7;margin-top:5px">
+          ${is3v3
+            ? `单节 ${PARAMS.period_minutes} 分钟或先得 ${PARAMS.win_score} 分 · ${PARAMS.shot_clock_s} 秒进攻时限`
+            : `${PARAMS.period_count} 节 × ${PARAMS.period_minutes} 分钟 · ${PARAMS.shot_clock_s} 秒进攻时限`}
+        </div>
+        <div style="font-size:10px;opacity:.85;margin-top:3px;background:rgba(255,255,255,.12);border-radius:999px;display:inline-block;padding:1px 9px">
+          弧内 ${PARAMS.inside_arc_points} 分 / 弧外 ${PARAMS.outside_arc_points} 分
+        </div>
+      </div>
+
+      ${periods.length ? `
+      <div class="sec-label" style="padding:0 12px">${is3v3 ? '回合分布' : '全场时间轴'}</div>
+      <div style="display:flex;gap:3px;padding:0 12px">${tlHtml}</div>
+      <div style="padding:4px 12px 0;font-size:9px;color:var(--ink-3)">点某一节可跳到该节的事件列表</div>` : ''}
+
+      <div class="sec-label" style="padding:0 12px;margin-top:14px">关键指标</div>
+      <div class="statgrid statgrid--4" style="padding:0 12px">
+        <div class="stat"><div class="stat__n">${F.madeOverAttempt(s.arc_out_made, s.arc_out_attempted)}</div><div class="stat__l">${is3v3 ? '远投(2分)' : '三分'}</div><div class="stat__sub" style="font-size:9px;color:var(--ink-3)">${F.rate(s.arc_out_made, s.arc_out_attempted)}</div></div>
+        <div class="stat"><div class="stat__n">${F.madeOverAttempt(s.shots_made, s.shots_attempted)}</div><div class="stat__l">投篮命中</div><div class="stat__sub" style="font-size:9px;color:var(--ink-3)">${F.rate(s.shots_made, s.shots_attempted)}</div></div>
+        <div class="stat"><div class="stat__n ${is3v3 ? 'stat__n--na' : ''}">${is3v3 ? '不适用' : F.num(s.fast_breaks)}</div><div class="stat__l">快攻</div><div class="stat__sub" style="font-size:9px;color:var(--ink-3)">${is3v3 ? '12秒下已关闭' : '回合数'}</div></div>
+        <div class="stat"><div class="stat__n">${F.num(s.turnovers)}</div><div class="stat__l">失误</div><div class="stat__sub" style="font-size:9px;color:var(--ink-3)">需补录归属</div></div>
+      </div>
+      <div style="padding:4px 12px 0;font-size:9.5px;color:var(--ink-3);line-height:1.6">
+        篮板、助攻、抢断需 AI 逐人识别，第一版暂不采集；不做假的估测。
+      </div>
+
+      <div class="sec-label" style="padding:0 12px;margin-top:14px">深度数据</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 12px">
+        <div class="card ${prog.pending ? 'card--warn' : 'card--fill'}" style="cursor:pointer;margin:0" onclick="go('events')">
+          <div style="font-size:18px">📝</div>
+          <div class="card__title" ${prog.pending ? 'style="color:var(--warn-ink)"' : ''}>事件列表</div>
+          <div class="card__sub" ${prog.pending ? 'style="color:var(--warn-ink)"' : ''}>${prog.pending ? '待补录 ' + prog.pending : '共 ' + prog.total + ' 个'}</div>
+        </div>
+        <div class="card card--fill" style="cursor:pointer;margin:0" onclick="go('heatmap')">
+          <div style="font-size:18px">🔥</div>
+          <div class="card__title">投篮热图</div>
+          <div class="card__sub">${is3v3 ? '半场单框视角' : '按点 · 分区域'}</div>
+        </div>
+        <div class="card card--fill ${is3v3 ? '' : ''}" style="cursor:pointer;margin:0;${is3v3 ? 'opacity:.5' : ''}" onclick="${is3v3 ? `toast('3x3 赛制第一版关闭快攻识别')` : `go('events')`}">
+          <div style="font-size:18px">🎬</div>
+          <div class="card__title">精彩片段</div>
+          <div class="card__sub">${is3v3 ? '本赛制不可用' : '按快攻 / 连中筛选'}</div>
+        </div>
+        <div class="card card--fill" style="cursor:pointer;margin:0" onclick="go('formation')">
+          <div style="font-size:18px">📍</div>
+          <div class="card__title">阵型快照</div>
+          <div class="card__sub">每 ${PARAMS.formation_sample_interval_s} 秒一次 · ${PARAMS.formation_points} 点</div>
+        </div>
+      </div>
+
+      ${!prog.complete ? `
+      <div onclick="go('events')" style="margin:14px 12px 20px;padding:12px;background:var(--warn-2);border:1px solid var(--warn);border-radius:14px;cursor:pointer">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:12px;font-weight:600;color:var(--warn-ink)">补录进度 ${prog.resolved} / ${prog.total}</span>
+          <span style="font-size:11px;color:var(--warn-ink);text-decoration:underline">去补录 ›</span>
+        </div>
+        <div style="height:5px;background:rgba(255,255,255,.75);border-radius:3px;overflow:hidden;margin-top:8px">
+          <div style="width:${prog.percent}%;height:100%;background:var(--warn);border-radius:3px"></div>
+        </div>
+        <div style="font-size:10px;color:var(--warn-ink);opacity:.85;margin-top:5px">补录完成后，球员级数据与球队统计才会更新</div>
+      </div>` : `
+      <div class="card card--ok" style="margin:14px 12px 20px">
+        <div class="card__body" style="color:#14532d">✓ 本场补录已完成，数据已全部汇总</div>
+      </div>`}`;
+  },
+  notes() {
+    const s = REPORT.team_stats;
+    return `
+    <h4>这一屏的四个硬约束</h4>
+    <ul>
+      <li><b>口径标识常驻</b>（PRD 9.4 #4.8）：顶部那行蓝底文字由 <code>scopeLabelFromParams(params)</code> 生成，教练随时能核对当前看的是什么口径</li>
+      <li><b>告警条</b>：契约 <code>warnings</code> 非空就必须显示。当前组合有 ${REPORT.warnings.length} 条</li>
+      <li><b>标定不合格要阻断</b>：<code>calibration.ok === false</code> 时整页不展示数据，只显示原因</li>
+      <li><b>补录进度条常驻底部</b>：没补完就一直提醒</li>
+    </ul>
+    <h4>切换参数组合看差异</h4>
+    <div class="srcbox"><span class="c">// 当前组合的真实报告数据</span>
+format:                <span class="s">"${PARAMS.format}"</span>
+court_type:            <span class="s">"${PARAMS.court_type}"</span>
+three_point_radius_m:  <span class="k">${PARAMS.three_point_radius_m}</span>
+three_point_geometry:  <span class="s">"${PARAMS.three_point_geometry}"</span>
+inside/outside:        <span class="k">${PARAMS.inside_arc_points}</span> / <span class="k">${PARAMS.outside_arc_points}</span> 分
+shot_clock_s:          <span class="k">${PARAMS.shot_clock_s}</span>
+fast_break_enabled:    <span class="k">${PARAMS.fast_break_enabled}</span>
+periods:               <span class="k">${REPORT.periods.length}</span> 节
+arc_out:               <span class="k">${s.arc_out_made}</span>/<span class="k">${s.arc_out_attempted}</span> 命中</div>
+    <div class="callout warn">
+      <b>切到 3 对 3 再看这一屏</b>：比分卡变成 21 分制、时间轴只剩单节、
+      「三分」变「远投(2分)」、快攻卡变灰不可点、告警条多一条说明。
+      这些全是 <code>mock/report.js</code> 根据 params 真实产出的，不是写死的界面分支。
+    </div>`;
+  }
+};
+
+// ---------- 屏 07 事件补录 ----------
+SCREENS.events = {
+  title: '事件补录',
+  cap: '产品生死线 · 点卡片 → 选人 → 自动跳下一个',
+  render() {
+    const prog = SESSION.progress();
+    const filters = SESSION.filterDefs();
+    const list = SESSION.list(SCREENS.events._filter || 'ALL');
+    const is3v3 = currentCombo.fmt === '3V3';
+
+    return `
+      <div style="padding:8px 12px 0">
+        <div class="scope scope--strong">${esc(P.scopeLabelFromParams(PARAMS))}</div>
+      </div>
+
+      <div style="margin:0 12px 8px;padding:12px;background:${prog.complete ? 'var(--ok-2)' : 'var(--warn-2)'};border:1px solid ${prog.complete ? 'var(--ok)' : 'var(--warn)'};border-radius:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:12px;font-weight:600;color:${prog.complete ? '#14532d' : 'var(--warn-ink)'}">
+            ${prog.complete ? '✓ 本场补录已完成' : '补录进度 ' + prog.resolved + ' / ' + prog.total}
+          </span>
+          <span style="font-size:11px;color:${prog.complete ? '#14532d' : 'var(--warn-ink)'};opacity:.8">${prog.percent}%</span>
+        </div>
+        <div style="height:5px;background:rgba(255,255,255,.75);border-radius:3px;overflow:hidden;margin-top:8px">
+          <div style="width:${prog.percent}%;height:100%;background:${prog.complete ? 'var(--ok)' : 'var(--warn)'};border-radius:3px"></div>
+        </div>
+        ${!prog.complete ? `<div style="font-size:10px;color:var(--warn-ink);opacity:.85;margin-top:5px">还有 ${prog.pending} 个事件待处理 · 单个约 3-5 秒</div>` : ''}
+      </div>
+
+      <div style="display:flex;gap:4px;padding:0 12px 8px;flex-wrap:wrap">
+        ${filters.map(f => `
+          <span class="fchip ${(SCREENS.events._filter || 'ALL') === f.key ? 'fchip--on' : ''} ${f.disabled ? '' : ''}"
+                style="${f.disabled ? 'opacity:.4;' : ''}${f.highlight && (SCREENS.events._filter || 'ALL') !== f.key ? 'border-color:var(--warn);color:var(--warn-ink);background:var(--warn-2);' : ''}"
+                onclick="${f.disabled ? `toast('${is3v3 ? '3x3 第一版关闭快攻识别' : ''}')` : `setFilter('${f.key}')`}">${esc(f.label)}</span>
+        `).join('')}
+      </div>
+
+      <div style="padding:0 12px 90px">
+        ${list.length ? list.map(ev => {
+          const resolved = SESSION.isResolved(ev);
+          const name = SESSION.displayName(ev);
+          const meta = [];
+          if (ev.distance_m != null) meta.push('距筐 ' + ev.distance_m.toFixed(1) + ' m');
+          if (ev.in_bounds === false) meta.push('⚠ 坐标越界');
+          if (ev.confidence != null && ev.confidence < 0.6) meta.push('低置信度');
+          return `
+          <div onclick="openSheet('${ev.id}')"
+               style="display:flex;align-items:center;gap:8px;background:${resolved ? 'var(--card)' : '#fffbeb'};border:1px solid ${resolved ? 'var(--line-2)' : 'var(--warn)'};border-left:${resolved ? '1px' : '4px'} solid ${resolved ? 'var(--line-2)' : 'var(--warn)'};border-radius:10px;padding:8px;margin-bottom:4px;cursor:pointer">
+            <div style="width:54px;height:36px;border-radius:4px;background:var(--fill-2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--ink-3)">
+              ${{SHOT:'🏀',TURNOVER:'⚠',FAST_BREAK:'⚡',REBOUND:'↕'}[ev.kind] || '·'}
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:12px;font-weight:500;color:var(--ink)">
+                ${esc(ev.label_zh || ({SHOT:'投篮',TURNOVER:'失误',FAST_BREAK:'快攻回合'}[ev.kind] || '事件'))}${ev.made != null ? (ev.made ? ' · 命中' : ' · 未中') : ''}
+              </div>
+              <div style="font-size:10px;color:var(--ink-3);margin-top:1px">${esc(F.eventTimeText(ev.timestamp_s, REPORT.periods, PARAMS.format))}</div>
+              ${meta.length ? `<div style="font-size:9px;color:var(--ink-3);margin-top:1px">${esc(meta.join(' · '))}</div>` : ''}
+            </div>
+            <div style="text-align:right;flex-shrink:0;max-width:80px">
+              <div style="font-size:11px;color:${resolved && ev.player_id ? 'var(--ink-2)' : 'var(--warn-ink)'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(name)}</div>
+              ${resolved
+                ? (ev.attribution_source === 'UNKNOWN' ? '<span class="chip chip--muted" style="margin-top:2px">看不清</span>'
+                  : ev.attribution_source === 'NOT_OUR_TEAM' ? '<span class="chip chip--muted" style="margin-top:2px">不是我方</span>'
+                  : ev.skipped ? '<span class="chip chip--muted" style="margin-top:2px">已跳过</span>'
+                  : '<span class="chip chip--ok" style="margin-top:2px">✓</span>')
+                : '<span class="chip chip--warn" style="margin-top:2px">待录</span>'}
+            </div>
+          </div>`;
+        }).join('') : `<div style="padding:60px 20px;text-align:center;color:var(--ink-3);font-size:12px">这个筛选下没有事件</div>`}
+      </div>
+
+      <div style="position:fixed;left:0;right:0;bottom:0;display:flex;gap:8px;padding:8px 12px;background:#fff;border-top:1px solid var(--line-2);z-index:40;max-width:359px;margin:0 auto">
+        <div onclick="doUndo()" style="flex:1;text-align:center;padding:8px;border:1px solid var(--line);border-radius:8px;font-size:11px;color:var(--ink-2);cursor:pointer;${SESSION.undoDepth ? '' : 'opacity:.4'}">
+          ↶ 撤销${SESSION.undoDepth ? ' (' + SESSION.undoDepth + ')' : ''}
+        </div>
+        <div onclick="toast('第二版提供批量归属')" style="flex:1;text-align:center;padding:8px;border:1px solid var(--line);border-radius:8px;font-size:11px;color:var(--ink-2);cursor:pointer">批量归属</div>
+      </div>
+
+      <div id="sheetRoot"></div>`;
+  },
+  notes() {
+    const prog = SESSION.progress();
+    return `
+    <h4>这是整个产品价值最依赖的一屏</h4>
+    <p style="margin:0 0 10px">PRD 7.1 原话：这块不做扎实，教练懒得补录，<b>产品价值直接归零</b>。
+    开发计划给了 2 周专项排期和 14 条 checklist。</p>
+    <div class="callout ok">
+      <b>关键在「保存 · 下一个 →」这个动作。</b>
+      选完人一键跳到下一个未补录事件，单个 3-5 秒。
+      没有这个按钮则每次都要关浮层 → 找橙色卡片 → 点开，一场 15 分钟。<b>差 5 倍。</b>
+    </div>
+    <h4>现在就试（这是真实状态机在跑）</h4>
+    <ul>
+      <li>点任意一张<b>橙色</b>卡片 → 底部浮层弹出</li>
+      <li>点一个球员头像 → <b>立刻保存并自动跳到下一个未补录事件</b>，不用点保存</li>
+      <li>连点几次，看进度条实时变化</li>
+      <li>点「撤销」可以退回，支持连续撤销（栈上限 200）</li>
+      <li>试试「看不清」和「不是我方」—— 两者都<b>不会填入任何球员</b>，报告里显示「—」</li>
+    </ul>
+    <h4>当前状态（<code>attribution.progress()</code> 实时值）</h4>
+    <div class="srcbox">total:      <span class="k">${prog.total}</span>
+resolved:   <span class="k">${prog.resolved}</span>
+attributed: <span class="k">${prog.attributed}</span>   <span class="c">// 「看不清」不计入</span>
+pending:    <span class="k">${prog.pending}</span>
+percent:    <span class="k">${prog.percent}</span>%
+undoDepth:  <span class="k">${SESSION.undoDepth}</span>
+lastPlayer: <span class="s">${esc(SESSION.lastPlayerId || 'null')}</span></div>
+    <h4>为什么「看不清」必须有</h4>
+    <p style="margin:0">没有它，教练会被迫乱选一个人。<b>脏数据比空数据更糟</b> ——
+    空数据教练知道要补，脏数据他会拿去批评球员。选了「看不清」的事件在报告里显示 <code>—</code>。</p>`
+  }
+};
+SCREENS.events._filter = 'ALL';
+
+// ---------- 屏 09 热图 ----------
+SCREENS.heatmap = {
+  title: '投篮热图',
+  cap: '球场底图由 params 驱动 · 三分线两种几何',
+  render() {
+    const shots = REPORT.events
+      .filter(e => e.kind === 'SHOT' && e.x_m != null)
+      .map(e => ({ id: e.id, x_m: e.x_m, y_m: e.y_m, made: !!e.made }));
+
+    const showHeat = SCREENS.heatmap._mode !== 'SHOTS';
+    const heat = showHeat
+      ? (SCREENS.heatmap._mode === 'MADE'
+          ? shots.filter(s => s.made).map(s => ({ x_m: s.x_m, y_m: s.y_m, weight: 1 }))
+          : (REPORT.formations || []).flatMap(f => (f.positions_m || []).map(p => ({ x_m: p[0], y_m: p[1], weight: 1 }))))
+      : [];
+
+    const r = courtSvgHtml({ shots: SCREENS.heatmap._mode === 'MOVEMENT' ? [] : shots, heat });
+    const made = shots.filter(s => s.made).length;
+    const s = REPORT.team_stats;
+    const is3v3 = currentCombo.fmt === '3V3';
+
+    return `
+      <div style="padding:8px 12px 0">
+        <div class="scope scope--strong">${esc(P.scopeLabelFromParams(PARAMS))} · 三分线 ${PARAMS.three_point_radius_m} m · ${PARAMS.three_point_geometry === 'PURE_ARC' ? '纯弧线' : '弧线+底角直线'}</div>
+      </div>
+
+      <div class="seg" style="margin:8px 12px">
+        ${[['SHOTS','投篮点'],['MOVEMENT','跑动热区'],['MADE','命中密度']].map(([k,l]) => `
+          <div class="seg__item ${(SCREENS.heatmap._mode||'SHOTS')===k?'seg__item--on':''}" onclick="setHeatMode('${k}')">${l}</div>`).join('')}
+      </div>
+
+      ${SCREENS.heatmap._mode === 'MOVEMENT' ? `
+      <div class="alert alert--info" style="margin:0 12px 8px;font-size:10px">
+        B 级数据不区分个人，这是全队跑动密集度。看整体压迫范围可以，评估单个球员的跑动需要第二版的逐人追踪。
+      </div>` : ''}
+
+      <div style="padding:0 12px">${r.html}</div>
+
+      ${r.warnings.length ? `<div class="alert alert--err" style="margin:8px 12px 0;font-size:10px">${r.warnings.map(w=>'⚠ '+esc(w)).join('<br>')}</div>` : ''}
+
+      <div style="display:flex;gap:8px;align-items:center;padding:8px 12px 0;font-size:10px;color:var(--ink-3)">
+        ${SCREENS.heatmap._mode === 'MOVEMENT'
+          ? '<span>冷</span><span style="flex:1;height:5px;border-radius:3px;background:linear-gradient(90deg,#eab308,#f59e0b,#ef4444)"></span><span>热</span>'
+          : `<span style="display:flex;align-items:center;gap:3px"><i style="width:8px;height:8px;border-radius:50%;background:var(--ok);display:inline-block"></i>命中 ${made}</span>
+             <span style="display:flex;align-items:center;gap:3px"><i style="width:8px;height:8px;border-radius:50%;background:var(--err);display:inline-block"></i>未中 ${shots.length - made}</span>`}
+      </div>
+
+      <div class="statgrid statgrid--3" style="padding:12px">
+        <div class="stat"><div class="stat__n">${F.madeOverAttempt(s.shots_made, s.shots_attempted)}</div><div class="stat__l">总出手</div><div class="stat__sub" style="font-size:9px;color:var(--ink-3)">${F.rate(s.shots_made, s.shots_attempted)}</div></div>
+        <div class="stat"><div class="stat__n">${F.madeOverAttempt(s.arc_out_made, s.arc_out_attempted)}</div><div class="stat__l">${is3v3 ? '远投(2分)' : '三分'}</div><div class="stat__sub" style="font-size:9px;color:var(--ink-3)">${F.rate(s.arc_out_made, s.arc_out_attempted)}</div></div>
+        <div class="stat"><div class="stat__n">${shots.length}</div><div class="stat__l">图上的点</div><div class="stat__sub" style="font-size:9px;color:var(--ink-3)">个</div></div>
+      </div>
+
+      <div style="padding:0 16px 20px;font-size:10px;color:var(--ink-3);text-align:center;line-height:1.7">
+        长按球场任意位置 → 找出该点附近的事件并播放片段
+      </div>`;
+  },
+  notes() {
+    const court = CG.createCourt(PARAMS);
+    return `
+    <h4>这张图不是画出来的，是算出来的</h4>
+    <p style="margin:0 0 10px">底图 SVG 由 <code>svgBuilder.buildFullSvg(params, layers)</code> 生成，
+    球场线、三分弧、禁区、罚球圈、中圈的每一个坐标都从 <code>params</code> 换算。<b>没有一处硬编码。</b></p>
+    <div class="srcbox"><span class="c">// 当前组合的几何参数</span>
+court_type:      <span class="s">"${PARAMS.court_type}"</span>  <span class="k">${PARAMS.court_length_m}</span>×<span class="k">${PARAMS.court_width_m}</span> m
+geometry:        <span class="s">"${PARAMS.three_point_geometry}"</span>
+radius:          <span class="k">${PARAMS.three_point_radius_m}</span> m
+corner_lateral:  <span class="k">${PARAMS.corner_lateral_m}</span>
+corner_junction: <span class="k">${PARAMS.corner_junction_x_m}</span>
+x 范围:          [<span class="k">${court.xMin}</span>, <span class="k">${court.xMax.toFixed(3)}</span>]
+y 半宽:          ±<span class="k">${court.yHalf}</span></div>
+    <div class="callout warn">
+      <b>切换参数组合，重点看三分线的形状变化：</b><br>
+      · <b>一线 5对5</b> → 弧线 + 两侧底角直线段（两段几何，底角三分比弧顶更近）<br>
+      · <b>U15 / U12</b> → 纯弧线，半径 5.80 m，明显比一线的圈小<br>
+      · <b>3对3</b> → 纯弧线 6.75 m，但球场只有 15×11 的半场，弧线会被边线裁掉
+    </div>
+    <h4>为什么两种几何不能共用一套代码</h4>
+    <p style="margin:0 0 10px">青少年半径 5.80 &lt; 底角横向 6.60，弧线永远碰不到底角直线的位置，
+    几何上<b>必须退化为纯弧线</b>。若强行套用成人几何，会产生「底角直线段落在弧线内侧」的矛盾配置 ——
+    判定给出错误结果且<b>不报错</b>。</p>
+    <p style="margin:0"><code>court-svg</code> 组件的 <code>_validate()</code> 会拦住这种配置并<b>拒绝渲染</b>：
+    宁可不出图，也不画一张几何错误的场地图糊弄教练。</p>
+    <h4>跑动热区默认折叠</h4>
+    <p style="margin:0">切到「跑动热区」会看到一条蓝色说明。PRD 3.3 的判断是：
+    B 级数据不区分个人，全队一起跑的热图教练其实读不出信息，
+    所以<b>默认不显示</b>，主动切换才出现，避免报告页被无意义视觉填满。</p>`
+  }
+};
+SCREENS.heatmap._mode = 'SHOTS';
+
+// ---------- 屏 08 阵型 ----------
+SCREENS.formation = {
+  title: '阵型快照',
+  cap: '置信度不足不显示阵型名',
+  render() {
+    const frames = REPORT.formations || [];
+    const idx = Math.min(SCREENS.formation._idx || 0, Math.max(0, frames.length - 1));
+    const f = frames[idx];
+    if (!f) return '<div style="padding:80px 20px;text-align:center;color:var(--ink-3);font-size:12px">本场没有阵型数据</div>';
+
+    const starters = ROSTER.filter(p => p.isStarter).slice(0, PARAMS.formation_points);
+    const r = courtSvgHtml({ formation: f }, { formation: { numbers: starters.map(p => String(p.number)), showBall: true } });
+
+    const conf = f.confidence || 0;
+    const suppressed = !f.label || conf < 0.6;
+
+    return `
+      <div style="padding:8px 12px 0">
+        <div class="scope scope--strong">${esc(P.scopeLabelFromParams(PARAMS))} · 阵型 ${PARAMS.formation_points} 点</div>
+      </div>
+      <div style="padding:0 12px">${r.html}</div>
+
+      <div class="card" style="margin:12px;padding:12px;text-align:center;background:var(--accent-2);border-color:var(--accent);border-style:solid">
+        <div style="font-size:10px;color:var(--ink-3)">识别阵型</div>
+        ${suppressed
+          ? `<div style="font-size:15px;font-weight:500;color:var(--ink-3);margin-top:2px">未识别</div>
+             <div style="font-size:10px;color:var(--ink-3);margin-top:3px;line-height:1.5">置信度 ${(conf*100).toFixed(0)}% 偏低，不给出阵型名以免误导</div>`
+          : `<div style="font-size:15px;font-weight:600;color:var(--accent);margin-top:2px">${esc(f.label)}</div>
+             <div style="font-size:10px;color:var(--ink-3);margin-top:3px">置信度 ${(conf*100).toFixed(0)}%</div>`}
+        <div style="font-size:9.5px;color:var(--ink-3);margin-top:6px;opacity:.8">${f.positions_m.length} 个点位 · 每 ${PARAMS.formation_sample_interval_s} 秒采样一次</div>
+      </div>
+
+      <div style="padding:0 12px">
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--ink-3);margin-bottom:2px">
+          <span>${esc(F.clockTime(f.timestamp_s))}</span>
+          <span style="color:var(--accent)">${idx + 1} / ${frames.length}</span>
+        </div>
+        <input type="range" min="0" max="${frames.length - 1}" value="${idx}" oninput="setFrame(this.value)"
+               style="width:100%;accent-color:#2563eb">
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <div class="btn btn--ghost btn--sm" style="cursor:pointer" onclick="setFrame(${Math.max(0, idx-1)})">‹ 上一帧</div>
+          <div class="btn btn--primary btn--sm" style="flex:1;cursor:pointer" onclick="playFrames()">${SCREENS.formation._playing ? '⏸ 暂停演变' : '▶ 播放阵型演变'}</div>
+          <div class="btn btn--ghost btn--sm" style="cursor:pointer" onclick="setFrame(${Math.min(frames.length-1, idx+1)})">下一帧 ›</div>
+        </div>
+        <div class="btn btn--ghost btn--block" style="margin-top:8px;cursor:pointer" onclick="toast('已收藏这一帧')">+ 收藏这一帧</div>
+      </div>
+      <div style="padding:12px 16px 20px;font-size:10px;color:var(--ink-3);text-align:center;line-height:1.7">
+        拖动时间轴看每 ${PARAMS.formation_sample_interval_s} 秒的阵型变化 · 收藏后可截图分享到群
+      </div>`;
+  },
+  notes() {
+    const frames = REPORT.formations || [];
+    const nulls = frames.filter(f => !f.label).length;
+    return `
+    <h4>宁可少标，不要标错</h4>
+    <p style="margin:0 0 10px">阵型识别第一版准确率可能只有 60-70%。教练对「AI 说错话」的容忍度很低，
+    <b>一次错误阵型可能让他整个不信这个产品</b>。</p>
+    <div class="callout">
+      所以规则是：<code>label</code> 为 <code>null</code> 或置信度 &lt; 0.6 时，
+      <b>不显示阵型名</b>，只显示「未识别」。拖动下面的时间轴，会看到有些帧有名字、有些没有。
+    </div>
+    <h4>当前报告的真实数据</h4>
+    <div class="srcbox">阵型帧总数:      <span class="k">${frames.length}</span>
+label 为 null:   <span class="k">${nulls}</span>  (<span class="k">${frames.length ? Math.round(nulls/frames.length*100) : 0}</span>%)
+每帧点数:        <span class="k">${frames[0] ? frames[0].positions_m.length : 0}</span>  <span class="c">// = params.formation_points = ${PARAMS.formation_points}</span>
+采样间隔:        <span class="k">${PARAMS.formation_sample_interval_s}</span> 秒</div>
+    <p style="margin:0 0 10px">Mock 刻意让 ≥25% 的帧 <code>label</code> 为 null，
+    就是为了覆盖这条降级路径（PRD 9.2 #2.14）。</p>
+    <h4>点数与赛制联动</h4>
+    <p style="margin:0">切到 <b>3 对 3</b>：图上只有 3 个蓝点，球场变成 15×11 的半场单框。
+    点数来自 <code>params.formation_points</code>，不是写死的 5。
+    如果 pipeline 给了错误点数，<code>buildFormation()</code> 会用<b>红色</b>画出点位并在 warnings 里告警。</p>
+    <h4>可以操作</h4>
+    <ul style="margin:0">
+      <li>拖时间轴看每一帧</li>
+      <li>点「播放阵型演变」连续播放</li>
+      <li>点「收藏这一帧」——教练的真实需求是截图发群讨论战术</li>
+    </ul>`
+  }
+};
+SCREENS.formation._idx = 0;
+SCREENS.formation._playing = false;
+
+// ---------- 球队页屏 02 比赛数据 ----------
+SCREENS.teamStats = {
+  title: '球队比赛数据',
+  cap: '赛制口径筛选 · 没有「全部」选项',
+  render() {
+    // 用真实活动数据构造 games，走真实的 scope 聚合
+    const games = MD.ACTIVITIES
+      .filter(a => Number.isFinite(a.scoreFor))
+      .map(a => ({
+        id: a.id, format: a.format, ageGroup: a.ageGroup, playedAt: a.playedAt,
+        pointsFor: a.scoreFor, pointsAgainst: a.scoreAgainst, won: !!a.won,
+        fgm: a.fgm || 0, fga: a.fga || 0, arcOutMade: a.arcOutMade || 0, arcOutAtt: a.arcOutAtt || 0,
+        attributed: a.attributedCount >= a.eventCount,
+      }));
+
+    const scopes = SC.availableScopes(games);
+    const active = SCREENS.teamStats._scope
+      || (scopes[0] ? { format: scopes[0].format, ageGroup: scopes[0].ageGroup } : null);
+    if (!active) return '<div style="padding:80px 20px;text-align:center;color:var(--ink-3);font-size:12px">还没有比赛数据</div>';
+
+    const stats = SC.aggregate(games, active.format, active.ageGroup);
+    const list = games.filter(g => g.format === active.format && g.ageGroup === active.ageGroup);
+    const comp = SC.completenessNote(list.filter(g => g.attributed).length, list.length);
+    const others = scopes.filter(s => !(s.format === active.format && s.ageGroup === active.ageGroup));
+
+    // 合并会得到的错误数字（用于对比展示）
+    const sameAge = games.filter(g => g.ageGroup === active.ageGroup);
+    const naiveRate = sameAge.length ? sameAge.filter(g => g.won).length / sameAge.length : null;
+
+    return `
+      <div style="padding:8px 12px 0">
+        <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--ink-3)">
+          赛制口径 <span style="color:var(--err);font-size:9px;border:1px solid var(--err-2);border-radius:999px;padding:0 5px;background:var(--err-2)">不可合并</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:4px;padding:4px 12px 0;flex-wrap:wrap">
+        ${scopes.map(s => `
+          <span class="fchip ${s.format===active.format && s.ageGroup===active.ageGroup ? 'fchip--on' : ''}"
+                style="cursor:pointer" onclick="setScope('${s.format}','${s.ageGroup}')">
+            ${esc(P.FORMAT_LABEL[s.format])} · ${s.count} 场
+          </span>`).join('')}
+      </div>
+      <div style="padding:6px 12px 0;font-size:9.5px;color:var(--ink-3)">
+        注意这里<b style="color:var(--err)">没有「全部」选项</b>
+      </div>
+
+      <div class="scope scope--strong" style="margin:8px 12px 0">
+        当前口径：${esc(stats.label)}${others.length ? ' | 另有 ' + others.map(o=>P.FORMAT_LABEL[o.format]+' '+o.count+' 场').join('、') : ''}
+      </div>
+
+      ${comp.incomplete ? `
+      <div class="alert alert--warn" style="margin:8px 12px 0;font-size:10px">⚠ ${esc(comp.text)}，场均数据会偏低 · 点击去补录</div>`
+      : `<div style="margin:8px 12px 0;font-size:10px;color:var(--ok);text-align:center">${esc(comp.text)}</div>`}
+
+      <div class="card card--fill" style="margin:12px;padding:14px 12px;text-align:center">
+        <div style="display:flex;align-items:center;justify-content:center">
+          <div style="text-align:center;padding:0 16px"><div style="font-size:26px;font-weight:600;color:var(--ok)">${stats.wins}</div><div style="font-size:10px;color:var(--ink-3)">胜</div></div>
+          <div style="color:var(--ink-3);font-size:14px">:</div>
+          <div style="text-align:center;padding:0 16px"><div style="font-size:26px;font-weight:600;color:var(--err)">${stats.losses}</div><div style="font-size:10px;color:var(--ink-3)">负</div></div>
+          <div style="width:1px;height:32px;background:var(--line);margin:0 8px"></div>
+          <div style="text-align:center"><div style="font-size:26px;font-weight:600">${stats.winRate != null ? Math.round(stats.winRate*100)+'%' : '—'}</div><div style="font-size:10px;color:var(--ink-3)">胜率</div></div>
+        </div>
+      </div>
+
+      <div class="sec-label" style="padding:0 12px">关键指标</div>
+      <div class="statgrid statgrid--3" style="padding:0 12px">
+        <div class="stat"><div class="stat__n">${F.num(stats.ppg,1)}</div><div class="stat__l">场均得分</div></div>
+        <div class="stat"><div class="stat__n">${F.num(stats.ppgAgainst,1)}</div><div class="stat__l">场均失分</div></div>
+        <div class="stat"><div class="stat__n">${F.signedNum(stats.netPpg,1)}</div><div class="stat__l">净胜分</div></div>
+      </div>
+      <div class="statgrid statgrid--3" style="padding:6px 12px 0">
+        <div class="stat"><div class="stat__n ${stats.fgPct==null?'stat__n--na':''}">${stats.fgPct!=null?F.pct(stats.fgPct,1):'—'}</div><div class="stat__l">命中率</div></div>
+        <div class="stat"><div class="stat__n ${stats.arcOutPct==null?'stat__n--na':''}">${stats.arcOutPct!=null?F.pct(stats.arcOutPct,1):'—'}</div><div class="stat__l">弧外命中率</div></div>
+        <div class="stat"><div class="stat__n">${stats.games}</div><div class="stat__l">场次</div></div>
+      </div>
+
+      <div class="sec-label" style="padding:0 12px;margin-top:14px">全部比赛 · ${list.length} 场</div>
+      <div style="padding:0 12px 20px">
+        ${list.map(g => `
+        <div class="item" style="cursor:pointer" onclick="toast('打开该场报告')">
+          <div class="item__avatar ${g.won ? 'item__avatar--ok' : 'item__avatar--err'}">${g.won?'胜':'负'}</div>
+          <div class="item__body">
+            <div class="item__nm">${esc(F.shortDate(g.playedAt))}</div>
+            <div class="item__sub">${g.attributed ? '数据完整' : '部分待补录'}</div>
+          </div>
+          <div class="item__val"><div class="item__val-n">${g.pointsFor}:${g.pointsAgainst}</div></div>
+        </div>`).join('')}
+      </div>
+
+      ${naiveRate != null && scopes.length > 1 ? `
+      <div class="alert alert--err" style="margin:0 12px 20px;font-size:10px;line-height:1.7">
+        <b>对比：如果提供「全部赛制」选项</b><br>
+        同年龄段合并会算出胜率 <b>${Math.round(naiveRate*100)}%</b>，
+        而当前口径是 <b>${stats.winRate!=null?Math.round(stats.winRate*100)+'%':'—'}</b>。
+        合并值把 3对3 的 21 分和 5对5 的 78 分平均在一起，在篮球意义上无效。
+      </div>` : ''}`;
+  },
+  notes() {
+    return `
+    <h4>为什么没有「全部赛制」选项</h4>
+    <p style="margin:0 0 10px">5对5 的 8胜4负 和 3对3 的 3胜1负 合并成「11胜5负 · 胜率 69%」，
+    这个数字<b>在篮球意义上完全无效</b> —— 两种赛制的人数、场地、时限、计分口径都不同，胜率不可比。</p>
+    <div class="callout warn">
+      与其给一个看起来全面、实际错误的数字，不如强制教练选一个口径。
+      页面底部那条红色对比就是实证。
+    </div>
+    <h4>这一屏跑的是真实聚合代码</h4>
+    <p style="margin:0 0 10px">上面的战绩、场均、命中率全部由 <code>scope.aggregate(games, format, ageGroup)</code> 算出，
+    不是写死的展示数字。<code>availableScopes()</code> 在结构上<b>就不可能</b>返回「全部」这个选项。</p>
+    <div class="srcbox"><span class="c">// utils/scope.js 的守卫</span>
+aggregateGuarded(mixedGames)
+  <span class="k">→</span> <span class="s">CrossFormatAggregationError</span>
+     <span class="c">"检测到跨赛制聚合：5 对 5、3 对 3。"</span></div>
+    <p style="margin:0 0 10px">前端这份守卫是后端 <code>aggregate_guarded()</code> 的镜像。
+    <b>两层都要有</b> —— 前端会在本地做即时聚合（列表小计、筛选后统计），
+    如果前端自己合并了，后端的守卫就绕过去了。</p>
+    <h4>数据完整度标注</h4>
+    <p style="margin:0">有场次未补录时，指标旁必须写「基于 10/12 场 · 2 场待补录」。
+    教练得知道分母，否则会拿着偏低的数字去批评球员（PRD P2-25）。</p>`;
+  }
+};
+SCREENS.teamStats._scope = null;
+
+// ---------- 实时占位 ----------
+SCREENS.realtime = {
+  title: '实时分析',
+  cap: '灰显占位 · 第一版不实现',
+  render() {
+    return `
+      <div style="padding:100px 24px;text-align:center">
+        <div style="width:60px;height:60px;margin:0 auto 12px;border:2px dashed var(--line);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--ink-3)">⏱</div>
+        <div style="font-size:14px;color:var(--ink-2);font-weight:500;margin-bottom:6px">实时分析 · 内测中</div>
+        <div style="font-size:12px;color:var(--ink-3);line-height:1.7">
+          第一版暂不支持比赛实时上传与分析。<br>
+          当前流程为：录制结束后上传，云端处理完成会通知你。<br>
+          实时能力会在后续版本开放。
+        </div>
+        <div class="btn btn--primary" style="margin-top:20px;display:inline-block;padding:8px 24px;cursor:pointer" onclick="go('home')">知道了</div>
+      </div>`;
+  },
+  notes: `
+    <h4>占位但不实现</h4>
+    <p style="margin:0 0 10px">PRD 决策 3：第一版不做实时，<b>入口灰显占位，无后端逻辑</b>。</p>
+    <p style="margin:0 0 10px">占位的价值有两个：</p>
+    <ul>
+      <li>让教练知道路线图上还有这个能力，愿意继续攒数据</li>
+      <li>在架构图上保留一条灰虚线，让未来的自己或同事看到「这不是漏做，是第一版明确不接通」</li>
+    </ul>
+    <div class="callout">
+      实时分析的技术成本比录后上传高一到两个数量级：需要流式推流、服务端持续 GPU 推理、
+      低延迟回传。内测期一台 GPU 服务器串行处理已经要排队，实时更不现实。
+    </div>`
+};
+
+// ---------- 屏 10 套路演练 ----------
+SCREENS.routine = {
+  title: '套路演练报告',
+  cap: '按套路分段 · 与比赛报告结构完全不同',
+  render() {
+    const act = MD.ACTIVITIES.find(a => a.template === 'ROUTINE');
+    const routines = (act && act.routines) || [];
+    const totalAtt = routines.reduce((s, r) => s + r.actual, 0);
+    const totalSuc = routines.reduce((s, r) => s + r.success, 0);
+
+    const tone = (v) => v == null ? 'na' : v >= 0.7 ? 'ok' : v >= 0.4 ? 'warn' : 'err';
+
+    return `
+      <div style="padding:8px 12px 0"><div class="scope scope--strong">套路演练 · ${esc(act ? F.shortDate(act.playedAt) : '')}</div></div>
+
+      <div class="card card--fill" style="margin:8px 12px;padding:12px">
+        <div style="display:flex">
+          ${[['套路数',routines.length],['演练次数',totalAtt],['成功',totalSuc],['成功率', totalAtt?Math.round(totalSuc/totalAtt*100)+'%':'—']].map(([l,v]) => `
+            <div style="flex:1;text-align:center">
+              <div style="font-size:17px;font-weight:600">${v}</div>
+              <div style="font-size:10px;color:var(--ink-3);margin-top:2px">${l}</div>
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <div class="sec-label" style="padding:0 12px">套路明细</div>
+      <div style="padding:0 12px 20px">
+        ${routines.map(r => {
+          const rate = r.actual ? r.success / r.actual : null;
+          const t = tone(rate);
+          return `
+          <div class="card" style="padding:0;overflow:hidden;border-left:4px solid var(--${t==='na'?'line':t==='ok'?'ok':t==='warn'?'warn':'err'})">
+            <div style="display:flex;align-items:center;gap:8px;padding:12px">
+              <div style="flex:1;min-width:0">
+                <div style="font-size:12px;font-weight:600">${esc(r.name)}</div>
+                <div style="font-size:10px;color:var(--ink-3);margin-top:2px">演练 ${r.actual} 次 · 成功 ${r.success} 次 · 平均 ${r.avgSeconds} 秒</div>
+                ${r.planned && r.actual !== r.planned ? `<div style="font-size:10px;color:var(--warn-ink);margin-top:2px">⚠ 实际演练 ${r.actual} 次 / 预设 ${r.planned} 次</div>` : ''}
+              </div>
+              <div style="text-align:right;flex-shrink:0">
+                <span class="chip chip--${t==='na'?'muted':t}">${rate!=null?Math.round(rate*100)+'%':'—'}</span>
+              </div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+
+      <div style="padding:0 16px 20px;font-size:10px;color:var(--ink-3);text-align:center;line-height:1.7">
+        套路归属第一版靠教练标记与手动修正。后期 AI 会自动从录像里提取套路并分段。
+      </div>`;
+  },
+  notes: `
+    <h4>与比赛报告完全不同的结构</h4>
+    <ul>
+      <li>没有比分、没有时间轴、没有节次</li>
+      <li>核心是「每个套路一行」，展开看该套路的所有演练片段</li>
+      <li>成功率徽章分级：<b>≥70% 绿 / 40-69% 橙 / &lt;40% 红</b></li>
+    </ul>
+    <div class="callout">
+      <b>「平均耗时」是套路质量的重要指标。</b>
+      7 秒内完成的挡拆比 12 秒的质量高得多。这个字段第一版就加上，教练会很在意。
+    </div>
+    <h4>边界情况</h4>
+    <ul>
+      <li>录了但没标套路起止 → 整段作为「未分类」，让教练手动切</li>
+      <li>标了但次数不匹配（预设 8 次实际 6 次）→ 显示「实际 6 / 预设 8」并提醒，上面「4-out 突分」那条就是</li>
+    </ul>
+    <h4>补救路径</h4>
+    <p style="margin:0">教练中途忘了建套路清单时，可以在报告页「新增套路 + 手动框选时间范围」。
+    第一版就做，工作量不大但很实用。</p>`
+};
+
+// ==========================================================================
+// 交互
+// ==========================================================================
+
+function go(name) {
+  currentScreen = name;
+  render();
+}
+
+function switchAge(age) {
+  const c = COMBOS.find(x => x.age === age && x.fmt === currentCombo.fmt);
+  if (c) { currentCombo = c; onComboChange(); }
+  else { toast(`当前赛制下没有 ${P.AGE_GROUP_LABEL[age]} 的预设组合，请从左侧切换`); }
+}
+
+function switchFormat(fmt) {
+  if (fmt === 'CUSTOM') { toast('自定义赛制需填人数与场地，见小程序端'); return; }
+  const c = COMBOS.find(x => x.fmt === fmt && x.age === currentCombo.age)
+         || COMBOS.find(x => x.fmt === fmt);
+  if (c) { currentCombo = c; onComboChange(); }
+}
+
+function setFilter(k) { SCREENS.events._filter = k; render(); }
+function setHeatMode(m) { SCREENS.heatmap._mode = m; render(); }
+function setFrame(i) { SCREENS.formation._idx = Number(i); render(); }
+function setScope(f, a) { SCREENS.teamStats._scope = { format: f, ageGroup: a }; render(); }
+
+function playFrames() {
+  const frames = REPORT.formations || [];
+  if (SCREENS.formation._playing) {
+    clearInterval(SCREENS.formation._timer);
+    SCREENS.formation._playing = false;
+    render();
+    return;
+  }
+  SCREENS.formation._playing = true;
+  render();
+  SCREENS.formation._timer = setInterval(() => {
+    const next = (SCREENS.formation._idx || 0) + 1;
+    if (next >= frames.length) {
+      clearInterval(SCREENS.formation._timer);
+      SCREENS.formation._playing = false;
+      render();
+      return;
+    }
+    SCREENS.formation._idx = next;
+    render();
+  }, 300);
+}
+
+// ---------- 补录浮层 ----------
+function openSheet(eventId) {
+  SESSION.setCursor(eventId);
+  const ev = SESSION.getEvent(eventId);
+  if (!ev) return;
+
+  const items = SESSION.pickerOrder();
+  const next = SESSION.nextPending(eventId);
+  const meta = [];
+  if (ev.distance_m != null) meta.push('出手位置：距筐 ' + ev.distance_m.toFixed(1) + ' m');
+  if (ev.x_m != null) meta.push(`坐标 (${ev.x_m.toFixed(1)}, ${ev.y_m.toFixed(1)})`);
+  if (ev.behind_three_point_line != null) meta.push(ev.behind_three_point_line ? '弧外' : '弧内');
+  if (ev.confidence != null) meta.push('置信度 ' + Math.round(ev.confidence * 100) + '%');
+
+  const root = document.getElementById('sheetRoot');
+  root.innerHTML = `
+    <div onclick="closeSheet()" style="position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:100"></div>
+    <div style="position:fixed;left:0;right:0;bottom:0;z-index:101;background:#fff;border-radius:16px 16px 0 0;box-shadow:0 -6px 20px rgba(0,0,0,.15);padding:12px;max-height:78vh;overflow-y:auto;max-width:359px;margin:0 auto">
+      <div style="width:36px;height:4px;background:var(--line-2);border-radius:2px;margin:0 auto 10px"></div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+        <span style="font-size:13px;font-weight:600">${esc(ev.label_zh || '事件')}${ev.made != null ? ' · ' + (ev.made ? '命中' : '未中') : ''}</span>
+        <span style="font-size:11px;color:var(--ink-3)">${esc(F.eventTimeText(ev.timestamp_s, REPORT.periods, PARAMS.format))}</span>
+      </div>
+
+      <div style="position:relative;aspect-ratio:16/9;background:#0f172a;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:8px">
+        <div style="width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.92);color:var(--ink);display:flex;align-items:center;justify-content:center;font-size:15px">▶</div>
+        <div style="position:absolute;left:8px;top:8px;background:rgba(255,255,255,.9);font-size:9px;padding:1px 6px;border-radius:3px">事件片段 · 自动播放</div>
+        <div style="position:absolute;right:8px;bottom:8px;color:rgba(255,255,255,.75);font-size:9px">00:0${ev.clip_duration_s || 10}</div>
+        <div style="position:absolute;left:8px;right:8px;bottom:16px;height:2px;background:rgba(255,255,255,.3);border-radius:1px"><div style="width:40%;height:100%;background:#fff;border-radius:1px"></div></div>
+      </div>
+
+      ${meta.length ? `<div style="font-size:10px;color:var(--ink-3);margin-bottom:8px;line-height:1.6">${esc(meta.join(' · '))}</div>` : ''}
+      ${ev.in_bounds === false ? `<div class="alert alert--err" style="font-size:10px">⚠ 该事件坐标落在场地范围外，可能是标定偏移。归属仍可补录，但位置数据不可信。</div>` : ''}
+
+      <div style="font-size:12px;font-weight:600;margin:10px 0 6px">谁${ev.kind === 'TURNOVER' ? '失误' : '投的'}？</div>
+
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px">
+        ${items.map(it => `
+          <div onclick="pick('${esc(it.id)}')"
+               style="position:relative;aspect-ratio:1;border:1px ${it.isLast ? 'solid var(--warn)' : (it.kind==='special' ? 'dashed var(--line)' : 'dashed var(--line)')};border-radius:8px;background:${it.kind==='special' ? 'var(--fill)' : '#fff'};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:3px 1px;cursor:pointer">
+            ${it.isLast ? '<div style="position:absolute;top:-6px;right:-3px;background:var(--warn);color:#fff;font-size:8px;padding:0 4px;border-radius:999px">刚选</div>' : ''}
+            <div style="width:26px;height:26px;border-radius:50%;background:var(--fill);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--ink-2)">
+              ${it.kind === 'player' ? it.number : it.id === '__not_our_team__' ? '✕' : '?'}
+            </div>
+            <div style="font-size:9px;color:var(--ink-2);text-align:center;line-height:1.2;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+              ${it.kind === 'player' ? it.number + '号 ' + esc(it.name) : esc(it.label)}
+            </div>
+          </div>`).join('')}
+      </div>
+
+      <div style="font-size:9.5px;color:var(--ink-3);line-height:1.6;background:var(--fill);border-radius:6px;padding:4px 8px;margin-bottom:8px">
+        选「看不清」不会填入任何球员，报告里显示为「—」。宁可留空也不要猜。
+      </div>
+
+      <div style="display:flex;gap:5px">
+        <div onclick="doSkip()" style="flex:1;text-align:center;padding:8px;border:1px solid var(--line);border-radius:8px;font-size:11px;color:var(--ink-2);cursor:pointer">跳过</div>
+        <div onclick="doUndo()" style="flex:1;text-align:center;padding:8px;border:1px solid var(--line);border-radius:8px;font-size:11px;color:var(--ink-2);cursor:pointer;${SESSION.undoDepth?'':'opacity:.4'}">撤销</div>
+        <div onclick="toast('已保存')" style="flex:2.4;text-align:center;padding:8px;background:var(--accent);border-radius:8px;font-size:11px;color:#fff;cursor:pointer;font-weight:500">
+          ${next ? '保存 · 下一个 →' : '保存'}
+        </div>
+      </div>
+      <div style="font-size:9.5px;color:var(--ink-3);text-align:center;margin-top:8px;line-height:1.6">
+        ${next ? '下一个未补录事件' : '本场已无待补录事件'} · 点球员头像即直接保存并跳转
+      </div>
+    </div>`;
+}
+
+function closeSheet() {
+  const root = document.getElementById('sheetRoot');
+  if (root) root.innerHTML = '';
+}
+
+/** 选人即保存 + 自动跳下一个（14 条 checklist 的第 8 条） */
+function pick(choice) {
+  const cur = SESSION.current();
+  if (!cur) return;
+  const r = SESSION.select(cur.id, choice);
+  if (!r.ok) return;
+
+  if (r.resolvedAll || !r.next) {
+    closeSheet();
+    render();
+    toast(r.resolvedAll ? '本场补录完成' : '没有更多待补录事件');
+    return;
+  }
+  openSheet(r.next.id);
+  // 同时刷新底下的列表
+  const body = document.getElementById('screen');
+  const keepScroll = body.scrollTop;
+  refreshListOnly();
+  body.scrollTop = keepScroll;
+}
+
+function doSkip() {
+  const cur = SESSION.current();
+  if (!cur) return;
+  const r = SESSION.skip(cur.id);
+  if (r.next) openSheet(r.next.id);
+  else { closeSheet(); toast('已跳过'); }
+  refreshListOnly();
+}
+
+function doUndo() {
+  const r = SESSION.undo();
+  if (!r.ok) { toast('没有可撤销的操作'); return; }
+  refreshListOnly();
+  if (document.getElementById('sheetRoot').innerHTML) openSheet(r.eventId);
+  toast('已撤销');
+}
+
+/** 只刷新列表与进度，不重建整屏（避免浮层被冲掉） */
+function refreshListOnly() {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = SCREENS.events.render();
+  const body = document.getElementById('screen');
+  if (currentScreen === 'events') {
+    body.innerHTML = tmp.innerHTML;
+    // 浮层是 fixed 定位，重建后需要重新挂
+  }
+  updateNotes();
+}
+
+// ==========================================================================
+// 渲染主控
+// ==========================================================================
+
+function render() {
+  const s = SCREENS[currentScreen] || SCREENS.home;
+  document.getElementById('navTitle').textContent = s.title;
+  document.getElementById('phoneCap').textContent = s.cap || '';
+  document.getElementById('screen').innerHTML = s.render();
+  document.getElementById('screen').scrollTop = 0;
+
+  document.querySelectorAll('.nav button').forEach(b => {
+    b.classList.toggle('on', b.dataset.screen === currentScreen);
+  });
+  updateNotes();
+}
+
+function updateNotes() {
+  const s = SCREENS[currentScreen] || SCREENS.home;
+  document.getElementById('notes').innerHTML =
+    typeof s.notes === 'function' ? s.notes() : (s.notes || '');
+}
+
+function onComboChange() {
+  rebuildData();
+  SCREENS.formation._idx = 0;
+  SCREENS.events._filter = 'ALL';
+  closeSheet();
+  render();
+  renderCombos();
+  toast(`已切换到 ${currentCombo.name}`);
+}
+
+function renderCombos() {
+  document.getElementById('comboBox').innerHTML = COMBOS.map(c => `
+    <button class="${c.key === currentCombo.key ? 'on' : ''}" onclick="pickCombo('${c.key}')">
+      ${esc(c.name)}
+      <small>${esc(c.desc)}</small>
+    </button>`).join('');
+}
+
+function pickCombo(key) {
+  const c = COMBOS.find(x => x.key === key);
+  if (!c) return;
+  currentCombo = c;
+  onComboChange();
+}
+
+const NAV = [
+  ['home', '01', '首页 · 教练工作台'],
+  ['activityNew', '02', '新建活动 · 年龄段/赛制'],
+  ['report', '06', '报告总览'],
+  ['events', '07', '事件补录 ★'],
+  ['heatmap', '09', '投篮热图'],
+  ['formation', '08', '阵型快照'],
+  ['teamStats', '球02', '球队比赛数据'],
+  ['routine', '10', '套路演练报告'],
+  ['realtime', '—', '实时分析（占位）'],
+];
+
+function renderNav() {
+  document.getElementById('navBox').innerHTML = NAV.map(([k, n, l]) => `
+    <button data-screen="${k}" class="${k === currentScreen ? 'on' : ''}" onclick="go('${k}')">
+      <span class="n">${n}</span>${esc(l)}
+    </button>`).join('');
+}
+
+// ---------- 启动 ----------
+rebuildData();
+renderCombos();
+renderNav();
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "name": "basketball-ai-miniprogram",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI 篮球分析小程序 · 前端（F 轨）",
+  "scripts": {
+    "test": "node --test",
+    "test:conformance": "node --test tests/conformance.test.js",
+    "test:watch": "node --test --watch",
+    "fixture": "py ../scripts/gen_conformance_fixture.py",
+    "static": "node ../scripts/static-check.js",
+    "verify": "node ../scripts/verify.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

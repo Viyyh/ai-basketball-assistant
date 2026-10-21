@@ -1,0 +1,11 @@
+<view class="empty">
+  <view class="empty__icon">{{vIcon}}</view>
+  <view class="empty__title">{{vTitle}}</view>
+  <view wx:if="{{vDesc}}" class="empty__desc">{{vDesc}}</view>
+  <button
+    wx:if="{{showAction && vAction}}"
+    class="btn btn--primary empty__btn"
+    bindtap="onAction"
+  >{{vAction}}</button>
+  <slot></slot>
+</view>

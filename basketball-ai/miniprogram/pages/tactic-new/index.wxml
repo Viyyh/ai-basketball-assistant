@@ -1,0 +1,162 @@
+<view class="page">
+
+  <!-- 步骤指示 -->
+  <view class="tn-steps">
+    <view class="tn-step {{step >= 1 ? 'tn-step--on' : ''}}">1 选片段</view>
+    <view class="tn-step__arrow">→</view>
+    <view class="tn-step {{name ? 'tn-step--on' : ''}}">2 命名</view>
+    <view class="tn-step__arrow">→</view>
+    <view class="tn-step {{selectedTags.length ? 'tn-step--on' : ''}}">3 打标签</view>
+  </view>
+
+  <view class="tn-body">
+
+    <!-- ============ Step 1 选片段 ============ -->
+    <view class="sec-label">选择素材来源</view>
+    <view class="seg">
+      <view
+        wx:for="{{sources}}"
+        wx:key="key"
+        class="seg__item {{activeSource === item.key ? 'seg__item--on' : ''}}"
+        data-key="{{item.key}}"
+        bindtap="onTapSource"
+      >{{item.label}}</view>
+    </view>
+
+    <block wx:if="{{activeSource !== 'UPLOAD'}}">
+      <view wx:if="{{activityDisabled}}" class="alert alert--warn">
+        还没有已生成报告的录像可作为素材。
+        <text wx:if="{{processingCount}}">（{{processingCount}} 场正在处理中）</text>
+      </view>
+
+      <view wx:else class="field tn-picker">
+        <view class="field__label">选择录像</view>
+        <picker mode="selector" range="{{activities}}" range-key="label"
+                value="{{activityIndex}}" bindchange="onSelectActivity">
+          <view class="field__input">
+            {{activityIndex >= 0 ? activities[activityIndex].label : '请选择一场比赛或训练'}}
+          </view>
+        </picker>
+      </view>
+
+      <!-- ⭐ 智能推荐片段：把"从 45 分钟里找回合"压缩到 10 秒 -->
+      <block wx:if="{{selectedActivity}}">
+        <view class="sec-label">
+          智能推荐片段
+          <text wx:if="{{loadingRecommend}}" class="tn-rec-loading">分析中…</text>
+        </view>
+
+        <view wx:if="{{loadingRecommend}}" class="tn-rec-empty">
+          AI 正在从本场已识别的快攻与命中回合里挑候选…
+        </view>
+
+        <block wx:elif="{{recommendations.length}}">
+          <view class="alert alert--info tn-rec-hint">
+            根据本场快攻与进球自动推荐。点一下即填入时间区间，不用自己拉时间轴。
+          </view>
+          <view
+            wx:for="{{recommendations}}"
+            wx:key="eventId"
+            class="tn-rec"
+            data-id="{{item.eventId}}"
+            bindtap="onUseRecommendation"
+          >
+            <view class="tn-rec__ph">▶</view>
+            <view class="tn-rec__body">
+              <view class="tn-rec__t">{{item.reason}} · {{item.timeText}}</view>
+              <view class="tn-rec__s">建议名：{{item.suggestedName}} · {{item.durationText}}</view>
+            </view>
+            <view class="tn-rec__act">用这个</view>
+          </view>
+        </block>
+
+        <view wx:else class="tn-rec-empty">
+          本场没有合适的推荐片段，可以手动框选时间范围。
+        </view>
+
+        <!-- 手动框选 -->
+        <view class="sec-label">或手动框选时间段</view>
+        <view class="card tn-range">
+          <view class="tn-range__slider">
+            <view class="tn-range__label">起点</view>
+            <slider min="0" max="{{activityDurationS || 2700}}" value="{{startS}}"
+                    activeColor="#7c3aed" backgroundColor="#e2e8f0" block-size="18"
+                    bindchange="onStartSlider" bindchanging="onStartSlider" />
+            <view class="tn-range__val">{{startText}}</view>
+          </view>
+          <view class="tn-range__slider">
+            <view class="tn-range__label">终点</view>
+            <slider min="0" max="{{activityDurationS || 2700}}" value="{{endS}}"
+                    activeColor="#7c3aed" backgroundColor="#e2e8f0" block-size="18"
+                    bindchange="onEndSlider" bindchanging="onEndSlider" />
+            <view class="tn-range__val">{{endText}}</view>
+          </view>
+
+          <view class="row row--between tn-range__sum">
+            <text>片段时长 <text class="tn-strong">{{durationText}}</text></text>
+            <text class="linkbtn" bindtap="onSwapTime">交换起止</text>
+          </view>
+
+          <view wx:if="{{tooLong}}" class="alert alert--warn tn-range__warn">
+            战术卡建议控制在 2 分钟内，过长不利于给球员讲解。仍可保存。
+          </view>
+          <view wx:if="{{overHardLimit}}" class="alert alert--err tn-range__warn">
+            已超过 3 分钟，确定要作为一个战术卡保存吗？建议拆成几段。
+          </view>
+        </view>
+
+        <view wx:if="{{overlapWarning}}" class="alert alert--warn">{{overlapWarning}}</view>
+      </block>
+    </block>
+
+    <view wx:else class="alert alert--info">
+      本地上传第一版暂未开放。可以先把视频传到某场活动里，再从那里切片。
+    </view>
+
+    <!-- ============ Step 2 命名 ============ -->
+    <view class="sec-label">战术名 <text class="req">*</text></view>
+    <view class="field">
+      <input class="field__input" value="{{name}}" bindinput="onNameInput"
+             placeholder="如：挡拆外弹 · 1-5 号位" placeholder-class="field__placeholder" />
+    </view>
+
+    <view class="sec-label">战术要点（可选）</view>
+    <view class="field">
+      <textarea class="field__input tn-note" value="{{note}}" bindinput="onNoteInput"
+                placeholder="如：4 号位给 5 号位做掩护后外弹到 45 度，接球投三分"
+                placeholder-class="field__placeholder" maxlength="200" auto-height />
+    </view>
+
+    <!-- ============ Step 3 标签 ============ -->
+    <view class="sec-label">标签（最多 2 个）</view>
+    <view class="tn-tags">
+      <view
+        wx:for="{{presetTags}}"
+        wx:key="*this"
+        class="fchip {{selectedTags.indexOf(item) >= 0 ? 'fchip--on' : ''}}"
+        data-tag="{{item}}"
+        bindtap="onToggleTag"
+      >{{selectedTags.indexOf(item) >= 0 ? '✓ ' : ''}}{{item}}</view>
+    </view>
+
+    <view class="row row--gap1 tn-custom">
+      <view class="field flex1" style="margin-bottom:0">
+        <input class="field__input" value="{{customTagInput}}" bindinput="onCustomTagInput"
+               placeholder="自定义标签" placeholder-class="field__placeholder" />
+      </view>
+      <view class="btn btn--ghost btn--sm" bindtap="onAddCustomTag">添加</view>
+    </view>
+
+  </view>
+
+  <!-- 提交 -->
+  <view class="tn-submit">
+    <view class="row row--gap2">
+      <view class="btn btn--ghost flex1" bindtap="onCancel">取消</view>
+      <view class="btn btn--primary flex1" bindtap="onSubmit">
+        {{submitting ? '保存中…' : '保存战术卡'}}
+      </view>
+    </view>
+  </view>
+
+</view>

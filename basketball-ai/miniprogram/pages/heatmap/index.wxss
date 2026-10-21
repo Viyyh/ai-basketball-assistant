@@ -1,0 +1,68 @@
+.hm-loading { padding: 160rpx 0; text-align: center; color: var(--ink-3); font-size: var(--fs-sm); }
+.hm-scope { padding: var(--sp-2) var(--sp-3) 0; }
+.hm-modes { margin: var(--sp-2) var(--sp-3); }
+.hm-note { margin: 0 var(--sp-3) var(--sp-2); }
+.hm-court { padding: 0 var(--sp-3); }
+.hm-alert { margin: var(--sp-2) var(--sp-3) 0; }
+
+/* 图例 */
+.hm-legend {
+  display: flex; align-items: center; gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3) 0;
+  font-size: var(--fs-xs); color: var(--ink-3);
+}
+.hm-legend__item { display: flex; align-items: center; gap: 6rpx; }
+.hm-legend__item--btn { color: var(--accent); }
+.hm-legend__spacer { flex: 1; }
+.hm-legend__bar {
+  flex: 1; height: 10rpx; border-radius: 5rpx;
+  background: linear-gradient(90deg, #eab308, #f59e0b, #ef4444);
+}
+.hm-dot { width: 16rpx; height: 16rpx; border-radius: 50%; }
+.hm-dot--made { background: var(--ok); }
+.hm-dot--miss { background: var(--err); }
+
+/* 分区统计 */
+.hm-zones {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  gap: 6rpx; padding: 0 var(--sp-3);
+}
+.hm-zone {
+  background: var(--card); border: 2rpx solid var(--line-2);
+  border-radius: var(--r-md); padding: var(--sp-2) 2rpx; text-align: center;
+}
+.hm-zone--on { border-color: var(--accent); background: var(--accent-2); }
+.hm-zone--empty { opacity: 0.5; }
+.hm-zone__label { font-size: 18rpx; color: var(--ink-3); }
+.hm-zone--on .hm-zone__label { color: var(--accent); }
+.hm-zone__val { font-size: var(--fs-sm); font-weight: 600; color: var(--ink); margin-top: 4rpx; }
+.hm-zone__rate { font-size: 18rpx; color: var(--ink-3); margin-top: 2rpx; }
+.hm-zone-hint {
+  padding: var(--sp-1) var(--sp-3) 0;
+  font-size: 18rpx; color: var(--ink-3); line-height: 1.6;
+}
+
+.hm-summary { padding: var(--sp-3); }
+.stat__sub { font-size: 18rpx; color: var(--ink-3); margin-top: 2rpx; }
+
+/* 筛选 */
+.hm-filters { padding: 0 var(--sp-3); }
+.hm-frow { white-space: nowrap; display: flex; margin-bottom: var(--sp-1); }
+.hm-frow .fchip { margin-right: var(--sp-1); flex-shrink: 0; }
+.hm-frow--static { display: flex; align-items: center; justify-content: space-between; }
+.hm-switch {
+  display: flex; align-items: center; gap: var(--sp-1);
+  font-size: var(--fs-sm); color: var(--ink-2);
+}
+.hm-switch switch { transform: scale(0.8); }
+
+.hm-tip {
+  padding: var(--sp-3) var(--sp-4) var(--sp-6);
+  font-size: var(--fs-xs); color: var(--ink-3); text-align: center; line-height: 1.7;
+}
+
+/* 长按取点浮层 */
+.hm-sheet__empty {
+  padding: var(--sp-5) 0; text-align: center;
+  font-size: var(--fs-sm); color: var(--ink-3);
+}

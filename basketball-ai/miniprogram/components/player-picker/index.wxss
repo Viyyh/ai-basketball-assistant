@@ -1,0 +1,94 @@
+.picker { width: 100%; }
+.picker--disabled { opacity: 0.5; pointer-events: none; }
+
+.picker__grid {
+  display: grid;
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-2);
+}
+
+.pp {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border: 2rpx dashed var(--line);
+  border-radius: var(--r-md);
+  background: var(--card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4rpx;
+  padding: 6rpx 2rpx;
+  box-sizing: border-box;
+}
+
+.pp--on {
+  border-style: solid;
+  border-color: var(--accent);
+  background: var(--accent-2);
+}
+
+.pp--special {
+  border-color: var(--line);
+  background: var(--fill);
+}
+.pp--special.pp--on {
+  border-color: var(--ink-2);
+  background: var(--fill-2);
+}
+
+/* 上一次选过的人 */
+.pp--last { border-color: var(--warn); }
+.pp__last-badge {
+  position: absolute;
+  top: -10rpx;
+  right: -6rpx;
+  background: var(--warn);
+  color: #fff;
+  font-size: 16rpx;
+  line-height: 1.4;
+  padding: 0 8rpx;
+  border-radius: var(--r-pill);
+}
+
+.pp__avatar {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  background: var(--fill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--ink-2);
+}
+.pp--on .pp__avatar { background: var(--accent); color: #fff; }
+.pp--special .pp__avatar { background: var(--fill-2); color: var(--ink-3); }
+
+.pp__name {
+  font-size: 18rpx;
+  color: var(--ink-2);
+  text-align: center;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+.pp--on .pp__name { color: var(--accent); font-weight: 600; }
+
+.pp__pos {
+  font-size: 16rpx;
+  color: var(--ink-3);
+  line-height: 1.2;
+}
+
+.picker__note {
+  font-size: var(--fs-xs);
+  color: var(--ink-3);
+  line-height: 1.6;
+  background: var(--fill);
+  border-radius: var(--r-sm);
+  padding: 6rpx var(--sp-2);
+}

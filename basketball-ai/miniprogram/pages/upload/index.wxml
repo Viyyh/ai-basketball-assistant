@@ -1,0 +1,112 @@
+<view class="page">
+
+  <view class="up-hd">
+    <view class="up-hd__name">{{activityName}}</view>
+    <view class="up-hd__meta" wx:if="{{totalChunks}}">{{totalChunks}} 个分片 · 每片 8 MB</view>
+  </view>
+
+  <!-- ============ 上传中 ============ -->
+  <block wx:if="{{status === 'uploading' || status === 'paused'}}">
+
+    <!-- 进度环：第一优先级信息 -->
+    <view class="ring">
+      <view class="ring__circle" style="background: conic-gradient(var(--accent) {{percent * 3.6}}deg, var(--line-2) 0deg);">
+        <view class="ring__inner">
+          <view class="ring__pct">{{percent}}%</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 剩余时间：第二优先级 -->
+    <view class="up-eta">
+      <view class="up-eta__main">已上传 {{uploadedText}} / {{totalText}}</view>
+      <view class="up-eta__sub">
+        {{etaText}}
+        <text wx:if="{{rateText}}" class="up-eta__rate"> · {{rateText}}</text>
+      </view>
+      <view wx:if="{{etaUnstable}}" class="up-eta__warn">网络波动中，估算可能不准</view>
+    </view>
+
+    <!-- 「可以放心离开」：第三优先级，消除等待焦虑 -->
+    <view class="card card--ok up-safe">
+      <view class="card__title" style="color:#14532d">✓ 可以放心离开小程序</view>
+      <view class="card__body">
+        上传会在后台继续。断网会自动重试，进度不会丢。完成后微信通知你。
+      </view>
+    </view>
+
+    <view wx:if="{{status === 'paused'}}" class="alert alert--warn">
+      已暂停。断点已保存，随时可以继续。
+    </view>
+
+    <view wx:if="{{networkBlocked}}" class="alert alert--warn">
+      当前为 {{networkType}} 网络，你设置了「仅 Wi-Fi 上传」，已自动暂停。
+    </view>
+
+    <view class="field up-opt">
+      <view class="row row--between">
+        <view>
+          <view class="field__label" style="margin-bottom:0">仅 Wi-Fi 上传</view>
+          <view class="t-xs">移动网络下可能产生流量费用</view>
+        </view>
+        <switch checked="{{wifiOnly}}" color="#2563eb" bindchange="onToggleWifiOnly" />
+      </view>
+    </view>
+
+    <view class="up-chunks">
+      分片进度 {{uploadedChunks}} / {{totalChunks}}
+      <text wx:if="{{interruptionCount}}" class="t-xs"> · 已中断 {{interruptionCount}} 次并自动续传</text>
+    </view>
+
+    <view class="row row--gap2 up-acts">
+      <view wx:if="{{status === 'uploading'}}" class="btn btn--ghost flex1" bindtap="onPause">暂停</view>
+      <view wx:else class="btn btn--primary flex1" bindtap="onResume">继续上传</view>
+      <view class="btn btn--danger-ghost flex1" bindtap="onCancel">中止上传</view>
+    </view>
+
+    <view class="up-note">
+      中止不会删除录像：本地保留 24 小时，可从首页「未上传」入口找回
+    </view>
+  </block>
+
+  <!-- ============ 完成 ============ -->
+  <block wx:elif="{{status === 'done'}}">
+    <view class="up-done">
+      <view class="up-done__icon">✓</view>
+      <view class="up-done__title">上传完成</view>
+      <view class="up-done__desc">已进入云端处理队列，正在跳转到处理进度…</view>
+    </view>
+  </block>
+
+  <!-- ============ 失败 ============ -->
+  <block wx:elif="{{status === 'failed'}}">
+    <view class="up-fail">
+      <view class="up-fail__icon">!</view>
+      <view class="up-fail__title">上传未完成</view>
+      <view class="up-fail__desc">{{errorText || '网络异常，已保留断点'}}</view>
+      <view class="row row--gap2" style="margin-top:32rpx">
+        <view class="btn btn--primary flex1" bindtap="onRetry">重试</view>
+        <view class="btn btn--ghost flex1" bindtap="onGoHome">回首页</view>
+      </view>
+      <view class="up-note">已上传的分片不会浪费，重试会从缺口继续</view>
+    </view>
+  </block>
+
+  <!-- ============ 已取消 ============ -->
+  <block wx:elif="{{status === 'cancelled'}}">
+    <view class="up-fail">
+      <view class="up-fail__icon up-fail__icon--muted">–</view>
+      <view class="up-fail__title">已中止上传</view>
+      <view class="up-fail__desc">
+        录像仍保留在手机本地 24 小时。可从首页「未上传」入口继续上传。
+      </view>
+      <view class="btn btn--primary" style="margin-top:32rpx" bindtap="onGoHome">回首页</view>
+    </view>
+  </block>
+
+  <!-- ============ 准备中 ============ -->
+  <block wx:else>
+    <view class="up-loading">正在准备上传…</view>
+  </block>
+
+</view>

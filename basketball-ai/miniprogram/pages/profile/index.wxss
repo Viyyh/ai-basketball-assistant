@@ -1,0 +1,65 @@
+.pf-head { margin: var(--sp-3); padding: var(--sp-4) var(--sp-3); }
+.pf-head__row { display: flex; align-items: center; gap: var(--sp-3); }
+.pf-head__avatar {
+  width: 96rpx; height: 96rpx; border-radius: 50%;
+  background: #334155; color: #cbd5e1;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36rpx; font-weight: 600; flex-shrink: 0;
+}
+.pf-head__main { flex: 1; min-width: 0; }
+.pf-head__name { font-size: 32rpx; font-weight: 600; color: #fff; }
+.pf-head__sub { font-size: var(--fs-xs); color: #94a3b8; margin-top: 4rpx; }
+.pf-head__edit { color: #94a3b8; font-size: 32rpx; padding: 0 var(--sp-1); }
+
+.pf-todo { margin: 0 var(--sp-3) var(--sp-2); }
+
+.pf-group {
+  margin: 0 var(--sp-3) var(--sp-2);
+  background: var(--card);
+  border: 2rpx solid var(--line-2);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+
+.pf-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--sp-3);
+  border-bottom: 2rpx solid var(--line-2);
+}
+.pf-row:last-child { border-bottom: none; }
+.pf-row--col { display: block; }
+.pf-row__label { font-size: var(--fs-md); color: var(--ink); flex: 1; min-width: 0; }
+.pf-row__label--danger { color: var(--err); }
+.pf-row__sub { font-size: var(--fs-xs); color: var(--ink-3); margin-top: 4rpx; line-height: 1.5; }
+.pf-row__val { font-size: var(--fs-sm); color: var(--ink-3); flex-shrink: 0; margin-left: var(--sp-2); }
+.pf-row switch { transform: scale(0.85); }
+
+.pf-hint {
+  padding: 0 var(--sp-4) var(--sp-2);
+  font-size: var(--fs-xs); color: var(--ink-3); line-height: 1.6;
+}
+
+.pf-verify { margin: 0 var(--sp-3) var(--sp-2); }
+.pf-verify__list { margin: var(--sp-1) 0; }
+.pf-verify__item {
+  font-size: var(--fs-xs); color: var(--warn-ink);
+  line-height: 1.7; opacity: 0.9;
+}
+
+.pf-local { margin-top: var(--sp-2); }
+.pf-local__item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--sp-1) 0;
+  border-top: 2rpx solid var(--line-2);
+}
+.pf-local__name {
+  font-size: var(--fs-sm); color: var(--ink-2); flex: 1; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pf-local__act { font-size: var(--fs-sm); color: var(--accent); flex-shrink: 0; margin-left: var(--sp-2); }
+
+.pf-footer {
+  padding: var(--sp-4) var(--sp-4) var(--sp-6);
+  font-size: var(--fs-xs); color: var(--ink-3);
+  line-height: 1.8; text-align: center;
+}

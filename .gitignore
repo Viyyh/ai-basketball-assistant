@@ -1,0 +1,31 @@
+# macOS
+.DS_Store
+._*
+
+# Node
+node_modules/
+dist/
+*.log
+npm-debug.log*
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# 环境与密钥
+.env
+.env.*
+!.env.example
+
+# 本地构建产物
+*.local.json
+/tmp/
+/output/
+
+# 审阅截图（临时产物，不入库）
+.dsh-review/

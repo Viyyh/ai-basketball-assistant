@@ -1,0 +1,228 @@
+<view class="page">
+
+  <!-- 模板选择。切换模板时年龄段与赛制保留不变 -->
+  <view class="sec-label">选择模板</view>
+  <view class="seg">
+    <view
+      wx:for="{{templateOptions}}"
+      wx:key="value"
+      class="seg__item {{template === item.value ? 'seg__item--on' : ''}}"
+      data-value="{{item.value}}"
+      bindtap="onPickTemplate"
+    >{{item.label}}</view>
+  </view>
+
+  <view class="form">
+
+    <!-- 基本信息 -->
+    <view class="field">
+      <view class="field__label">活动名称</view>
+      <input class="field__input" value="{{name}}" data-field="name" bindinput="onInput"
+             placeholder="留空则自动生成" placeholder-class="field__placeholder" />
+    </view>
+
+    <view class="field">
+      <view class="field__label">日期</view>
+      <picker mode="date" value="{{playedAt}}" data-field="playedAt" bindchange="onPickerDate">
+        <view class="field__input">{{playedAt}}</view>
+      </picker>
+    </view>
+
+    <view class="field">
+      <view class="field__label">场地</view>
+      <input class="field__input" value="{{venue}}" data-field="venue" bindinput="onInput"
+             placeholder="如：市体育中心 1 号场" placeholder-class="field__placeholder" />
+    </view>
+
+    <view wx:if="{{isMatch}}" class="field">
+      <view class="field__label">对手</view>
+      <input class="field__input" value="{{opponentName}}" data-field="opponentName" bindinput="onInput"
+             placeholder="如：育才中学 U16" placeholder-class="field__placeholder" />
+    </view>
+
+    <!-- ============ 年龄段（必填，PRD 决策 10） ============ -->
+    <view class="sec-label">年龄段 <text class="req">*</text></view>
+    <view class="optgrid optgrid--5">
+      <view
+        wx:for="{{ageOptions}}"
+        wx:key="value"
+        class="opt {{ageGroup === item.value ? 'opt--on' : ''}}"
+        data-value="{{item.value}}"
+        bindtap="onPickAge"
+      >{{item.label}}</view>
+    </view>
+    <!-- 选中后立即显示"这会影响什么"：让教练理解而非机械点选 -->
+    <view wx:if="{{ageHint}}" class="hint">{{ageHint}}</view>
+
+    <!-- ============ 赛制（必填，PRD 决策 11） ============ -->
+    <view class="sec-label">赛制 <text class="req">*</text></view>
+    <view class="optgrid optgrid--4">
+      <view
+        wx:for="{{formatOptions}}"
+        wx:key="value"
+        class="opt {{format === item.value ? 'opt--on' : ''}}"
+        data-value="{{item.value}}"
+        bindtap="onPickFormat"
+      >{{item.label}}</view>
+    </view>
+    <!-- 3对3 / 4对4 未选场地时提示转橙 -->
+    <view wx:if="{{formatHint}}" class="hint {{formatHintIsWarn ? 'hint--warn' : ''}}">{{formatHint}}</view>
+
+    <!-- 4对4 与自定义：必须追问全场还是半场，否则 AI 无法标定 -->
+    <block wx:if="{{needCourtChoice}}">
+      <view class="sec-label">场地类型 <text class="req">*</text></view>
+      <view class="optgrid optgrid--4">
+        <view
+          wx:for="{{courtOptions}}"
+          wx:key="value"
+          class="opt {{courtType === item.value ? 'opt--on' : ''}}"
+          data-value="{{item.value}}"
+          bindtap="onPickCourt"
+        >{{item.label}}</view>
+      </view>
+      <view wx:if="{{format === 'CUSTOM'}}" class="field">
+        <view class="field__label">每队人数</view>
+        <input class="field__input" type="number" value="{{customPlayers}}"
+               data-field="customPlayers" bindinput="onCustomPlayersChange" />
+      </view>
+    </block>
+
+    <!-- 节次（3对3 固定单节，不可改） -->
+    <block wx:if="{{!is3v3 && ageGroup}}">
+      <view class="sec-label">节次设置</view>
+      <view class="row row--gap2">
+        <view class="field flex1" style="margin-bottom:0">
+          <view class="field__label">节数</view>
+          <input class="field__input" type="number" value="{{periodCount}}"
+                 data-field="periodCount" bindinput="onPeriodChange" />
+        </view>
+        <view class="field flex1" style="margin-bottom:0">
+          <view class="field__label">每节分钟</view>
+          <input class="field__input" type="digit" value="{{periodMinutes}}"
+                 data-field="periodMinutes" bindinput="onPeriodChange" />
+        </view>
+      </view>
+      <view class="hint">
+        <text class="hint__sub">按 {{ageOptions[0] ? '' : ''}}所选年龄段预填，可按实际联赛规则修改</text>
+      </view>
+    </block>
+
+    <!-- ============ 名单（人数随赛制联动） ============ -->
+    <block wx:if="{{isScrimmage}}">
+      <!-- 团队对抗：红蓝分组 -->
+      <view class="sec-label">分组名单（每队 {{needPlayers}} 人）</view>
+      <view class="seg">
+        <view class="seg__item {{activeGroup === 'red' ? 'seg__item--on' : ''}}"
+              data-side="red" bindtap="onSwitchGroup">红队 {{groups.red.length}}/{{needPlayers}}</view>
+        <view class="seg__item {{activeGroup === 'blue' ? 'seg__item--on' : ''}}"
+              data-side="blue" bindtap="onSwitchGroup">蓝队 {{groups.blue.length}}/{{needPlayers}}</view>
+      </view>
+      <view class="pgrid">
+        <view
+          wx:for="{{roster}}"
+          wx:key="id"
+          class="pcell {{(activeGroup === 'red' ? groups.red : groups.blue).indexOf(item.id) >= 0 ? 'pcell--on' : ''}} {{(activeGroup === 'red' ? groups.blue : groups.red).indexOf(item.id) >= 0 ? 'pcell--other' : ''}}"
+          data-id="{{item.id}}"
+          data-slot="group"
+          bindtap="onTogglePlayer"
+        >
+          <view class="pcell__num">{{item.number}}</view>
+          <view class="pcell__name">{{item.name}}</view>
+        </view>
+      </view>
+    </block>
+
+    <block wx:else>
+      <view class="row row--between">
+        <view class="sec-label" style="margin-bottom:0">首发名单（{{starters.length}}/{{needPlayers}} 人）</view>
+        <view wx:if="{{canCopyLast}}" class="linkbtn" bindtap="onCopyLast">从上一场复制</view>
+      </view>
+      <view class="hint" wx:if="{{canCopyLast}}">
+        <text class="hint__sub">上次：{{lastParamsText}}，复制会连同年龄段与赛制一起带出</text>
+      </view>
+
+      <view class="pgrid">
+        <view
+          wx:for="{{roster}}"
+          wx:key="id"
+          class="pcell {{starters.indexOf(item.id) >= 0 ? 'pcell--on' : ''}}"
+          data-id="{{item.id}}"
+          data-slot="starter"
+          bindtap="onTogglePlayer"
+        >
+          <view class="pcell__num">{{item.number}}</view>
+          <view class="pcell__name">{{item.name}}</view>
+          <view class="pcell__pos">{{item.position}}</view>
+        </view>
+      </view>
+
+      <view class="sec-label">替补名单（可选）</view>
+      <view class="pgrid">
+        <view
+          wx:for="{{roster}}"
+          wx:key="id"
+          class="pcell pcell--sm {{bench.indexOf(item.id) >= 0 ? 'pcell--on' : ''}} {{starters.indexOf(item.id) >= 0 ? 'pcell--disabled' : ''}}"
+          data-id="{{item.id}}"
+          data-slot="bench"
+          bindtap="onTogglePlayer"
+        >
+          <view class="pcell__num">{{item.number}}</view>
+          <view class="pcell__name">{{item.name}}</view>
+        </view>
+      </view>
+    </block>
+
+    <!-- 赛制切换导致的人员调整：明确告知 + 可撤销，绝不静默丢弃 -->
+    <view wx:if="{{reassignNotice}}" class="alert alert--warn">
+      <view>{{reassignNotice.text}}</view>
+      <view class="linkbtn linkbtn--inline" bindtap="onUndoReassign">撤销</view>
+    </view>
+
+    <!-- ============ 套路清单（仅套路演练） ============ -->
+    <block wx:if="{{isRoutine}}">
+      <view class="sec-label">套路清单（最多 8 个）</view>
+      <view class="row row--gap1">
+        <view class="field flex1" style="margin-bottom:0">
+          <input class="field__input" value="{{routineInput}}" bindinput="onRoutineInput"
+                 placeholder="套路名称" placeholder-class="field__placeholder" />
+        </view>
+        <view class="field" style="margin-bottom:0;width:140rpx">
+          <input class="field__input" type="number" value="{{routinePlannedInput}}"
+                 bindinput="onRoutinePlannedInput" placeholder="次数" placeholder-class="field__placeholder" />
+        </view>
+        <view class="btn btn--primary btn--sm" bindtap="onAddRoutine">添加</view>
+      </view>
+
+      <view class="presets">
+        <view
+          wx:for="{{routinePresets}}"
+          wx:key="*this"
+          class="fchip"
+          data-name="{{item}}"
+          bindtap="onAddPresetRoutine"
+        >+ {{item}}</view>
+      </view>
+
+      <view wx:if="{{routines.length}}" class="routine-list">
+        <view wx:for="{{routines}}" wx:key="id" class="routine">
+          <view class="routine__name">{{item.name}}</view>
+          <view class="routine__plan">{{item.planned ? '预设 ' + item.planned + ' 次' : '未设次数'}}</view>
+          <view class="routine__del" data-id="{{item.id}}" bindtap="onRemoveRoutine">✕</view>
+        </view>
+      </view>
+      <view wx:else class="hint">
+        <text class="hint__sub">不建清单也能录，但报告只能按时间轴展示，无法按套路分段统计成功率</text>
+      </view>
+    </block>
+
+  </view>
+
+  <!-- 提交 -->
+  <view class="submit-bar">
+    <button class="btn btn--primary btn--block" bindtap="onSubmit" disabled="{{submitting}}">
+      {{submitting ? '创建中…' : '下一步 · 开始录制'}}
+    </button>
+    <view class="submit-note">年龄段与赛制必填，它们决定 AI 的场地标定与计分口径</view>
+  </view>
+
+</view>

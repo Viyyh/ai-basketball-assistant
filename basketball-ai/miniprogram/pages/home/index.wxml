@@ -1,0 +1,104 @@
+<view class="page">
+
+  <!-- 顶部问候 -->
+  <view class="hd">
+    <view class="hd__left">
+      <view class="hd__greet">{{greeting}}，{{coachName}}</view>
+      <view class="hd__sub">本周已录 {{weekCount}} 场</view>
+    </view>
+    <view class="hd__avatar" bindtap="onGoTeam">队</view>
+  </view>
+
+  <!-- 主 CTA：开始新录制 -->
+  <view class="cta" bindtap="onNewRecording" hover-class="cta--hover">
+    <view class="cta__main">
+      <view class="cta__title">开始新录制</view>
+      <view class="cta__sub">比赛 · 团队对抗 · 套路演练</view>
+    </view>
+    <!-- 实时入口灰显占位（PRD 决策 3）：不新开一屏，只做角标 -->
+    <view class="cta__realtime" catchtap="onTapRealtime">实时分析 · 内测中</view>
+  </view>
+
+  <!-- 待补录提醒：产品闭环的命脉，必须显眼 -->
+  <view
+    wx:if="{{pending}}"
+    class="pending {{pendingOverdue ? 'pending--overdue' : ''}}"
+    bindtap="onGoPending"
+    hover-class="pending--hover"
+  >
+    <view class="pending__icon">{{pendingOverdue ? '!' : '⚠'}}</view>
+    <view class="pending__body">
+      <view class="pending__title">
+        <block wx:if="{{pendingOverdue}}">{{pendingCount}} 场报告严重逾期（最久 {{pendingDays}} 天）</block>
+        <block wx:else>{{pendingCount}} 场报告待补录</block>
+      </view>
+      <view class="pending__desc">
+        最旧：{{pending.dateText}} {{pending.name}} · 还差 {{pending.eventCount - pending.attributedCount}} 个事件
+      </view>
+    </view>
+    <view class="pending__arrow">›</view>
+  </view>
+
+  <!-- 未上传的本地视频：取消 ≠ 删除，24 小时内可找回 -->
+  <view wx:if="{{pendingLocal.length}}" class="local-box">
+    <view class="local-box__title">有 {{pendingLocal.length}} 段录像未上传完</view>
+    <view
+      wx:for="{{pendingLocal}}"
+      wx:key="filePath"
+      class="local-box__item"
+    >
+      <view class="local-box__name">{{item.activityName || '未命名录像'}}</view>
+      <view class="local-box__acts">
+        <text class="local-box__act" data-path="{{item.filePath}}" data-activityid="{{item.activityId}}" bindtap="onResumeLocal">继续上传</text>
+        <text class="local-box__act local-box__act--dim" data-path="{{item.filePath}}" bindtap="onDismissLocal">忽略</text>
+      </view>
+    </view>
+    <view class="local-box__note">本地录像保留 24 小时，超时后需重新录制</view>
+  </view>
+
+  <!-- 最近活动 -->
+  <view class="sec-label">最近活动</view>
+
+  <view wx:if="{{loading}}" class="loading">加载中…</view>
+
+  <block wx:elif="{{recent.length}}">
+    <view
+      wx:for="{{recent}}"
+      wx:key="id"
+      class="act"
+      data-id="{{item.id}}"
+      data-status="{{item.status}}"
+      bindtap="onTapActivity"
+      hover-class="act--hover"
+    >
+      <view class="act__badge act__badge--{{item.won ? 'win' : (item.hasScore ? 'loss' : 'na')}}">
+        <block wx:if="{{!item.hasScore}}">·</block>
+        <block wx:elif="{{item.won}}">胜</block>
+        <block wx:else>负</block>
+      </view>
+
+      <view class="act__body">
+        <view class="act__name">{{item.dateText}} · {{item.name}}</view>
+        <view class="act__meta">
+          {{item.templateText}} · {{item.durationText}}
+          <text wx:if="{{item.hasScore}}" class="act__score"> · {{item.scoreFor}}:{{item.scoreAgainst}}</text>
+        </view>
+      </view>
+
+      <status-tag
+        wx:if="{{item.isPending}}"
+        status="{{pendingOverdue ? 'overdue' : 'pending'}}"
+      />
+      <status-tag wx:elif="{{item.isProcessing}}" status="processing" />
+      <status-tag wx:elif="{{item.isComplete}}" status="done" />
+      <status-tag wx:else status="placeholder" text="{{item.status}}" />
+    </view>
+  </block>
+
+  <empty-state
+    wx:else
+    scene="noGames"
+    bind:action="onNewRecording"
+  />
+
+</view>

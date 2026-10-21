@@ -1,0 +1,39 @@
+<view class="clip">
+  <video
+    wx:if="{{src && !failed}}"
+    id="clip-video"
+    class="clip__video"
+    src="{{src}}"
+    autoplay="{{autoplay}}"
+    loop="{{loop}}"
+    controls="{{false}}"
+    show-center-play-btn="{{false}}"
+    object-fit="contain"
+    bindtimeupdate="onTimeUpdate"
+    bindended="onEnded"
+    binderror="onError"
+    bindloadedmetadata="onLoaded"
+  />
+
+  <view wx:elif="{{failed}}" class="clip__fallback clip__fallback--err">
+    <view class="clip__fallback-icon">!</view>
+    <view>片段加载失败</view>
+    <view class="clip__fallback-sub">已记录，可稍后重试；不影响补录</view>
+  </view>
+
+  <view wx:else class="clip__fallback">
+    <view class="clip__fallback-icon">▶</view>
+    <view>暂无片段</view>
+  </view>
+
+  <view wx:if="{{sourceTag}}" class="clip__tag">{{sourceTag}}</view>
+
+  <view wx:if="{{showControls && src && !failed}}" class="clip__bar">
+    <view class="clip__track">
+      <view class="clip__prog" style="width:{{progressPct}}%"></view>
+    </view>
+    <view class="clip__time">{{durationText}}</view>
+  </view>
+
+  <view wx:if="{{loading && src && !failed}}" class="clip__loading">加载中…</view>
+</view>

@@ -1,0 +1,33 @@
+<view
+  class="ev {{resolved ? 'ev--done' : 'ev--pending'}}"
+  bindtap="onTap"
+  hover-class="ev--hover"
+>
+  <view class="ev__thumb">
+    <image wx:if="{{thumb}}" class="ev__thumb-img" src="{{thumb}}" mode="aspectFill" />
+    <view wx:else class="ev__thumb-ph">{{kindIcon}}</view>
+    <view wx:if="{{made !== null}}" class="ev__made ev__made--{{made ? 'y' : 'n'}}">
+      {{made ? '✓' : '✕'}}
+    </view>
+  </view>
+
+  <view class="ev__body">
+    <view class="ev__title">{{titleText}}</view>
+    <view class="ev__time">{{timeText}}</view>
+    <view wx:if="{{metaText}}" class="ev__meta">{{metaText}}</view>
+  </view>
+
+  <view class="ev__who">
+    <block wx:if="{{resolved}}">
+      <view class="ev__name">{{display}}</view>
+      <status-tag wx:if="{{isUnknown}}" status="unknown" size="sm" />
+      <status-tag wx:elif="{{isNotOurTeam}}" status="notOurTeam" size="sm" />
+      <status-tag wx:elif="{{event.skipped}}" status="skipped" size="sm" />
+      <status-tag wx:else status="done" size="sm" />
+    </block>
+    <block wx:else>
+      <view class="ev__name ev__name--na">未补录</view>
+      <status-tag status="pending" size="sm" />
+    </block>
+  </view>
+</view>

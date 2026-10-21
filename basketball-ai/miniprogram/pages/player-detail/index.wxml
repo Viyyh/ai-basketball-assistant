@@ -1,0 +1,135 @@
+<view class="page">
+
+  <view wx:if="{{loading}}" class="pd-loading">加载球员数据…</view>
+
+  <block wx:elif="{{notFound}}">
+    <empty-state title="找不到这名球员" desc="球员可能已被移除。" action="返回球员库" bind:action="onBack" />
+  </block>
+
+  <block wx:else>
+
+    <!-- 球员头卡 -->
+    <view class="card pd-head" wx:if="{{player}}">
+      <view class="pd-head__row">
+        <view class="pd-head__num">{{player.number}}</view>
+        <view class="pd-head__main">
+          <view class="pd-head__name">{{player.name}}</view>
+          <view class="pd-head__sub">
+            {{player.position}} · {{player.height}} cm · 惯用{{player.handedness}}手
+          </view>
+          <view class="pd-head__tags">
+            <text class="chip chip--player">{{player.isStarter ? '首发' : '替补'}}</text>
+            <text class="chip" wx:if="{{player.gamesPlayed}}">{{player.gamesPlayed}} 场出场</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 口径切换：5对5 与 3对3 的数据不合并 -->
+    <block wx:if="{{scopes.length > 1}}">
+      <view class="sec-label">数据口径（不可合并）</view>
+      <view class="pd-scopes">
+        <view
+          wx:for="{{scopes}}"
+          wx:key="label"
+          class="fchip {{activeScope.label === item.label ? 'fchip--on' : ''}}"
+          data-index="{{index}}"
+          bindtap="onTapScope"
+        >{{item.label}}</view>
+      </view>
+    </block>
+
+    <view wx:if="{{scopeText}}" class="scope scope--strong pd-scope">当前口径：{{scopeText}}</view>
+
+    <!-- 赛季场均 -->
+    <block wx:if="{{metrics.length}}">
+      <view class="sec-label">赛季场均</view>
+      <view class="statgrid statgrid--4 pd-metrics">
+        <view wx:for="{{metrics}}" wx:key="key" class="stat">
+          <view class="stat__n {{item.value === '—' ? 'stat__n--na' : ''}}">{{item.value}}</view>
+          <view class="stat__l">{{item.label}}</view>
+        </view>
+      </view>
+      <view wx:if="{{metricsNote}}" class="pd-note">{{metricsNote}}</view>
+    </block>
+
+    <!-- 投篮分布：弧线半径由 params 驱动，本页不硬编码 -->
+    <block wx:if="{{shotParams && shotDots.length}}">
+      <view class="sec-label">个人投篮分布</view>
+      <view class="pd-court">
+        <court-svg
+          params="{{shotParams}}"
+          shots="{{shotDots}}"
+          showScope="{{false}}"
+          height="{{560}}"
+          scale="{{34}}"
+        />
+      </view>
+      <!-- 口径标注：3对3 的出手点全在半场，不标注会严重误导 -->
+      <view class="pd-court-note">
+        {{scopeText}} · 三分线 {{shotParams.three_point_radius_m}} m（{{shotParams.three_point_geometry === 'PURE_ARC' ? '纯弧线' : '弧线+底角'}}）
+      </view>
+
+      <view class="pd-legend">
+        <view class="pd-legend__item"><view class="pd-dot pd-dot--made"></view>命中 {{shotSummary.made}}</view>
+        <view class="pd-legend__item"><view class="pd-dot pd-dot--miss"></view>未中 {{shotSummary.att - shotSummary.made}}</view>
+        <view class="pd-legend__item">命中率 {{shotSummary.rateText}}</view>
+      </view>
+
+      <view class="statgrid statgrid--3 pd-zones">
+        <view wx:for="{{zoneStats}}" wx:key="key" class="stat {{item.empty ? 'stat--na' : ''}}">
+          <view class="stat__n {{item.empty ? 'stat__n--na' : ''}}">{{item.empty ? '—' : item.text}}</view>
+          <view class="stat__l">{{item.label}}</view>
+          <view class="stat__sub">{{item.empty ? '—' : item.rateText}}</view>
+        </view>
+      </view>
+    </block>
+
+    <!-- 得分趋势 -->
+    <block wx:if="{{trendPoints}}">
+      <view class="sec-label">得分趋势</view>
+      <view class="card pd-trend">
+        <view class="pd-chart">
+          <polyline points="{{trendPoints}}" fill="none" stroke="#0d9488" stroke-width="2" />
+        </view>
+        <view class="pd-trend__labels">
+          <text>{{trend[0].dateText}}</text>
+          <text>{{trend[trend.length - 1].dateText}}</text>
+        </view>
+      </view>
+    </block>
+
+    <!-- 逐场记录：点击跳该场报告并已按该球员过滤 -->
+    <block wx:if="{{gameLog.length}}">
+      <view class="sec-label">逐场记录</view>
+      <view class="pd-log">
+        <view
+          wx:for="{{gameLog}}"
+          wx:key="id"
+          class="item"
+          data-id="{{item.id}}"
+          bindtap="onTapGame"
+        >
+          <view class="item__body">
+            <view class="item__nm">{{item.dateText}} {{item.opponent}}</view>
+            <view class="item__sub">出手 {{item.shots}} · 命中 {{item.made}}</view>
+          </view>
+          <view class="item__val">
+            <view class="item__val-n">{{item.points}}</view>
+            <view class="item__val-l">得分</view>
+          </view>
+        </view>
+      </view>
+      <view class="pd-note">点某一场可跳到该场事件列表，已按这名球员过滤</view>
+    </block>
+
+    <empty-state
+      wx:if="{{!gameLog.length}}"
+      title="还没有这名球员的数据"
+      desc="补录时把事件归属到这名球员，数据会自动汇总到这里。"
+      showAction="{{false}}"
+    />
+
+  </block>
+
+</view>

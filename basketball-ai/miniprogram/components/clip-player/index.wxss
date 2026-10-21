@@ -1,0 +1,76 @@
+.clip {
+  position: relative;
+  width: 100%;
+  background: #0f172a;
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+
+.clip__video {
+  display: block;
+  width: 100%;
+  height: 340rpx;
+}
+
+.clip__fallback {
+  height: 340rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-1);
+  color: #64748b;
+  font-size: var(--fs-sm);
+}
+.clip__fallback--err { color: #fca5a5; }
+.clip__fallback-icon { font-size: 44rpx; opacity: 0.7; }
+.clip__fallback-sub { font-size: var(--fs-xs); opacity: 0.7; }
+
+.clip__tag {
+  position: absolute;
+  left: 12rpx;
+  top: 12rpx;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--ink);
+  font-size: var(--fs-xs);
+  padding: 2rpx 12rpx;
+  border-radius: 4rpx;
+}
+
+.clip__bar {
+  position: absolute;
+  left: 16rpx;
+  right: 16rpx;
+  bottom: 14rpx;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+}
+.clip__track {
+  flex: 1;
+  height: 6rpx;
+  background: rgba(255, 255, 255, 0.28);
+  border-radius: 3rpx;
+  overflow: hidden;
+}
+.clip__prog {
+  height: 100%;
+  background: #ffffff;
+  border-radius: 3rpx;
+}
+.clip__time {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: var(--fs-xs);
+  flex-shrink: 0;
+}
+
+.clip__loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  font-size: var(--fs-sm);
+  pointer-events: none;
+}

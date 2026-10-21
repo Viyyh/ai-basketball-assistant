@@ -1,0 +1,78 @@
+.court-wrap {
+  position: relative;
+  width: 100%;
+  background: var(--fill);
+  border: 2rpx solid var(--line);
+  border-radius: var(--r-md);
+  padding: var(--sp-1);
+  box-sizing: border-box;
+}
+
+.court-img {
+  display: block;
+  width: 100%;
+}
+
+.court-loading {
+  height: 460rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-3);
+  font-size: var(--fs-sm);
+}
+
+/* 口径角标 */
+.court-scope {
+  position: absolute;
+  left: var(--sp-2);
+  top: var(--sp-2);
+  font-size: var(--fs-xs);
+  color: var(--ink-2);
+  background: rgba(255, 255, 255, 0.88);
+  border-radius: var(--r-sm);
+  padding: 2rpx 12rpx;
+  line-height: 1.6;
+}
+
+/* 告警条 */
+.court-warn {
+  margin-top: var(--sp-1);
+  background: var(--warn-2);
+  border-radius: var(--r-sm);
+  padding: 6rpx var(--sp-2);
+}
+.court-warn__line {
+  font-size: var(--fs-xs);
+  color: var(--warn-ink);
+  line-height: 1.6;
+}
+
+/* 参数错误态：拒绝渲染，明确告知原因 */
+.court-error {
+  padding: var(--sp-5) var(--sp-3);
+  text-align: center;
+}
+.court-error__icon {
+  width: 72rpx;
+  height: 72rpx;
+  margin: 0 auto var(--sp-2);
+  border-radius: 50%;
+  background: var(--err-2);
+  color: var(--err);
+  font-size: 40rpx;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.court-error__text {
+  font-size: var(--fs-sm);
+  color: var(--err-ink);
+  line-height: 1.6;
+  margin-bottom: var(--sp-1);
+}
+.court-error__hint {
+  font-size: var(--fs-xs);
+  color: var(--ink-3);
+}

@@ -1,0 +1,147 @@
+<view class="page">
+
+  <view wx:if="{{loading}}" class="rp-loading">加载报告中…</view>
+
+  <block wx:elif="{{notFound}}">
+    <empty-state scene="noReport" title="找不到这场报告" desc="活动可能已被删除，或报告尚未生成。" />
+  </block>
+
+  <block wx:elif="{{stillProcessing}}">
+    <empty-state
+      scene="noReport"
+      title="报告还在生成中"
+      desc="视频处理完成后会通过微信通知你，可以先离开小程序。"
+      action="查看处理进度"
+      bind:action="onGoProcessing"
+    />
+  </block>
+
+  <!-- ============ 标定不合格：阻断 ============ -->
+  <block wx:elif="{{calibrationBlocked}}">
+    <view class="rp-block">
+      <view class="rp-block__icon">!</view>
+      <view class="rp-block__title">场地标定不合格</view>
+      <view class="rp-block__desc">{{calibrationNote}}</view>
+      <view class="rp-block__why">
+        标定误差过大会让所有坐标类数据（投篮点、热图、阵型）整体偏移。
+        为避免给你一份看起来正常但实际错误的报告，这里先不展示。
+      </view>
+      <view class="alert alert--warn" wx:if="{{warnings.length}}">
+        <view wx:for="{{warnings}}" wx:key="*this">⚠ {{item}}</view>
+      </view>
+      <view class="row row--gap2" style="margin-top:32rpx">
+        <view class="btn btn--primary flex1" bindtap="onGoProcessing">重新处理</view>
+        <view class="btn btn--ghost flex1" bindtap="onBack">返回</view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ============ 正常报告 ============ -->
+  <block wx:else>
+
+    <!-- 口径标识常驻（PRD 9.4 #4.8） -->
+    <view class="rp-scope">
+      <scope-badge params="{{params}}" showRadius="{{true}}" />
+    </view>
+
+    <!-- 告警条：契约 warnings 非空时必须显示 -->
+    <view wx:if="{{warnings.length}}" class="alert alert--warn rp-warn">
+      <view wx:for="{{warnings}}" wx:key="*this" class="rp-warn__line">⚠ {{item}}</view>
+    </view>
+
+    <!-- 顶部比分卡 -->
+    <view class="scorecard" wx:if="{{scoreHeader}}">
+      <view class="scorecard__teams">
+        <view class="scorecard__team">{{scoreHeader.left}}</view>
+        <view class="scorecard__score">
+          <block wx:if="{{scoreHeader.scoreFor !== null}}">{{scoreHeader.scoreFor}}</block>
+          <block wx:else>—</block>
+        </view>
+        <view class="scorecard__vs">:</view>
+        <view class="scorecard__score">
+          <block wx:if="{{scoreHeader.scoreAgainst !== null}}">{{scoreHeader.scoreAgainst}}</block>
+          <block wx:else>—</block>
+        </view>
+        <view class="scorecard__team scorecard__team--r">{{scoreHeader.right}}</view>
+      </view>
+      <view class="scorecard__meta">{{scoreHeader.meta}}</view>
+      <view class="scorecard__note">{{scoreHeader.note}}</view>
+    </view>
+
+    <!-- 时间轴 -->
+    <view class="sec-label" wx:if="{{timeline.length}}">
+      {{is3v3 ? '回合分布' : '全场时间轴'}}
+    </view>
+    <view class="tl" wx:if="{{timeline.length}}">
+      <view
+        wx:for="{{timeline}}"
+        wx:key="index"
+        class="tl__seg"
+        data-index="{{item.index}}"
+        bindtap="onTapPeriod"
+      >
+        <view class="tl__band">
+          <view
+            wx:for="{{item.marks}}"
+            wx:for-item="m"
+            wx:key="id"
+            class="tl__mark tl__mark--{{m.tone}}"
+            style="left:{{m.pos}}%"
+          ></view>
+        </view>
+        <view class="tl__label">{{item.label}}</view>
+        <view class="tl__count">{{item.eventCount}}</view>
+      </view>
+    </view>
+    <view class="tl-hint" wx:if="{{timeline.length}}">点某一节可跳到该节的事件列表</view>
+
+    <!-- 关键指标 -->
+    <view class="sec-label">关键指标</view>
+    <view class="statgrid statgrid--4 rp-metrics">
+      <view wx:for="{{metrics}}" wx:key="key" class="stat {{item.available ? '' : 'stat--na'}}">
+        <view class="stat__n {{item.value === '—' || item.value === '不适用' ? 'stat__n--na' : ''}}">{{item.value}}</view>
+        <view class="stat__l">{{item.label}}</view>
+        <view class="stat__sub">{{item.sub}}</view>
+      </view>
+    </view>
+    <view class="rp-mnote">{{metricsNote}}</view>
+
+    <!-- 2×2 入口卡：顺序按使用频率（事件 > 热图 > 片段 > 阵型） -->
+    <view class="sec-label">深度数据</view>
+    <view class="rp-entries">
+      <view
+        wx:for="{{entries}}"
+        wx:key="key"
+        class="card rp-entry rp-entry--{{item.tone}} {{item.disabled ? 'rp-entry--disabled' : ''}}"
+        data-url="{{item.url}}"
+        data-disabled="{{item.disabled}}"
+        data-reason="{{item.disabledReason}}"
+        bindtap="onTapEntry"
+        hover-class="{{item.disabled ? '' : 'rp-entry--hover'}}"
+      >
+        <view class="rp-entry__icon">{{item.icon}}</view>
+        <view class="rp-entry__title">{{item.title}}</view>
+        <view class="rp-entry__sub">{{item.sub}}</view>
+      </view>
+    </view>
+
+    <!-- 补录进度条常驻底部：没补完就一直提醒 -->
+    <view wx:if="{{!attribution.complete}}" class="rp-attr" bindtap="onTapAttribution">
+      <view class="rp-attr__row">
+        <text class="rp-attr__text">补录进度 {{attribution.resolved}} / {{attribution.total}}</text>
+        <text class="rp-attr__cta">去补录 ›</text>
+      </view>
+      <view class="rp-attr__track">
+        <view class="rp-attr__fill" style="width:{{attribution.percent}}%"></view>
+      </view>
+      <view class="rp-attr__note">
+        补录完成后，球员级数据与球队统计才会更新
+      </view>
+    </view>
+    <view wx:else class="card card--ok rp-attr-done">
+      <view class="card__body" style="color:#14532d">✓ 本场补录已完成，数据已全部汇总</view>
+    </view>
+
+  </block>
+
+</view>

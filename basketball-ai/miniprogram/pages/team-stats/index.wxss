@@ -1,0 +1,68 @@
+.ts-loading { padding: 160rpx 0; text-align: center; color: var(--ink-3); font-size: var(--fs-sm); }
+
+/* 赛制口径筛选 */
+.ts-scope-hd {
+  display: flex; align-items: center; gap: var(--sp-1);
+  padding: var(--sp-2) var(--sp-3) 0;
+  font-size: var(--fs-xs); color: var(--ink-3);
+}
+.ts-scope-hd__warn {
+  color: var(--err); font-size: 18rpx;
+  border: 2rpx solid var(--err-2); border-radius: var(--r-pill);
+  padding: 0 10rpx; background: var(--err-2);
+}
+.ts-scopes {
+  display: flex; flex-wrap: wrap; gap: var(--sp-1);
+  padding: var(--sp-1) var(--sp-3) 0;
+}
+
+.ts-scope-line { margin: var(--sp-2) var(--sp-3) 0; }
+
+.ts-complete { margin: var(--sp-2) var(--sp-3) 0; }
+.ts-complete-ok {
+  margin: var(--sp-2) var(--sp-3) 0;
+  font-size: var(--fs-xs); color: var(--ok); text-align: center;
+}
+
+.ts-range { margin: var(--sp-3) var(--sp-3) var(--sp-2); }
+
+/* 战绩 */
+.ts-record { margin: 0 var(--sp-3) var(--sp-3); padding: var(--sp-4) var(--sp-3); }
+.ts-record__row { display: flex; align-items: center; justify-content: center; }
+.ts-record__cell { text-align: center; padding: 0 var(--sp-4); }
+.ts-record__n { font-size: 52rpx; font-weight: 600; line-height: 1.1; color: var(--ink); }
+.ts-record__n--win { color: var(--ok); }
+.ts-record__n--loss { color: var(--err); }
+.ts-record__l { font-size: var(--fs-xs); color: var(--ink-3); margin-top: 4rpx; }
+.ts-record__vs { color: var(--ink-3); font-size: var(--fs-lg); }
+.ts-record__divider { width: 2rpx; height: 64rpx; background: var(--line); margin: 0 var(--sp-2); }
+
+/* 趋势 */
+.ts-trend { margin: 0 var(--sp-3) var(--sp-3); }
+.ts-trend__hd { margin-bottom: var(--sp-2); }
+.ts-chart { width: 100%; height: 130rpx; }
+.ts-chart polyline { vector-effect: non-scaling-stroke; }
+.ts-trend__labels {
+  display: flex; justify-content: space-between;
+  font-size: 18rpx; color: var(--ink-3); margin-top: 4rpx;
+}
+.ts-trend-few { margin: 0 var(--sp-3) var(--sp-3); }
+
+/* 指标 */
+.ts-metrics { padding: 0 var(--sp-3); }
+
+/* 深度数据 */
+.ts-deep { display: flex; gap: var(--sp-1); padding: 0 var(--sp-3); }
+.ts-deep__item {
+  flex: 1; text-align: center; padding: var(--sp-3) 4rpx; margin-bottom: 0;
+}
+.ts-deep__item--off { opacity: 0.45; }
+.ts-deep__icon { font-size: 34rpx; line-height: 1; }
+.ts-deep__label { font-size: var(--fs-xs); color: var(--ink-3); margin-top: var(--sp-1); }
+
+/* 比赛列表 */
+.ts-games { padding: 0 var(--sp-3); }
+.ts-note {
+  padding: var(--sp-3) var(--sp-4) var(--sp-6);
+  font-size: var(--fs-xs); color: var(--ink-3); line-height: 1.7; text-align: center;
+}

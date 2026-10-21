@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>AI 篮球分析小程序 · 球队页设计 v0.1</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  :root {
+    --ink: #1e293b;
+    --ink-2: #475569;
+    --ink-3: #94a3b8;
+    --line: #cbd5e1;
+    --line-2: #e2e8f0;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --fill: #f1f5f9;
+    --fill-2: #e2e8f0;
+    --accent: #2563eb;
+    --accent-2: #dbeafe;
+    --warn: #f59e0b;
+    --warn-2: #fef3c7;
+    --ok: #16a34a;
+    --ok-2: #dcfce7;
+    --err: #dc2626;
+    --err-2: #fee2e2;
+    --purple: #7c3aed;
+    --purple-2: #ede9fe;
+    --teal: #0d9488;
+    --teal-2: #ccfbf1;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    margin: 0;
+    padding: 0;
+    line-height: 1.7;
+    font-size: 14px;
+  }
+  .wrap { max-width: 1220px; margin: 0 auto; padding: 40px 32px 80px; }
+  header { border-bottom: 1px solid var(--line); padding-bottom: 20px; margin-bottom: 32px; }
+  header h1 { font-size: 26px; margin: 0 0 8px; font-weight: 600; letter-spacing: -0.01em; }
+  header .meta { color: var(--ink-2); font-size: 13px; }
+  header .meta span { margin-right: 16px; }
+
+  .toc { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 20px 24px; margin-bottom: 40px; }
+  .toc h3 { margin: 0 0 12px; font-size: 14px; color: var(--ink-2); font-weight: 600; letter-spacing: 0.02em; }
+  .toc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px 20px; font-size: 13px; }
+  .toc-grid a { color: var(--ink); text-decoration: none; padding: 4px 0; }
+  .toc-grid a:hover { color: var(--accent); }
+  .toc-num { display: inline-block; width: 30px; color: var(--ink-3); font-family: "SF Mono", Consolas, monospace; }
+
+  /* IA overview */
+  .ia-box { background: white; border: 1px solid var(--line); border-radius: 10px; padding: 24px; margin-bottom: 48px; }
+  .ia-box h3 { margin: 0 0 16px; font-size: 16px; font-weight: 600; }
+  .ia-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+  .ia-item { border: 1.5px solid var(--line); border-radius: 8px; padding: 14px; }
+  .ia-item h4 { margin: 0 0 6px; font-size: 14px; font-weight: 600; }
+  .ia-item p { margin: 0 0 8px; font-size: 12px; color: var(--ink-2); }
+  .ia-item .src { font-size: 11px; color: var(--ink-3); }
+
+  section.screen { margin-bottom: 60px; scroll-margin-top: 24px; }
+  section.screen > h2 { font-size: 20px; margin: 0 0 6px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+  .badge-num { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: var(--accent); color: white; border-radius: 6px; font-size: 13px; font-weight: 600; flex-shrink: 0; }
+  .badge-num.purple { background: var(--purple); }
+  .badge-num.teal { background: var(--teal); }
+  .badge-num.warn { background: var(--warn); }
+  .badge-num.gray { background: var(--ink-3); }
+  .screen-desc { color: var(--ink-2); margin: 0 0 20px; font-size: 14px; padding-left: 38px; }
+
+  .grid { display: grid; grid-template-columns: 340px 1fr; gap: 32px; align-items: start; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+  .phone { width: 320px; height: 640px; border: 2px solid var(--ink); border-radius: 32px; background: white; padding: 12px 10px; position: relative; box-shadow: 0 4px 14px rgba(30, 41, 59, 0.06); overflow: hidden; }
+  .phone::before { content: ""; position: absolute; top: 6px; left: 50%; transform: translateX(-50%); width: 60px; height: 5px; background: var(--ink); border-radius: 3px; }
+  .screen-body { width: 100%; height: 100%; background: white; overflow-y: auto; overflow-x: hidden; border-radius: 22px; position: relative; font-size: 12px; line-height: 1.4; }
+  .screen-body::-webkit-scrollbar { width: 0; }
+
+  .notes h4 { font-size: 13px; margin: 16px 0 8px; color: var(--ink); font-weight: 600; }
+  .notes h4:first-child { margin-top: 0; }
+  .notes ul { margin: 0 0 16px; padding-left: 20px; color: var(--ink-2); font-size: 13.5px; }
+  .notes li { margin-bottom: 6px; }
+  .callout { background: var(--warn-2); border-left: 3px solid var(--warn); padding: 10px 14px; font-size: 13px; color: #78350f; margin: 8px 0 16px; border-radius: 0 6px 6px 0; }
+  .callout.info { background: var(--accent-2); border-color: var(--accent); color: #1e3a8a; }
+  .callout.risk { background: var(--err-2); border-color: var(--err); color: #7f1d1d; }
+  .callout.ok { background: var(--ok-2); border-color: var(--ok); color: #14532d; }
+  .callout.purple { background: var(--purple-2); border-color: var(--purple); color: #4c1d95; }
+  .callout b { font-weight: 600; }
+
+  .wf-top { height: 28px; background: var(--fill); border-radius: 8px; display: flex; align-items: center; padding: 0 10px; font-size: 11px; color: var(--ink-3); margin-bottom: 8px; }
+  .wf-nav { display: flex; justify-content: space-around; padding: 8px 6px; border-top: 1px solid var(--line-2); background: white; position: absolute; bottom: 0; left: 0; right: 0; font-size: 10px; color: var(--ink-3); }
+  .wf-nav span { flex: 1; text-align: center; }
+  .wf-nav span.active { color: var(--accent); font-weight: 600; }
+  .wf-nav .nav-inner { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .wf-nav .nav-icon { width: 16px; height: 16px; background: currentColor; border-radius: 3px; opacity: 0.35; }
+  .wf-nav .nav-icon.circle { border-radius: 50%; }
+  .wf-nav .nav-icon.round { border-radius: 8px; }
+
+  .content { padding: 0 12px 60px; }
+
+  .card { background: white; border: 1.5px dashed var(--line); border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; }
+  .card.fill { background: var(--fill); border-style: solid; }
+  .card.accent { background: var(--accent-2); border-color: var(--accent); border-style: solid; }
+  .card.warn { background: var(--warn-2); border-color: var(--warn); border-style: solid; }
+  .card.purple { background: var(--purple-2); border-color: var(--purple); border-style: solid; }
+  .card.teal { background: var(--teal-2); border-color: var(--teal); border-style: solid; }
+  .card.dark { background: #0f172a; border-color: #0f172a; color: #cbd5e1; border-style: solid; }
+  .card-title { font-size: 12px; color: var(--ink); font-weight: 600; margin-bottom: 4px; }
+  .card-sub { font-size: 11px; color: var(--ink-3); }
+  .card-body { font-size: 11px; color: var(--ink-2); }
+
+  .btn { display: inline-block; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 500; text-align: center; }
+  .btn.primary { background: var(--accent); color: white; }
+  .btn.ghost { background: transparent; border: 1.5px solid var(--line); color: var(--ink-2); }
+  .btn.block { display: block; width: 100%; }
+  .btn.small { padding: 4px 10px; font-size: 11px; }
+
+  .row { display: flex; gap: 8px; align-items: center; }
+  .row.space-between { justify-content: space-between; }
+  .col { display: flex; flex-direction: column; gap: 6px; }
+
+  .field { border: 1.5px dashed var(--line); border-radius: 6px; padding: 8px 10px; font-size: 11px; color: var(--ink-3); margin-bottom: 8px; }
+  .field label { display: block; font-size: 10px; color: var(--ink-3); margin-bottom: 2px; }
+
+  .chip { display: inline-block; padding: 2px 8px; background: var(--fill); border-radius: 10px; font-size: 10px; color: var(--ink-2); }
+  .chip.accent { background: var(--accent-2); color: var(--accent); }
+  .chip.warn { background: var(--warn-2); color: #92400e; }
+  .chip.ok { background: var(--ok-2); color: #14532d; }
+  .chip.err { background: var(--err-2); color: #7f1d1d; }
+  .chip.gray { background: var(--fill); color: var(--ink-3); }
+  .chip.purple { background: var(--purple-2); color: var(--purple); }
+  .chip.teal { background: var(--teal-2); color: #115e59; }
+  .chip.ai { background: #e0e7ff; color: #3730a3; }
+  .chip.manual { background: #fce7f3; color: #9d174d; }
+
+  .seg { display: flex; border: 1.5px solid var(--line); border-radius: 8px; overflow: hidden; margin-bottom: 10px; }
+  .seg span { flex: 1; text-align: center; padding: 6px; font-size: 11px; color: var(--ink-2); background: white; }
+  .seg span.active { background: var(--accent); color: white; font-weight: 500; }
+  .seg.purple span.active { background: var(--purple); }
+
+  .stat-tile { background: white; border: 1.5px solid var(--line-2); border-radius: 8px; padding: 6px 4px; text-align: center; }
+  .stat-tile .num { font-size: 16px; font-weight: 600; color: var(--ink); }
+  .stat-tile .lbl { font-size: 10px; color: var(--ink-3); margin-top: 1px; }
+  .stat-grid { display: grid; gap: 6px; margin-bottom: 10px; }
+  .stat-grid.c3 { grid-template-columns: repeat(3, 1fr); }
+  .stat-grid.c4 { grid-template-columns: repeat(4, 1fr); }
+
+  .list-item { display: flex; gap: 8px; align-items: center; background: white; border: 1.5px solid var(--line-2); border-radius: 8px; padding: 8px; margin-bottom: 6px; font-size: 11px; }
+  .list-item .avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--fill-2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: var(--ink-2); }
+  .list-item .body { flex: 1; min-width: 0; }
+  .list-item .nm { color: var(--ink); font-weight: 500; }
+  .list-item .sub { color: var(--ink-3); font-size: 10px; margin-top: 1px; }
+  .list-item .val { text-align: right; }
+  .list-item .val .n { font-size: 14px; font-weight: 600; color: var(--ink); }
+  .list-item .val .l { font-size: 9px; color: var(--ink-3); }
+
+  .vcard { position: relative; aspect-ratio: 16/9; background: #1e293b; border-radius: 8px; margin-bottom: 6px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+  .vcard .play { width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.92); color: var(--ink); display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .vcard .dur { position: absolute; bottom: 6px; right: 6px; background: rgba(0,0,0,0.65); color: white; font-size: 9px; padding: 1px 5px; border-radius: 3px; }
+  .vcard .tag { position: absolute; top: 6px; left: 6px; font-size: 9px; padding: 1px 6px; border-radius: 3px; background: rgba(255,255,255,0.9); color: var(--ink); }
+
+  .tactic-card { background: white; border: 1.5px solid var(--line-2); border-radius: 10px; padding: 8px; margin-bottom: 10px; }
+  .tactic-card .tc-title { font-size: 12px; font-weight: 600; margin: 6px 0 2px; }
+  .tactic-card .tc-meta { font-size: 10px; color: var(--ink-3); display: flex; gap: 6px; align-items: center; }
+
+  .person-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px; }
+  .person { aspect-ratio: 1; border: 1.5px dashed var(--line); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: var(--ink-3); background: white; }
+  .person .avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--fill); margin-bottom: 3px; }
+  .person.selected { border-color: var(--accent); border-style: solid; background: var(--accent-2); color: var(--accent); font-weight: 500; }
+  .person.selected .avatar { background: var(--accent); opacity: 0.4; }
+
+  .court { background: var(--fill); border: 1.5px solid var(--line); border-radius: 6px; padding: 6px; text-align: center; }
+  .court svg { width: 100%; height: auto; display: block; }
+
+  .scorecard { background: linear-gradient(90deg, #1e293b, #334155); color: white; border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+  .scorecard .teams { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .scorecard .team { flex: 1; font-size: 11px; opacity: 0.9; }
+  .scorecard .score { font-size: 24px; font-weight: 600; }
+  .scorecard .vs { padding: 0 8px; opacity: 0.6; font-size: 12px; }
+  .scorecard .meta-row { font-size: 10px; opacity: 0.7; text-align: center; }
+
+  .filter-chip { display: inline-block; padding: 4px 10px; background: white; border: 1.5px solid var(--line); border-radius: 12px; font-size: 11px; color: var(--ink-2); }
+  .filter-chip.active { background: var(--ink); color: white; border-color: var(--ink); }
+
+  .tabbar { display: flex; border-bottom: 1.5px solid var(--line-2); margin-bottom: 10px; }
+  .tabbar span { flex: 1; text-align: center; padding: 8px 2px; font-size: 11px; color: var(--ink-3); border-bottom: 2px solid transparent; }
+  .tabbar span.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+  .prog-row { display: flex; align-items: center; gap: 6px; font-size: 10px; margin-bottom: 4px; }
+  .prog-row .nm { width: 56px; color: var(--ink-2); flex-shrink: 0; }
+  .prog-row .track { flex: 1; height: 8px; background: var(--fill); border-radius: 4px; overflow: hidden; }
+  .prog-row .fill { height: 100%; background: var(--accent); border-radius: 4px; }
+  .prog-row .v { width: 30px; text-align: right; color: var(--ink-2); }
+
+  .mini-phone-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 16px; }
+  @media (max-width: 1100px) { .mini-phone-row { grid-template-columns: repeat(2, 1fr); } }
+  .mini-phone .phone { width: 100%; height: 560px; padding: 10px 8px; }
+  .mini-cap { text-align: center; font-size: 12px; color: var(--ink-2); margin-top: 8px; font-weight: 500; }
+
+  .source-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 9px; padding: 1px 6px; border-radius: 8px; }
+  .source-badge.ai { background: #e0e7ff; color: #3730a3; }
+  .source-badge.manual { background: #fce7f3; color: #9d174d; }
+  .source-badge.mixed { background: #fef3c7; color: #92400e; }
+
+  section.design-lang { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--line); }
+  section.design-lang h2 { font-size: 20px; margin: 0 0 16px; font-weight: 600; }
+  .pattern-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  .pattern { background: white; border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; }
+  .pattern h4 { font-size: 14px; margin: 0 0 4px; font-weight: 600; }
+  .pattern p { font-size: 12.5px; color: var(--ink-2); margin: 0; }
+
+  .callout.open-q { background: white; border: 1px solid var(--line); border-left: 3px solid var(--ink-3); border-radius: 0 6px 6px 0; padding: 12px 14px; margin-top: 8px; }
+  .callout.open-q ol { margin: 6px 0 0; padding-left: 20px; color: var(--ink-2); }
+  .callout.open-q li { margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>AI 篮球分析小程序 · 球队页设计</h1>
+  <div class="meta">
+    <span>版本 v0.2</span>
+    <span>日期 2026-10-11</span>
+    <span>配套：界面与交互设计v0.1.1 · 第一版范围确认v0.2</span>
+  </div>
+</header>
+
+<!-- IA Overview -->
+<div class="ia-box">
+  <h3>信息架构：球队页 = 数据资产沉淀层</h3>
+  <p style="font-size:13.5px;color:var(--ink-2);margin:0 0 16px;">
+    首页回答"现在要做什么"（录制、补录、看报告）。球队页回答"我们积累了什么"（战绩趋势、球员能力、战术库、对手情报）。
+    这两页的关系是：<b>首页产数据，球队页用数据</b>。
+  </p>
+  <div class="ia-grid">
+    <div class="ia-item" style="border-color:var(--accent);">
+      <h4>① 球队比赛数据</h4>
+      <p>战绩、趋势、关键指标。回答"我们这赛季打得怎么样"。</p>
+      <div class="src">来源：<span class="source-badge ai">AI 自动</span> <span class="source-badge manual">教练补录</span></div>
+    </div>
+    <div class="ia-item" style="border-color:var(--teal);">
+      <h4>② 球员个人数据库</h4>
+      <p>逐人档案与统计。回答"谁在进步、谁需要重点练"。</p>
+      <div class="src">来源：<span class="source-badge mixed">补录聚合</span> <span class="source-badge manual">教练录入</span></div>
+    </div>
+    <div class="ia-item" style="border-color:var(--purple);">
+      <h4>③ 球队战术板</h4>
+      <p>战术名称 + 视频片段的战术库。教练自己剪、自己命名。</p>
+      <div class="src">来源：<span class="source-badge manual">手动剪辑</span>（后期 AI 自动提取）</div>
+    </div>
+    <div class="ia-item" style="border-color:var(--warn);">
+      <h4>④ 对手球队记录</h4>
+      <p>交手历史 + 对手阵型 + 对手数据 + 重点球员 + 对手战术板。侦察手册。</p>
+      <div class="src">来源：<span class="source-badge ai">AI 自动</span> <span class="source-badge manual">手动剪辑/标记</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="toc">
+  <h3>本页 8 张屏</h3>
+  <div class="toc-grid">
+    <a href="#s1"><span class="toc-num">01</span>球队主页 · 中枢</a>
+    <a href="#s2"><span class="toc-num">02</span>球队比赛数据</a>
+    <a href="#s3"><span class="toc-num">03</span>球员数据库 · 列表</a>
+    <a href="#s4"><span class="toc-num">04</span>球员个人详情</a>
+    <a href="#s5"><span class="toc-num">05</span>球队战术板 · 战术库</a>
+    <a href="#s6"><span class="toc-num">06</span>新建战术 · 从录像切片</a>
+    <a href="#s7"><span class="toc-num">07</span>对手球队列表</a>
+    <a href="#s8"><span class="toc-num">08</span>对手详情 · 四个 tab</a>
+  </div>
+</div>
+
+<!-- ================================================== -->
+<section class="screen" id="s1">
+  <h2><span class="badge-num">01</span>球队主页 · 中枢</h2>
+  <p class="screen-desc">从首页底部导航"球队"进来的落地页。目标：一眼看清球队资产，四个模块一眼可达。</p>
+  <div class="grid">
+    <div class="phone">
+      <div class="screen-body">
+        <div class="wf-top">‹ 返回 &nbsp;&nbsp;我的球队</div>
+        <div class="content">
+          <!-- Team header -->
+          <div class="card dark" style="padding:14px 12px;">
+            <div class="row" style="gap:10px;">
+              <div style="width:48px;height:48px;border-radius:10px;background:#334155;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:12px;font-weight:600;">队徽</div>
+              <div style="flex:1;">
+                <div style="font-size:15px;font-weight:600;color:white;">雷霆 U16 青年队</div>
+                <div style="font-size:10px;opacity:0.7;margin-top:2px;">主教练 · 李教练 &nbsp;·&nbsp; 15 名球员</div>
+                <div style="margin-top:5px;">
+                  <span style="display:inline-block;font-size:9px;padding:1px 6px;border-radius:8px;background:rgba(255,255,255,0.14);color:#cbd5e1;margin-right:4px;">默认 15岁以下</span>
+                  <span style="display:inline-block;font-size:9px;padding:1px 6px;border-radius:8px;background:rgba(255,255,255,0.14);color:#cbd5e1;">默认 5 对 5</span>
+                </div>
+              </div>
+              <div style="color:#94a3b8;font-size:16px;">✎</div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px;">
+              <div style="text-align:center;">
+                <div style="font-size:16px;font-weight:600;color:white;">8<span style="font-size:11px;opacity:0.6;">胜</span>4<span style="font-size:11px;opacity:0.6;">负</span></div>
+                <div style="font-size:9px;opacity:0.6;">本赛季</div>
+              </div>
+              <div style="text-align:center;">
+                <div style="font-size:16px;font-weight:600;color:white;">72.4</div>
+                <div style="font-size:9px;opacity:0.6;">场均得分</div>
+              </div>
+              <div style="text-align:center;">
+                <div style="font-size:16px;font-weight:600;color:white;">41.2%</div>
+                <div style="font-size:9px;opacity:0.6;">投篮命中率</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pending reminder -->
+          <div class="card warn">
+            <div class="row space-between">
+              <div>
+                <div class="card-title" style="color:#92400e;">⚠ 2 场待补录，数据未汇总</div>
+                <div class="card-body" style="color:#92400e;">补录后球员数据才会更新</div>
+              </div>
+              <span style="color:#92400e;font-size:14px;">›</span>
+            </div>
+          </div>
+
+          <!-- Four module entries -->
+          <div style="font-size:12px;color:var(--ink-3);margin:14px 0 6px;">球队资产</div>
+
+          <div class="card accent" style="padding:9px;">
+            <div class="row space-between">
+              <div class="row" style="gap:8px;">
+                <span style="font-size:16px;">📊</span>
+                <div>
+                  <div class="card-title" style="color:var(--accent);">球队比赛数据</div>
+                  <div class="card-sub">5对5 12 场 · 3对3 4 场 · 3 项待完善</div>
+                </div>
+              </div>
+              <span style="color:var(--accent);">›</span>
+            </div>
+          </div>
+
+          <div class="card teal" style="padding:9px;">
+            <div class="row space-between">
+              <div class="row" style="gap:8px;">
+                <span style="font-size:16px;">👥</span>
+                <div>
+                  <div class="card-title" style="color:#115e59;">球员数据库</div>
+                  <div class="card-sub">15 名球员 · 8 人有完整数据</div>
+                </div>
+              </div>
+              <span style="color:#115e59;">›</span>
+            </div>
+          </div>
+
+          <div class="card purple" style="padding:9px;">
+            <div class="row space-between">
+              <div class="row" style="gap:8px;">
+                <span style="font-size:16px;">📋</span>
+                <div>
+                  <div class="card-title" style="color:var(--purple);">球队战术板</div>
+                  <div class="card-sub">24 张战术卡 · 本周新增 3 张</div>
+                </div>
+              </div>
+              <span style="color:var(--purple);">›</span>
+            </div>
+          </div>
+
+          <div class="card warn" style="padding:9px;">
+            <div class="row space-between">
+              <div class="row" style="gap:8px;">
+                <span style="font-size:16px;">🎯</span>
+                <div>
+                  <div class="card-title" style="color:#92400e;">对手记录</div>
+                  <div class="card-sub">8 支球队 · 下次对手：育才中学</div>
+                </div>
+              </div>
+              <span style="color:#92400e;">›</span>
+            </div>
+          </div>
+
+          <!-- Recent -->
+          <div style="font-size:12px;color:var(--ink-3);margin:14px 0 6px;">近期比赛</div>
+          <div class="list-item">
+            <div class="avatar" style="background:var(--ok-2);color:var(--ok);">胜</div>
+            <div class="body">
+              <div class="nm">vs 育才中学 U16</div>
+              <div class="sub">10/09 · 78:65</div>
+            </div>
+            <div class="val"><div class="n">78</div><div class="l">得分</div></div>
+          </div>
+          <div class="list-item">
+            <div class="avatar" style="background:var(--err-2);color:var(--err);">负</div>
+            <div class="body">
+              <div class="nm">vs 实验中学 U16</div>
+              <div class="sub">10/02 · 61:70</div>
+            </div>
+            <div class="val"><div class="n">61</div><div class="l">得分</div></div>
+          </div>
+        </div>
+        <div class="wf-nav">
+          <span><span class="nav-inner"><span class="nav-icon round"></span>首页</span></span>
+          <span class="active"><span class="nav-inner"><span class="nav-icon"></span>球队</span></span>
+          <span><span class="nav-inner"><span class="nav-icon"></span>历史</span></span>
+          <span><span class="nav-inner"><span class="nav-icon circle"></span>我的</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes">
+      <h4>页面结构</h4>
+      <ul>
+        <li><b>顶部球队卡（深色）</b>：队徽、队名、教练、球员数 + 三个核心指标（战绩 / 场均得分 / 命中率）。这是球队页的身份锚点</li>
+        <li><b>待补录提醒</b>：与首页同一个逻辑。补录没完成，球队页的球员数据就不准——所以必须在这里也提醒</li>
+        <li><b>四个模块入口</b>，用四色区分（蓝=比赛数据、青=球员库、紫=战术板、橙=对手记录），与后续每个模块页的主色一致，形成肌肉记忆</li>
+        <li><b>近期比赛</b>：胜/负色块 + 比分，可点进单场报告</li>
+      </ul>
+
+      <h4>颜色即导航</h4>
+      <ul>
+        <li>蓝 → 球队比赛数据（屏 02）</li>
+        <li>青 → 球员数据库（屏 03、04）</li>
+        <li>紫 → 球队战术板（屏 05、06）</li>
+        <li>橙 → 对手记录（屏 07、08）</li>
+      </ul>
+
+      <div class="callout info">
+        <b>四个入口的排序 = 使用频率。</b>教练日常看得最多的是比赛数据和球员数据（复盘），其次是对手记录（赛前准备），战术板是周期性维护。第一版固定这个顺序。
+      </div>
+
+      <div class="callout">
+        <b>"3 项记录待完善"这类小字要保留。</b>球队页的数据完整度会直接影响教练信任度。让教练看到"缺什么"，他才会去补。
+      </div>
+
+      <div class="callout info">
+        <b>球队头卡上的「默认 15岁以下 / 默认 5 对 5」两个标签是 v0.2 新增。</b>它们对应球队资料里的 <code>default_age_group</code> 与 <code>default_format</code>，新建活动时自动带出，教练只需确认而不用每次重选。青训队一整年往往都是同一年龄段打同一赛制，这个默认值能省掉大量重复操作。点头卡右上角 ✎ 可修改。
+      </div>
+
+      <div class="callout warn">
+        <b>比赛数据入口的副标题必须按赛制拆开写</b>（"5对5 12 场 · 3对3 4 场"），不能写成"16 场比赛"。这是"数据不可跨赛制合并"这条原则在 UI 上的第一道体现——从入口开始就让教练习惯分开看。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================== -->
+<section class="screen" id="s2">
+  <h2><span class="badge-num">02</span>球队比赛数据</h2>
+  <p class="screen-desc">回答"我们这赛季到底打得怎么样"。核心是趋势，不是单场。</p>
+  <div class="grid">
+    <div class="phone">
+      <div class="screen-body">
+        <div class="wf-top">‹ 球队 &nbsp;&nbsp;比赛数据</div>
+        <div class="content">
+          <!-- 赛制筛选：不可合并统计 -->
+          <div style="font-size:10px;color:var(--ink-3);margin-bottom:4px;">赛制口径 <span style="color:var(--err);">不可合并</span></div>
+          <div class="row" style="gap:4px;margin-bottom:6px;">
+            <span class="filter-chip active">5 对 5</span>
+            <span class="filter-chip">3 对 3</span>
+            <span class="filter-chip">4 对 4</span>
+          </div>
+          <div style="font-size:9.5px;color:var(--ink-3);background:var(--fill);border-radius:5px;padding:4px 7px;margin-bottom:8px;">
+            当前口径：5 对 5 · U15 · 12 场 &nbsp;|&nbsp; 另有 3 对 3 共 4 场
+          </div>
+
+          <div class="seg">
+            <span class="active">本赛季</span>
+            <span>近 10 场</span>
+            <span>自定义</span>
+          </div>
+
+          <!-- Record card -->
+          <div class="card fill" style="text-align:center;padding:12px;">
+            <div class="row space-between" style="padding:0 12px;">
+              <div>
+                <div style="font-size:22px;font-weight:600;color:var(--ok);">8</div>
+                <div class="card-sub">胜</div>
+              </div>
+              <div style="color:var(--ink-3);font-size:16px;">:</div>
+              <div>
+                <div style="font-size:22px;font-weight:600;color:var(--err);">4</div>
+                <div class="card-sub">负</div>
+              </div>
+              <div style="border-left:1px solid var(--line);padding-left:14px;">
+                <div style="font-size:22px;font-weight:600;">67%</div>
+                <div class="card-sub">胜率</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Trend chart -->
+          <div class="card">
+            <div class="row space-between" style="margin-bottom:6px;">
+              <span class="card-title">得分趋势</span>
+              <span class="card-sub">近 12 场</span>
+            </div>
+            <svg viewBox="0 0 280 100" style="width:100%;height:auto;">
+              <line x1="0" y1="80" x2="280" y2="80" stroke="#e2e8f0" stroke-width="1"/>
+              <line x1="0" y1="50" x2="280" y2="50" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="2 3"/>
+              <line x1="0" y1="20" x2="280" y2="20" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="2 3"/>
+              <polyline points="10,60 34,52 58,66 82,44 106,50 130,36 154,40 178,28 202,44 226,32 250,38 270,26"
+                        fill="none" stroke="#2563eb" stroke-width="2"/>
+              <circle cx="270" cy="26" r="3.5" fill="#2563eb"/>
+              <text x="4" y="16" font-size="8" fill="#94a3b8">85</text>
+              <text x="4" y="47" font-size="8" fill="#94a3b8">70</text>
+              <text x="4" y="77" font-size="8" fill="#94a3b8">55</text>
+            </svg>
+            <div class="row space-between" style="font-size:9px;color:var(--ink-3);margin-top:2px;">
+              <span>9月</span><span>10月</span>
+            </div>
+          </div>
+
+          <!-- Key metrics -->
+          <div class="stat-grid c3">
+            <div class="stat-tile"><div class="num">72.4</div><div class="lbl">场均得分</div></div>
+            <div class="stat-tile"><div class="num">65.8</div><div class="lbl">场均失分</div></div>
+            <div class="stat-tile"><div class="num">+6.6</div><div class="lbl">净胜分</div></div>
+          </div>
+          <div class="stat-grid c3">
+            <div class="stat-tile"><div class="num">41.2%</div><div class="lbl">投篮命中率</div></div>
+            <div class="stat-tile"><div class="num">34.6%</div><div class="lbl">三分命中率</div></div>
+            <div class="stat-tile"><div class="num">12.1</div><div class="lbl">场均失误</div></div>
+          </div>
+
+          <!-- Snapshot entries -->
+          <div style="font-size:12px;color:var(--ink-3);margin:14px 0 6px;">深度数据</div>
+          <div class="row" style="gap:6px;">
+            <div class="card fill" style="flex:1;text-align:center;padding:10px 4px;margin:0;">
+              <div style="font-size:14px;">🏀</div>
+              <div class="card-sub" style="margin-top:4px;">投篮分布</div>
+            </div>
+            <div class="card fill" style="flex:1;text-align:center;padding:10px 4px;margin:0;">
+              <div style="font-size:14px;">⚡</div>
+              <div class="card-sub" style="margin-top:4px;">快攻统计</div>
+            </div>
+            <div class="card fill" style="flex:1;text-align:center;padding:10px 4px;margin:0;">
+              <div style="font-size:14px;">📉</div>
+              <div class="card-sub" style="margin-top:4px;">失误分布</div>
+            </div>
+          </div>
+
+          <!-- Match list -->
+          <div style="font-size:12px;color:var(--ink-3);margin:14px 0 6px;">全部比赛 · 12 场</div>
+          <div class="list-item">
+            <div class="avatar" style="background:var(--ok-2);color:var(--ok);">胜</div>
+            <div class="body">
+              <div class="nm">vs 育才中学 U16</div>
+              <div class="sub">10/09 · 命中率 44% · 三分 8/22</div>
+            </div>
+            <div class="val"><div class="n">78:65</div></div>
+          </div>
+          <div class="list-item">
+            <div class="avatar" style="background:var(--err-2);color:var(--err);">负</div>
+            <div class="body">
+              <div class="nm">vs 实验中学 U16</div>
+              <div class="sub">10/02 · 命中率 36% · 三分 5/19</div>
+            </div>
+            <div class="val"><div class="n">61:70</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes">
+      <h4>数据分层</h4>
+      <ul>
+        <li><b>L1 战绩</b>：胜/负/胜率。教练最先看</li>
+        <li><b>L2 得分趋势</b>：折线图，每场一个点，直观看到"最近在涨还是跌"</li>
+        <li><b>L3 关键指标</b>：场均得分/失分/净胜分 + 命中率/三分率/失误</li>
+        <li><b>L4 深度数据</b>：投篮分布、快攻统计、失误分布（各自独立子页）</li>
+        <li><b>L5 比赛列表</b>：可点进单场报告</li>
+      </ul>
+
+      <div class="callout risk">
+        <b>这里有一个诚实性问题。</b>场均得分、篮板、助攻这些需要全部比赛都补录完才准确。如果有 2 场没补录，数字会偏低。<b>解决方案：在指标旁边加"基于 10/12 场"的小字</b>，点一下能看到"哪 2 场未补录"。
+      </div>
+
+      <h4>赛制口径筛选（v0.2 新增 · 必须做）</h4>
+      <ul>
+        <li>页面最顶部是<b>赛制筛选</b>，而不是时间范围。因为赛制决定了这份数据"能不能放在一起算"</li>
+        <li>选项：<code>5 对 5</code> <code>3 对 3</code> <code>4 对 4</code>，<b>没有"全部"这个选项</b></li>
+        <li>筛选条下方常驻一行口径说明："当前口径：5 对 5 · U15 · 12 场 | 另有 3 对 3 共 4 场"，让教练知道自己看的是哪一部分</li>
+      </ul>
+
+      <div class="callout risk">
+        <b>为什么不能提供"全部赛制"选项？</b><br>
+        5 对 5 的 8 胜 4 负和 3 对 3 的 3 胜 1 负合并成"11 胜 5 负 · 胜率 69%"，这个数字<b>在篮球意义上完全无效</b>——两种赛制的人数、场地、时限、计分口径都不同，胜率不可比。同样地，3 对 3 的"远投 2 分"和 5 对 5 的"三分"混在一起算命中率也是错的。<br>
+        <b>与其给一个看起来全面、实际错误的数字，不如强制教练选一个口径。</b>这一条要在数据库查询层面就约束住（见范围确认 v0.2 的 5.2 节），不能只靠前端筛选。
+      </div>
+
+      <div class="callout info">
+        <b>如果这支球队只打过一种赛制怎么办？</b>筛选条自动隐藏，口径说明保留（"当前口径：5 对 5 · U15 · 12 场"）。教练仍然知道自己看的是什么，但不会被无用的选择器干扰。
+      </div>
+
+      <div class="callout info">
+        <b>趋势图只做得分。</b>第一版不要做"命中率趋势 + 篮板趋势 + 助攻趋势"多线图——数据完整度不够时多线图会一团乱麻。单线得分趋势最稳定、最直观。<b>且趋势图必须只画当前赛制口径下的场次</b>，跨赛制的点不能连成一条线。
+      </div>
+
+      <h4>数据来源标注</h4>
+      <ul>
+        <li><span class="source-badge ai">AI 自动</span> 得分趋势、投篮命中率、三分命中率、投篮分布、快攻统计</li>
+        <li><span class="source-badge mixed">补录后聚合</span> 球员级数据汇总（篮板、助攻、抢断、失误）</li>
+        <li><span class="source-badge manual">教练录入</span> 比分、对手名称、<b>年龄段、赛制</b></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================== -->
+<section class="screen" id="s3">
+  <h2><span class="badge-num teal">03</span>球员数据库 · 列表</h2>
+  <p class="screen-desc">把"全队"拆成"个体"。教练看这页是想找"谁在进步、谁拖后腿"。</p>
+  <div class="grid">
+    <div class="phone">
+      <div class="screen-body">
+        <div class="wf-top">‹ 球队 &nbsp;&nbsp;球员数据库</div>
+        <div class="content">
+          <div class="row" style="gap:6px;margin-bottom:8px;">
+            <div class="field" style="flex:1;margin:0;padding:6px 10px;">🔍 搜索姓名 / 号码</div>
+            <button class="btn ghost small">排序</button>
+          </div>
+
+          <div class="row" style="gap:4px;margin-bottom:10px;flex-wrap:wrap;">
+            <span class="filter-chip active">全部 15</span>
+            <span class="filter-chip">后卫</span>
+            <span class="filter-chip">前锋</span>
+            <span class="filter-chip">中锋</span>
+          </div>
+
+          <div class="card warn" style="padding:8px;">
+            <div class="card-sub" style="color:#92400e;">⚠ 7 名球员数据不完整，补录后自动更新</div>
+          </div>
+
+          <!-- Player list -->
+          <div class="list-item">
+            <div class="avatar" style="background:var(--accent-2);color:var(--accent);">7</div>
+            <div class="body">
+              <div class="nm">李XX <span class="chip teal" style="margin-left:4px;">分卫</span></div>
+              <div class="sub">6 场 · 命中率 46%</div>
+            </div>
+            <div class="val"><div class="n">15.2</div><div class="l">场均得分</div></div>
+          </div>
+          <div class="list-item">
+            <div class="avatar" style="background:var(--accent-2);color:var(--accent);">23</div>
+            <div class="body">
+              <div class="nm">陈XX <span class="chip teal" style="margin-left:4px;">小前</span></div>
+              <div class="sub">6 场 · 命中率 42%</div>
+            </div>
+            <div class="val"><div class="n">13.8</div><div class="l">场均得分</div></div>
+          </div>
+          <div class="list-item">
+            <div class="avatar" style="background:var(--accent-2);color:var(--accent);">4</div>
+            <div class="body">
+              <div class="nm">王XX <span class="chip teal" style="margin-left:4px;">控卫</span></div>
+              <div class="sub">6 场 · 场均 5.1 助攻</div>
+            </div>
+            <div class="val"><div class="n">12.3</div><div class="l">场均得分</div></div>
+          </div>
+          <div class="list-item">
+            <div class="avatar" style="background:var(--accent-2);color:var(--accent);">11</div>
+            <div class="body">
+              <div class="nm">张XX <span class="chip teal" style="margin-left:4px;">大前</span></div>
+              <div class="sub">6 场 · 场均 7.2 篮板</div>
+            </div>
+            <div class="val"><div class="n">9.6</div><div class="l">场均得分</div></div>
+          </div>
+          <div class="list-item" style="border-style:dashed;">
+            <div class="avatar" style="background:var(--warn-2);color:#92400e;">8</div>
+            <div class="body">
+              <div class="nm">孙XX <span class="chip teal" style="margin-left:4px;">分卫</span></div>
+              <div class="sub" style="color:#92400e;">2 场待补录 · 数据不完整</div>
+            </div>
+            <div class="val"><div class="n" style="color:var(--ink-3);">--</div><div class="l">场均得分</div></div>
+          </div>
+          <div class="list-item" style="border-style:dashed;opacity:0.7;">
+            <div class="avatar">15</div>
+            <div class="body">
+              <div class="nm">吴XX <span class="chip teal" style="margin-left:4px;">中锋</span></div>
+              <div class="sub">本赛季未出场</div>
+            </div>
+            <div class="val"><div class="n" style="color:var(--ink-3);">--</div><div class="l">--</div></div>
+          </div>
+
+          <button class="btn ghost block" style="margin-top:8px;">+ 添加球员</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes">
+      <h4>列表设计要点</h4>
+      <ul>
+        <li>每行：号码（大）+ 姓名 + 位置标签 + 关键副指标 + <b>衡量数字</b></li>
+        <li>默认按"场均得分"倒序，可切换排序（篮板 / 助攻 / 出场场次）</li>
+        <li>位置筛选：后卫 / 前锋 / 中锋；第一版不做多级筛选（如"后卫 + 命中率 &gt; 40%"）</li>
+        <li><b>数据不完整的球员用虚线边框 + 橙字</b>，一眼看出哪些人需要补录</li>
+      </ul>
+
+      <div class="callout risk">
+        <b>空数据状态是常态。</b>新教练刚注册时，球员库里全是空数据。这时页面应该展示<b>"先录一场比赛"</b>的引导，而不是一堆"--"让人沮丧。
+      </div>
+
+      <h4>球员来源</h4>
+      <ul>
+        <li>新建比赛/训练时录入的名单自动进库</li>
+        <li>也支持在这里单独添加（用于还没录过比赛的球员）</li>
+        <li>球员可标记"已离队"，不删除（历史数据要保留）</li>
+      </ul>
+
+      <div class="callout info">
+        <b>位置标签是教练在录入时手动选的吗？</b>建议是。AI 无法判断球员位置，第一版让教练在球员资料页手动选位置，后续根据投篮分布推荐（比如"你的球员 23 号有 70% 出手在禁区，建议标为中锋"）。这个智能推荐是第二版内容。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================== -->
+<section class="screen" id="s4">
+  <h2><span class="badge-num teal">04</span>球员个人详情</h2>
+  <p class="screen-desc">单个球员的完整档案。教练拿这页跟球员本人沟通——"你看你这里有问题"。</p>
+  <div class="grid">
+    <div class="phone">
+      <div class="screen-body">
+        <div class="wf-top">‹ 球员数据库 &nbsp;&nbsp;7 号 李XX</div>
+        <div class="content">
+          <!-- Player header -->
+          <div class="card" style="border-style:solid;padding:12px;">
+            <div class="row" style="gap:10px;">
+              <div style="width:52px;height:52px;border-radius:50%;background:var(--teal-2);color:var(--teal);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;flex-shrink:0;">7</div>
+              <div style="flex:1;">
+                <div style="font-size:15px;font-weight:600;">李XX</div>
+                <div class="card-sub">分卫 · 179 cm · 惯用右手</div>
+                <div class="row" style="gap:4px;margin-top:4px;">
+                  <span class="chip teal">6 场出场</span>
+                  <span class="chip">场均 28 分钟</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Season stats -->
+          <div style="font-size:12px;color:var(--ink-3);margin:12px 0 6px;">本赛季场均</div>
+          <div class="stat-grid c4">
+            <div class="stat-tile"><div class="num">15.2</div><div class="lbl">得分</div></div>
+            <div class="stat-tile"><div class="num" style="color:var(--ink-3);">--</div><div class="lbl">篮板</div></div>
+            <div class="stat-tile"><div class="num" style="color:var(--ink-3);">--</div><div class="lbl">助攻</div></div>
+            <div class="stat-tile"><div class="num">46%</div><div class="lbl">命中率</div></div>
+          </div>
+          <div class="card warn" style="padding:6px 10px;">
+            <div class="card-sub" style="color:#92400e;">篮板、助攻等数据需补录后自动计算</div>
+          </div>
+
+          <!-- Personal shot chart -->
+          <div style="font-size:12px;color:var(--ink-3);margin:12px 0 6px;">个人投篮分布</div>
+          <div class="court">
+            <svg viewBox="0 0 200 150">
+              <rect x="4" y="4" width="192" height="146" fill="none" stroke="#94a3b8" stroke-width="1.2"/>
+              <path d="M 20 4 L 20 34 M 180 4 L 180 34" stroke="#94a3b8" stroke-width="1.2" fill="none"/>
+              <path d="M 20 34 A 80 80 0 0 0 180 34" fill="none" stroke="#94a3b8" stroke-width="1.2"/>
+              <rect x="70" y="4" width="60" height="70" fill="none" stroke="#94a3b8" stroke-width="1.2"/>
+              <circle cx="100" cy="62" r="12" fill="none" stroke="#94a3b8" stroke-width="1.2"/>
+              <circle cx="100" cy="16" r="5" fill="none" stroke="#94a3b8" stroke-width="1.2"/>
+              <!-- makes -->
+              <circle cx="42" cy="42" r="2.6" fill="#16a34a" stroke="white" stroke-width="0.8"/>
+              <circle cx="50" cy="36" r="2.6" fill="#16a34a" stroke="white" stroke-width="0.8"/>
+              <circle cx="158" cy="40" r="2.6" fill="#16a34a" stroke="white" stroke-width="0.8"/>
+              <circle cx="150" cy="48" r="2.6" fill="#16a34a" stroke="white" stroke-width="0.8"/>
+              <circle cx="100" cy="16" r="2.6" fill="#16a34a" stroke="white" stroke-width="0.8"/>
+              <circle cx="86" cy="30" r="2.6" fill="#16a34a" stroke="white" stroke-width="0.8"/>
+              <circle cx="112" cy="36" r="2.6" fill="#16a34a" stroke="white" stroke-width="0.8"/>
+              <!-- misses -->
+              <circle cx="36" cy="56" r="2.6" fill="#dc2626" stroke="white" stroke-width="0.8"/>
+              <circle cx="164" cy="58" r="2.6" fill="#dc2626" stroke="white" stroke-width="0.8"/>
+              <circle cx="104" cy="10" r="2.6" fill="#dc2626" stroke="white" stroke-width="0.8"/>
+              <circle cx="94" cy="52" r="2.6" fill="#dc2626" stroke="white" stroke-width="0.8"/>
+            </svg>
+          </div>
+          <div class="row space-between" style="font-size:9px;color:var(--ink-3);margin-top:4px;padding:0 6px;">
+            <span>● 命中 7</span><span style="color:var(--err);">● 未中 4</span><span>命中率 64%</span>
+          </div>
+
+          <!-- Trend -->
+          <div style="font-size:12px;color:var(--ink-3);margin:14px 0 6px;">得分趋势</div>
+          <div class="card" style="padding:8px;">
+            <svg viewBox="0 0 280 70" style="width:100%;height:auto;">
+              <polyline points="14,40 60,28 106,46 152,20 198,32 244,16"
+                        fill="none" stroke="#0d9488" stroke-width="2"/>
+              <circle cx="14" cy="40" r="3" fill="#0d9488"/>
+              <circle cx="60" cy="28" r="3" fill="#0d9488"/>
+              <circle cx="106" cy="46" r="3" fill="#0d9488"/>
+              <circle cx="152" cy="20" r="3" fill="#0d9488"/>
+              <circle cx="198" cy="32" r="3" fill="#0d9488"/>
+              <circle cx="244" cy="16" r="3.5" fill="#0d9488"/>
+            </svg>
+            <div class="row space-between" style="font-size:9px;color:var(--ink-3);">
+              <span>9/18</span><span>10/09</span>
+            </div>
+          </div>
+
+          <!-- Game log -->
+          <div style="font-size:12px;color:var(--ink-3);margin:14px 0 6px;">逐场记录</div>
+          <div class="list-item">
+            <div class="body">
+              <div class="nm">10/09 vs 育才中学</div>
+              <div class="sub">得分 22 · 三分 4/8 · 命中率 52%</div>
+            </div>
+            <span style="color:var(--ok);font-size:11px;">22</span>
+          </div>
+          <div class="list-item">
+            <div class="body">
+              <div class="nm">10/02 vs 实验中学</div>
+              <div class="sub">得分 13 · 三分 2/7 · 命中率 38%</div>
+            </div>
+            <span style="font-size:11px;">13</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes">
+      <h4>页面结构</h4>
+      <ul>
+        <li>顶部：号码 + 姓名 + 位置 + 身高惯用手 + 出场场次</li>
+        <li>赛季场均 4 tile：得分 / 篮板 / 助攻 / 命中率（篮板助攻待补录）</li>
+        <li><b>个人投篮分布图</b>：这是最有价值的一块——教练能直接看到"这个球员在哪投得准"</li>
+        <li>得分趋势折线：单球员逐场</li>
+        <li>逐场记录列表：可点进该场报告</li>
+      </ul>
+
+      <div class="callout ok">
+        <b>这页的实际用途是"沟通工具"。</b>教练会拿着手机跟球员说"你看你三分全在弧顶，底角一个没投过"或者"你这场比上场多了 9 分"。所以<b>每个数字都要能追溯到具体片段</b>——点某场记录能跳回报告的事件列表，并已按这个球员过滤。
+      </div>
+
+      <div class="callout">
+        <b>身高、体重、惯用手这些是教练手动录的。</b>第一版提供一个球员资料编辑页，字段极简（号码、姓名、位置、身高、惯用手）。不做伤病记录、不做体测数据，那些是第二版。
+      </div>
+
+      <h4>赛制与年龄段对这页的影响（v0.2 新增）</h4>
+      <ul>
+        <li><b>个人投篮分布图必须标注当前口径</b>。3对3 的出手点全部落在半场，和 5对5 的全场分布图放在一起看会严重误导。图上方要写清"5 对 5 · 12 场"或"3 对 3 · 4 场"</li>
+        <li><b>三分弧线半径随年龄段变化</b>。U15 用 5.80 m 画弧，一线用 6.75 m。如果这张 SVG 底图按成人标准硬画，教练会看到"这个球员三分线外一步就投了"的错误结论</li>
+        <li><b>3对3 口径下"三分"改称"远投"</b>，计分值是 2 分不是 3 分，球员场均得分的构成说明也要跟着改</li>
+        <li><b>赛季场均数据按赛制分组</b>。如果一个球员既打 5对5 又打 3对3，两组数字分开展示，不合并成一个"场均得分"</li>
+      </ul>
+
+      <div class="callout warn">
+        <b>球场底图 SVG 必须做成参数化组件</b>，接受 <code>format</code>（决定全场/半场）与 <code>three_point_radius_m</code>（决定弧线半径）两个入参。<b>不能在代码里画死一条 6.75 m 的弧线</b>——这是范围确认 v0.2 第 7.4 节点名的"静默错误数据"来源之一。屏 08 阵型、屏 09 热图、球队页球员详情、对手详情 Tab 1/2 共用同一个组件。
+      </div>
+
+      <h4>待确认</h4>
+      <ul>
+        <li>个人投篮分布图是"整赛季汇总"还是"可切到单场"？建议第一版默认整赛季，点逐场记录可看单场</li>
+        <li>要不要给球员本人一个查看入口？（涉及账号体系，第一版不做）</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================== -->
+<section class="screen" id="s5">
+  <h2><span class="badge-num purple">05</span>球队战术板 · 战术库</h2>
+  <p class="screen-desc">教练自己剪辑、自己命名的战术库。形态是"战术名称 + 视频"，不做绘制。</p>
+  <div class="grid">
+    <div class="phone">
+      <div class="screen-body">
+        <div class="wf-top">‹ 球队 &nbsp;&nbsp;球队战术板</div>
+        <div class="content">
+          <div class="row" style="gap:6px;margin-bottom:8px;">
+            <div class="field" style="flex:1;margin:0;padding:6px 10px;">🔍 搜索战术名 / 标签</div>
+            <button class="btn primary small" style="padding:6px 12px;">+ 新建</button>
+          </div>
+
+          <div class="row" style="gap:4px;margin-bottom:10px;flex-wrap:wrap;">
+            <span class="filter-chip active">全部 24</span>
+            <span class="filter-chip">进攻</span>
+            <span class="filter-chip">防守</span>
+            <span class="filter-chip">边线球</span>
+            <span class="filter-chip">训练</span>
+          </div>
+
+          <div class="tactic-card">
+            <div class="vcard">
+              <div class="play">▶</div>
+              <div class="tag">比赛切片</div>
+              <div class="dur">0:42</div>
+            </div>
+            <div class="tc-title">挡拆外弹 · 1-5 号位</div>
+            <div class="tc-meta">
+              <span class="chip purple">进攻</span>
+              <span class="chip">4 次引用</span>
+              <span>08:12 Q2</span>
+            </div>
+          </div>
+
+          <div class="tactic-card">
+            <div class="vcard">
+              <div class="play">▶</div>
+              <div class="tag">训练切片</div>
+              <div class="dur">1:15</div>
+            </div>
+            <div class="tc-title">底线交叉掩护</div>
+            <div class="tc-meta">
+              <span class="chip purple">进攻</span>
+              <span class="chip">2 次引用</span>
+              <span>团队对抗 10/07</span>
+            </div>
+          </div>
+
+          <div class="tactic-card">
+            <div class="vcard">
+              <div class="play">▶</div>
+              <div class="tag">比赛切片</div>
+              <div class="dur">0:28</div>
+            </div>
+            <div class="tc-title">2-3 联防轮转</div>
+            <div class="tc-meta">
+              <span class="chip purple">防守</span>
+              <span class="chip">5 次引用</span>
+              <span>10/02 Q3</span>
+            </div>
+          </div>
+
+          <div class="tactic-card" style="opacity:0.55;border-style:dashed;">
+            <div class="vcard" style="background:var(--fill-2);">
+              <div style="color:var(--ink-3);font-size:10px;">即将支持</div>
+            </div>
+            <div class="tc-title" style="color:var(--ink-3);">点状动画演示</div>
+            <div class="tc-meta">
+              <span class="chip gray">后期版本</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes">
+      <h4>战术卡结构</h4>
+      <ul>
+        <li><b>视频封面</b>：从切片第一帧自动生成缩略图，点击播放</li>
+        <li><b>来源标签</b>：比赛切片 / 训练切片（教练一眼知道素材出处）</li>
+        <li><b>时长</b>：多数战术卡 30 秒 - 2 分钟</li>
+        <li><b>战术名</b>：教练自己命名，无预设</li>
+        <li><b>标签</b>：进攻 / 防守 / 边线球 / 训练（最多 2 个，教练自建）</li>
+        <li><b>引用计数</b>：这张卡被多少份报告引用了（未来可跳转查看）</li>
+      </ul>
+
+      <div class="callout purple">
+        <b>战术卡的本质是"可复用的教学素材"。</b>教练平时要跟球员讲战术，口头讲不清楚。他录一场比赛，发现某个回合打得特别好，切成 30 秒，命名成"挡拆外弹"，以后直接调出来给球员看。这就是产品的核心价值。<b>所以视频质量和播放流畅度比什么都重要。</b>
+      </div>
+
+      <div class="callout info">
+        <b>"即将支持 · 点状动画演示"这张占位卡很重要。</b>教练看到产品路线图上有这个功能，会更愿意把战术卡攒起来——他知道这些素材未来会变成动画演示。占位卡不实现，但要展示。
+      </div>
+
+      <h4>与训练视频的接入</h4>
+      <ul>
+        <li>战术卡的素材来源有两种：<b>比赛切片</b>（AI 已识别的快攻/进球）和<b>训练切片</b>（团队对抗里教练标记的回合）</li>
+        <li>训练切片的获取路径：教练在训练报告里发现好的回合 → 点"存为战术卡" → 直接进战术库</li>
+        <li>这就是"从团队对抗中接入训练视频"的实现方式</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================== -->
+<section class="screen" id="s6">
+  <h2><span class="badge-num purple">06</span>新建战术 · 从录像切片</h2>
+  <p class="screen-desc">教练的核心编辑动作：从已有录像里挑一段，命名，存为战术卡。</p>
+  <div class="grid">
+    <div class="phone">
+      <div class="screen-body">
+        <div class="wf-top">‹ 取消 &nbsp;&nbsp;新建战术 &nbsp;&nbsp; 保存</div>
+        <div class="content">
+          <!-- Step indicator -->
+          <div class="row" style="gap:4px;justify-content:center;margin:10px 0 14px;">
+            <span class="chip accent">1 选片段</span>
+            <span style="color:var(--ink-3);font-size:10px;">→</span>
+            <span class="chip">2 命名</span>
+            <span style="color:var(--ink-3);font-size:10px;">→</span>
+            <span class="chip">3 打标签</span>
+          </div>
+
+          <!-- Source selection -->
+          <div style="font-size:12px;color:var(--ink-3);margin-bottom:6px;">选择素材来源</div>
+          <div class="seg">
+            <span class="active">从比赛</span>
+            <span>从训练</span>
+            <span>本地上传</span>
+          </div>
+
+          <div class="field" style="display:flex;justify-content:space-between;align-items:center;">
+            <span>10/09 vs 育才中学</span>
+            <span style="color:var(--ink-2);">切换 ›</span>
+          </div>
+
+          <!-- Clip picking -->
+          <div style="font-size:12px;color:var(--ink-3);margin:12px 0 6px;">选择时间段</div>
+          <div class="card" style="padding:10px;">
+            <!-- mini timeline -->
+            <div style="height:36px;background:var(--fill);border-radius:6px;position:relative;overflow:hidden;">
+              <div style="position:absolute;left:30%;top:0;bottom:0;width:12%;background:var(--purple);opacity:0.75;border-radius:3px;"></div>
+              <div style="position:absolute;left:30%;top:2px;width:1.5px;height:8px;background:var(--purple);"></div>
+              <div style="position:absolute;left:42%;top:2px;width:1.5px;height:8px;background:var(--purple);"></div>
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--ink-3);">拖动选取区间</div>
+            </div>
+            <div class="row space-between" style="font-size:10px;color:var(--ink-2);margin-top:6px;">
+              <span>起点 00:24:18</span>
+              <span>终点 00:24:42</span>
+              <span class="chip purple">24 秒</span>
+            </div>
+          </div>
+
+          <div class="card fill">
+            <div class="row space-between">
+              <span class="card-sub">试试"智能推荐片段"</span>
+              <span class="chip purple">3 个候选</span>
+            </div>
+            <div class="card-body" style="margin-top:4px;">根据本场快攻与进球自动推荐</div>
+          </div>
+
+          <!-- Naming -->
+          <div style="font-size:12px;color:var(--ink-3);margin:14px 0 6px;">战术名</div>
+          <div class="field"><label>名称</label>挡拆外弹 · 1-5 号位</div>
+
+          <div style="font-size:12px;color:var(--ink-3);margin:14px 0 6px;">战术要点（可选）</div>
+          <div class="field" style="min-height:50px;">
+            <label>备注</label>
+            4 号位给 5 号位做掩护后外弹到 45 度，接球投三分
+          </div>
+
+          <div style="font-size:12px;color:var(--ink-3);margin:14px 0 6px;">标签</div>
+          <div class="row" style="gap:6px;flex-wrap:wrap;">
+            <span class="chip purple">✓ 进攻</span>
+            <span class="chip purple">✓ 三分</span>
+            <span class="chip">防守</span>
+            <span class="chip">边线球</span>
+            <span class="chip">+ 自定义</span>
+          </div>
+
+          <button class="btn primary block" style="margin-top:16px;">保存战术卡</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes">
+      <h4>三步流程</h4>
+      <ul>
+        <li><b>Step 1 选片段</b>：从已有录像（比赛/训练）里拖时间区间选一段；或本地上传</li>
+        <li><b>Step 2 命名</b>：战术名（必填）+ 战术要点（选填，纯文本）</li>
+        <li><b>Step 3 打标签</b>：进攻 / 防守 / 边线球 / 三分 + 自定义标签</li>
+      </ul>
+
+      <div class="callout purple">
+        <b>"智能推荐片段"是这张屏的关键设计。</b>教练从 45 分钟录像里找一个回合很麻烦，得自己拉时间轴。我们的 AI 已经知道哪几段是快攻、哪几段是进球——直接把"可能值得做成战术卡的片段"列出来，教练从 3 个候选里点一个就行。<b>这把操作从 2 分钟降到 10 秒。</b>
+      </div>
+
+      <div class="callout info">
+        <b>本期不做智能推荐？</b>也可以。第一版先做"手动拖选时间段"完全可以，但接口上要预留"推荐片段"的数据通道——因为 AI 已经识别了事件，返回一段时间的候选成本极低。建议第一版就做，哪怕是简单的"本场所有快攻"，价值都很大。
+      </div>
+
+      <h4>边界情况</h4>
+      <ul>
+        <li>选了超过 3 分钟的范围 → 提示"战术卡建议控制在 2 分钟内"，但允许保存</li>
+        <li>选段与已存在战术卡重叠 → 提示"这段已经被用于'挡拆外弹'，是否继续？"</li>
+        <li>视频还在处理中 → "从比赛/训练"入口灰显，只能本地上传</li>
+      </ul>
+
+      <div class="callout">
+        <b>"本地上传"这个入口要有。</b>教练手里可能有别的渠道拍的视频（比如别人分享的比赛录像），也应该能存进战术库。但第一版可以只留着入口，先不实现。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================== -->
+<section class="screen" id="s7">
+  <h2><span class="badge-num warn">07</span>对手球队列表</h2>
+  <p class="screen-desc">赛前准备入口。教练点开对手，是要在赛前 30 分钟迅速复习一遍。</p>
+  <div class="grid">
+    <div class="phone">
+      <div class="screen-body">
+        <div class="wf-top">‹ 球队 &nbsp;&nbsp;对手记录</div>
+        <div class="content">
+          <div class="field" style="margin-bottom:10px;">🔍 搜索对手队名</div>
+
+          <div class="card warn">
+            <div class="row space-between">
+              <div>
+                <div class="card-title" style="color:#92400e;">下次对阵：育才中学 U16</div>
+                <div class="card-body" style="color:#92400e;">10/16 · 3 天前交手记录齐全</div>
+              </div>
+              <span style="color:#92400e;">›</span>
+            </div>
+          </div>
+
+          <div style="font-size:12px;color:var(--ink-3);margin:12px 0 6px;">交锋历史 · 8 支球队</div>
+
+          <div class="list-item">
+            <div class="avatar" style="background:var(--warn-2);color:#92400e;">育</div>
+            <div class="body">
+              <div class="nm">育才中学 U16</div>
+              <div class="sub">交手 3 次 · 2 胜 1 负 · 最近 10/09</div>
+            </div>
+            <div class="val"><div class="n" style="color:var(--ok);">2:1</div><div class="l">我方视角</div></div>
+          </div>
+
+          <div class="list-item">
+            <div class="avatar" style="background:var(--warn-2);color:#92400e;">实</div>
+            <div class="body">
+              <div class="nm">实验中学 U16</div>
+              <div class="sub">交手 2 次 · 0 胜 2 负 · 最近 10/02</div>
+            </div>
+            <div class="val"><div class="n" style="color:var(--err);">0:2</div><div class="l">我方视角</div></div>
+          </div>
+
+          <div class="list-item">
+            <div class="avatar" style="background:var(--warn-2);color:#92400e;">一</div>
+            <div class="body">
+              <div class="nm">第一中学 U16</div>
+              <div class="sub">交手 1 次 · 1 胜 0 负 · 最近 09/24</div>
+            </div>
+            <div class="val"><div class="n" style="color:var(--ok);">1:0</div><div class="l">我方视角</div></div>
+          </div>
+
+          <div class="list-item" style="opacity:0.75;border-style:dashed;">
+            <div class="avatar" style="background:var(--fill);color:var(--ink-3);">+</div>
+            <div class="body">
+              <div class="nm" style="color:var(--ink-2);">手动添加对手</div>
+              <div class="sub">用于录入比赛之外的侦察信息</div>
+            </div>
+          </div>
+
+          <div class="callout info" style="font-size:11px;margin-top:12px;">
+            对手记录由交手比赛自动生成。每打一场自动更新。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes">
+      <h4>列表结构</h4>
+      <ul>
+        <li><b>下次对阵提醒</b>：把即将迎战的对手置顶到显眼位置</li>
+        <li>对手卡：队名 + 交手次数 + 胜负 + 最近交手日期，右侧是"我方视角"的战绩</li>
+        <li>手动添加：用于还没交手过的对手（侦察比赛录像），或对手学校名变更的情况</li>
+      </ul>
+
+      <div class="callout">
+        <b>对手记录从哪来？</b>两个来源：<br>
+        <b>① 自动</b>：教练在小程序里录了自己球队的比赛后，AI 识别的对手信息（比分、对方阵型、对方重点动作）自动归到该对手名下。<br>
+        <b>② 手动</b>：教练自己去看别人的比赛，录下来上传，指定"这是实验中学的比赛"，AI 处理后数据也会进入这个对手档案。
+      </div>
+
+      <div class="callout info">
+        <b>这条路径是产品从"自己队工具"变成"侦察工具"的关键。</b>教练可以去现场录对手的比赛，上传后得到对手的阵型、重点球员、战术特征。第二版再考虑自动提取，第一版靠手动标记。
+      </div>
+
+      <h4>赛制维度（v0.2 新增）</h4>
+      <div class="callout warn">
+        <b>交手记录也必须按赛制拆开。</b>和育才中学打过 2 场 5对5、1 场 3对3，不能合并显示成"交手 3 次 · 2 胜 1 负"——3对3 那场的胜负和 5对5 完全不可比。<br>
+        正确做法：对手卡副标题写成 <b>"5对5 交手 2 次 · 1胜1负 | 3对3 交手 1 次 · 1胜"</b>；右侧战绩只统计<b>下次对阵所用赛制</b>的那部分。
+      </div>
+      <ul>
+        <li>对手详情页顶部同样要有赛制口径切换，四个 tab 的数据都跟着口径走</li>
+        <li>"下次对阵提醒"要带出赛制：如果下周是 3对3 比赛，提醒卡直接显示"3 对 3 · 我方与该队 3对3 交手 1 次"</li>
+        <li>手动添加对手时，也要记录是通过哪种赛制的侦察录像添加的</li>
+      </ul>
+
+      <h4>交互</h4>
+      <ul>
+        <li>点对手卡 → 进入对手详情（屏 08）</li>
+        <li>长按对手卡 → 快捷操作（重命名、合并、删除）</li>
+        <li>搜索：支持模糊匹配队名</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================== -->
+<section class="screen" id="s8">
+  <h2><span class="badge-num warn">08</span>对手详情 · 四个 tab</h2>
+  <p class="screen-desc">这是"对手侦察手册"的核心页。四个 tab：使用阵型 / 球队数据 / 重点球员 / 对手战术板。</p>
+
+  <div class="mini-phone-row">
+    <!-- Tab 1: 阵型 -->
+    <div class="mini-phone">
+      <div class="phone">
+        <div class="screen-body">
+          <div class="wf-top" style="font-size:10px;">‹ &nbsp;育才中学 U16</div>
+          <div class="content" style="padding:0 8px 50px;">
+            <div class="tabbar">
+              <span class="active">阵型</span>
+              <span>数据</span>
+              <span>球员</span>
+              <span>战术</span>
+            </div>
+            <div style="font-size:10px;color:var(--ink-3);margin-bottom:6px;">交手 3 场 · 共 47 次进攻回合</div>
+
+            <div class="court" style="padding:4px;">
+              <svg viewBox="0 0 200 130">
+                <rect x="3" y="3" width="194" height="124" fill="none" stroke="#94a3b8" stroke-width="1"/>
+                <path d="M 18 3 L 18 30 M 182 3 L 182 30" stroke="#94a3b8" stroke-width="1" fill="none"/>
+                <path d="M 18 30 A 82 82 0 0 0 182 30" fill="none" stroke="#94a3b8" stroke-width="1"/>
+                <rect x="72" y="3" width="56" height="62" fill="none" stroke="#94a3b8" stroke-width="1"/>
+                <circle cx="100" cy="54" r="11" fill="none" stroke="#94a3b8" stroke-width="1"/>
+                <circle cx="100" cy="14" r="4" fill="none" stroke="#94a3b8" stroke-width="1"/>
+                <circle cx="62" cy="56" r="7" fill="#f59e0b" stroke="white" stroke-width="1.2"/>
+                <circle cx="138" cy="56" r="7" fill="#f59e0b" stroke="white" stroke-width="1.2"/>
+                <circle cx="88" cy="26" r="7" fill="#f59e0b" stroke="white" stroke-width="1.2"/>
+                <circle cx="112" cy="26" r="7" fill="#f59e0b" stroke="white" stroke-width="1.2"/>
+                <circle cx="100" cy="78" r="7" fill="#f59e0b" stroke="white" stroke-width="1.2"/>
+              </svg>
+            </div>
+
+            <div style="font-size:10px;color:var(--ink-3);margin:10px 0 6px;">常用阵型分布</div>
+            <div class="prog-row"><span class="nm">2-3 联防</span><div class="track"><div class="fill" style="width:46%;background:var(--warn);"></div></div><span class="v">46%</span></div>
+            <div class="prog-row"><span class="nm">人盯人</span><div class="track"><div class="fill" style="width:36%;background:var(--accent);"></div></div><span class="v">36%</span></div>
+            <div class="prog-row"><span class="nm">3-2 联防</span><div class="track"><div class="fill" style="width:18%;background:var(--ink-3);"></div></div><span class="v">18%</span></div>
+
+            <div class="card fill" style="padding:6px;margin-top:8px;">
+              <div style="font-size:10px;color:var(--ink-2);">进攻端偏好：<b>45 度三分</b>（占比 38%）</div>
+            </div>
+            <div class="card fill" style="padding:6px;">
+              <div style="font-size:10px;color:var(--ink-2);">防守端偏好：<b>禁区收缩</b>（对手篮下出手占比仅 22%）</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mini-cap"><span class="chip warn">Tab 1</span> 使用阵型</div>
+    </div>
+
+    <!-- Tab 2: 数据 -->
+    <div class="mini-phone">
+      <div class="phone">
+        <div class="screen-body">
+          <div class="wf-top" style="font-size:10px;">‹ &nbsp;育才中学 U16</div>
+          <div class="content" style="padding:0 8px 50px;">
+            <div class="tabbar">
+              <span>阵型</span>
+              <span class="active">数据</span>
+              <span>球员</span>
+              <span>战术</span>
+            </div>
+            <div style="font-size:10px;color:var(--ink-3);margin-bottom:6px;">与我校交手 3 场 · 数据聚合</div>
+
+            <div class="stat-grid c3" style="gap:4px;">
+              <div class="stat-tile" style="padding:4px 2px;"><div class="num" style="font-size:13px;">68.3</div><div class="lbl" style="font-size:9px;">场均得分</div></div>
+              <div class="stat-tile" style="padding:4px 2px;"><div class="num" style="font-size:13px;">71.0</div><div class="lbl" style="font-size:9px;">场均失分</div></div>
+              <div class="stat-tile" style="padding:4px 2px;"><div class="num" style="font-size:13px;">39.8%</div><div class="lbl" style="font-size:9px;">命中率</div></div>
+            </div>
+            <div class="stat-grid c3" style="gap:4px;">
+              <div class="stat-tile" style="padding:4px 2px;"><div class="num" style="font-size:13px;">31.2%</div><div class="lbl" style="font-size:9px;">三分率</div></div>
+              <div class="stat-tile" style="padding:4px 2px;"><div class="num" style="font-size:13px;">14.7</div><div class="lbl" style="font-size:9px;">场均失误</div></div>
+              <div class="stat-tile" style="padding:4px 2px;"><div class="num" style="font-size:13px;">8.4</div><div class="lbl" style="font-size:9px;">场均快攻</div></div>
+            </div>
+
+            <div style="font-size:10px;color:var(--ink-3);margin:10px 0 6px;">得分趋势（3 场）</div>
+            <div class="card" style="padding:6px;">
+              <svg viewBox="0 0 260 56" style="width:100%;height:auto;">
+                <polyline points="20,36 130,16 240,30" fill="none" stroke="#f59e0b" stroke-width="2"/>
+                <circle cx="20" cy="36" r="3" fill="#f59e0b"/>
+                <circle cx="130" cy="16" r="3" fill="#f59e0b"/>
+                <circle cx="240" cy="30" r="3.5" fill="#f59e0b"/>
+              </svg>
+              <div class="row space-between" style="font-size:8px;color:var(--ink-3);">
+                <span>09/24 · 61</span><span>10/02 · 70</span><span>10/09 · 65</span>
+              </div>
+            </div>
+
+            <div style="font-size:10px;color:var(--ink-3);margin:10px 0 6px;">对手投篮分布</div>
+            <div class="court" style="padding:4px;">
+              <svg viewBox="0 0 200 100">
+                <rect x="3" y="3" width="194" height="94" fill="none" stroke="#94a3b8" stroke-width="1"/>
+                <rect x="72" y="3" width="56" height="50" fill="none" stroke="#94a3b8" stroke-width="1"/>
+                <path d="M 18 3 L 18 26 M 182 3 L 182 26" stroke="#94a3b8" stroke-width="1" fill="none"/>
+                <path d="M 18 26 A 82 82 0 0 0 182 26" fill="none" stroke="#94a3b8" stroke-width="1"/>
+                <circle cx="100" cy="50" r="20" fill="#f59e0b" opacity="0.28"/>
+                <circle cx="40" cy="30" r="14" fill="#f59e0b" opacity="0.18"/>
+                <circle cx="160" cy="30" r="14" fill="#f59e0b" opacity="0.18"/>
+              </svg>
+            </div>
+            <div style="font-size:9px;color:var(--ink-3);margin-top:4px;text-align:center;">颜色越深 = 出手越集中</div>
+          </div>
+        </div>
+      </div>
+      <div class="mini-cap"><span class="chip warn">Tab 2</span> 球队数据</div>
+    </div>
+
+    <!-- Tab 3: 重点球员 -->
+    <div class="mini-phone">
+      <div class="phone">
+        <div class="screen-body">
+          <div class="wf-top" style="font-size:10px;">‹ &nbsp;育才中学 U16</div>
+          <div class="content" style="padding:0 8px 50px;">
+            <div class="tabbar">
+              <span>阵型</span>
+              <span>数据</span>
+              <span class="active">球员</span>
+              <span>战术</span>
+            </div>
+            <div class="row space-between" style="margin-bottom:8px;">
+              <span style="font-size:10px;color:var(--ink-3);">重点球员 3 人</span>
+              <span class="chip warn">手动标记</span>
+            </div>
+
+            <div class="list-item" style="padding:6px;">
+              <div class="avatar" style="width:28px;height:28px;font-size:10px;background:var(--err-2);color:var(--err);">10</div>
+              <div class="body">
+                <div class="nm" style="font-size:11px;">赵XX</div>
+                <div class="sub" style="font-size:9px;">控卫 · 左撇子 · 突破强</div>
+              </div>
+              <span class="chip err" style="font-size:9px;">高威胁</span>
+            </div>
+            <div class="card fill" style="padding:6px;margin:-2px 0 6px;">
+              <div style="font-size:9.5px;color:var(--ink-2);">场均 18.4 分 · 三分率 41% · 场均 5.2 助攻</div>
+              <div style="font-size:9.5px;color:var(--ink-3);margin-top:3px;">备注：挡拆后第一选择是外弹三分</div>
+            </div>
+
+            <div class="list-item" style="padding:6px;">
+              <div class="avatar" style="width:28px;height:28px;font-size:10px;background:var(--warn-2);color:#92400e;">23</div>
+              <div class="body">
+                <div class="nm" style="font-size:11px;">孙XX</div>
+                <div class="sub" style="font-size:9px;">中锋 · 203 cm · 篮板机器</div>
+              </div>
+              <span class="chip warn" style="font-size:9px;">中威胁</span>
+            </div>
+            <div class="card fill" style="padding:6px;margin:-2px 0 6px;">
+              <div style="font-size:9.5px;color:var(--ink-2);">场均 11.2 篮板 · 二次进攻占总得分 34%</div>
+              <div style="font-size:9.5px;color:var(--ink-3);margin-top:3px;">备注：给他上身体，别让他舒服接球</div>
+            </div>
+
+            <div class="list-item" style="padding:6px;">
+              <div class="avatar" style="width:28px;height:28px;font-size:10px;">7</div>
+              <div class="body">
+                <div class="nm" style="font-size:11px;">周XX</div>
+                <div class="sub" style="font-size:9px;">分卫 · 三分投手</div>
+              </div>
+              <span class="chip" style="font-size:9px;">普通</span>
+            </div>
+
+            <button class="btn ghost block small" style="margin-top:6px;">+ 添加重点球员</button>
+
+            <div class="callout warn" style="font-size:9.5px;margin-top:8px;">
+              ⚠ 对手球员数据来自我校与其交手的比赛，非对手真实全量数据
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mini-cap"><span class="chip warn">Tab 3</span> 重点球员</div>
+    </div>
+
+    <!-- Tab 4: 对手战术板 -->
+    <div class="mini-phone">
+      <div class="phone">
+        <div class="screen-body">
+          <div class="wf-top" style="font-size:10px;">‹ &nbsp;育才中学 U16</div>
+          <div class="content" style="padding:0 8px 50px;">
+            <div class="tabbar">
+              <span>阵型</span>
+              <span>数据</span>
+              <span>球员</span>
+              <span class="active">战术</span>
+            </div>
+            <div class="row space-between" style="margin-bottom:8px;">
+              <span style="font-size:10px;color:var(--ink-3);">对手战术 5 张</span>
+              <button class="btn primary small" style="padding:3px 8px;font-size:9px;">+ 剪辑</button>
+            </div>
+
+            <div class="tactic-card" style="padding:6px;">
+              <div class="vcard" style="margin-bottom:4px;">
+                <div class="play" style="width:26px;height:26px;font-size:11px;">▶</div>
+                <div class="tag" style="font-size:8px;">从交手比赛</div>
+                <div class="dur" style="font-size:8px;">0:35</div>
+              </div>
+              <div class="tc-title" style="font-size:10px;">2-3 联防站位</div>
+              <div class="tc-meta" style="font-size:9px;">
+                <span class="chip warn">防守</span>
+                <span>10/09 Q1</span>
+              </div>
+            </div>
+
+            <div class="tactic-card" style="padding:6px;">
+              <div class="vcard" style="margin-bottom:4px;">
+                <div class="play" style="width:26px;height:26px;font-size:11px;">▶</div>
+                <div class="tag" style="font-size:8px;">从交手比赛</div>
+                <div class="dur" style="font-size:8px;">0:52</div>
+              </div>
+              <div class="tc-title" style="font-size:10px;">挡拆外弹（10 号）</div>
+              <div class="tc-meta" style="font-size:9px;">
+                <span class="chip warn">进攻</span>
+                <span>10/09 Q1</span>
+              </div>
+            </div>
+
+            <div class="tactic-card" style="padding:6px;">
+              <div class="vcard" style="margin-bottom:4px;">
+                <div class="play" style="width:26px;height:26px;font-size:11px;">▶</div>
+                <div class="tag" style="font-size:8px;">手动上传</div>
+                <div class="dur" style="font-size:8px;">1:20</div>
+              </div>
+              <div class="tc-title" style="font-size:10px;">全场紧逼</div>
+              <div class="tc-meta" style="font-size:9px;">
+                <span class="chip warn">防守</span>
+                <span>侦察录像</span>
+              </div>
+            </div>
+
+            <div class="callout info" style="font-size:9.5px;margin-top:8px;">
+              后期将支持 AI 自动从交手录像中提取对手战术
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mini-cap"><span class="chip warn">Tab 4</span> 对手战术板</div>
+    </div>
+  </div>
+
+  <div class="notes" style="margin-top:24px;">
+    <h4>四个 tab 的内容</h4>
+    <ul>
+      <li><b>Tab 1 使用阵型</b>：AI 从交手比赛里聚合对手常用阵型分布，附带一个代表阵型的球场图。还有"进攻端偏好 / 防守端偏好"两条简短的洞察</li>
+      <li><b>Tab 2 球队数据</b>：对手在我方视角下的统计（对位战绩、得分、命中率、三分率、失误、快攻），附得分趋势折线和对手投篮分布热区</li>
+      <li><b>Tab 3 重点球员</b>：教练手动标记的重点球员（名单 + 威胁等级 + 备注）。数据来自交手比赛的自动聚合</li>
+      <li><b>Tab 4 对手战术板</b>：教练从录像里剪辑命名的对手战术卡，与球队战术板同构，只是归属对手</li>
+    </ul>
+
+    <div class="callout warn">
+      <b>"对手战术板需要教练从比赛录像里剪辑并命名"——后期可 AI 自动提取。</b>这一点很关键：第一版是纯手动的，教练需要：<br>
+      1. 打开交手比赛的报告 → 2. 找到某个回合 → 3. 点"存为对手战术" → 4. 命名 → 5. 保存。<br>
+      和球队战术板的"新建战术"共用同一个编辑器，只是归属对象不同。工程上只做一次。
+    </div>
+
+    <div class="callout info">
+      <b>Tab 3 底部那行免责提示必须有。</b>"对手球员数据来自我校与其交手的比赛，非对手真实全量数据"——这个说明能避免教练产生错误认知（以为我们能拿到对手训练数据）。诚实让产品更可信。
+    </div>
+
+    <div class="callout risk">
+      <b>对手数据的准确性是产品从"自用工具"升级到"侦察工具"的核心。</b>但它的基础是"教练录了交手比赛"。如果教练只录自己队的比赛且没有补录完，对手数据就是空的。所以<b>对手详情页必须有友好的空状态</b>："还没有与育才中学的交手记录，去录一场吧"。
+    </div>
+  </div>
+</section>
+
+<!-- ================================================== -->
+<section class="design-lang">
+  <h2>数据来源的一致性</h2>
+  <p style="color:var(--ink-2);font-size:13.5px;margin-bottom:14px;">
+    球队页的所有数据都需明确来源。教练要知道"这个数是 AI 算的，还是我录的"，否则他不知道该不该信。
+  </p>
+
+  <div class="pattern-grid">
+    <div class="pattern">
+      <h4><span class="source-badge ai">AI 自动</span> 数据</h4>
+      <p>投篮点、命中/未中、二分三分判定、快攻识别、阵型采样、投篮热区、得分趋势 —— 全部来自 AI 对视频的处理</p>
+    </div>
+    <div class="pattern">
+      <h4><span class="source-badge mixed">补录后聚合</span> 数据</h4>
+      <p>球员级得分、篮板、助攻、抢断 —— 需要教练补录才能归属到具体球员，再自动聚合</p>
+    </div>
+    <div class="pattern">
+      <h4><span class="source-badge manual">教练录入</span> 数据</h4>
+      <p>比分、对手名、名单、球员属性、战术卡、重点球员、备注 —— 完全没有 AI 参与，全靠教练维护</p>
+    </div>
+  </div>
+
+  <h2 style="margin-top:32px;">空状态策略</h2>
+  <div class="pattern-grid">
+    <div class="pattern">
+      <h4>球队主页 · 0 场比赛</h4>
+      <p>不展示四个空模块，改成一个引导卡："录第一场比赛，开启你的球队数据"</p>
+    </div>
+    <div class="pattern">
+      <h4>球员数据库 · 无数据</h4>
+      <p>展示"添加球员"为主 CTA，球员卡片用虚线占位，数字用 -- 而不是 0（0 会被误读为"球员得分为 0"）</p>
+    </div>
+    <div class="pattern">
+      <h4>战术板 · 空库</h4>
+      <p>引导："从比赛的精彩片段里存一张战术卡试试" + 直接跳到上一场比赛的报告</p>
+    </div>
+    <div class="pattern">
+      <h4>对手记录 · 空档案</h4>
+      <p>引导："录一场与 XX 的比赛，对手数据会自动生成" + 支持手动添加对手基本信息</p>
+    </div>
+  </div>
+
+  <h2 style="margin-top:32px;">需要注意的 3 个产品判断</h2>
+
+  <div class="callout">
+    <b>1. 球队页的数据完整度决定产品信任度。</b>当教练看到"场均 8.4 篮板"但实际有 2 场没补录时，他会觉得"这产品不靠谱"。所以：<b>所有聚合数据旁边都要标"基于 N/M 场"</b>，让教练自己判断可不可信。
+  </div>
+
+  <div class="callout purple">
+    <b>2. 战术板是差异化最强的模块。</b>数据统计所有竞品都有，但"教练自己剪的战术库 + AI 从录像推荐片段"是独特的。建议：给这个模块最高优先级做深，哪怕球队比赛数据晚一点上线。
+  </div>
+
+  <div class="callout risk">
+    <b>3. 对手记录的法律边界。</b>录别人的比赛、剪辑对手战术、标记对手重点球员——在法律上属于"公开场合观察"，一般没问题。但如果未来商用，要明确"不能录制非公开训练"、"不能使用他人未公开的信息"。第一版是内测，无风险；商用版用户协议要写清。
+  </div>
+
+  <h2 style="margin-top:32px;">需要教练确认的开放问题</h2>
+  <div class="callout open-q">
+    <ol>
+      <li><b>战术卡的命名习惯</b>：教练通常怎么命名？"挡拆外弹"还是"DHO-45"？还是更口语化的"给 7 号做掩护"？（决定是否提供命名模板）</li>
+      <li><b>对手记录的使用场景</b>：是赛前一天系统看，还是赛前 30 分钟快速扫一遍？（决定页面的信息密度）</li>
+      <li><b>重点球员标记</b>：教练是提前标，还是边看录像边标？（决定标记入口放在哪）</li>
+      <li><b>球员数据对球员开放吗</b>：教练是否希望球员能看自己的数据？（涉及账号体系，但影响信息架构）</li>
+      <li><b>训练视频接入战术板</b>：教练更常用训练录像还是比赛录像做战术卡？（决定"素材来源"中训练/比赛哪个默认）</li>
+    </ol>
+  </div>
+</section>
+
+<div style="margin-top:60px;padding-top:20px;border-top:1px solid var(--line);color:var(--ink-2);font-size:13px;">
+  <div style="font-weight:600;color:var(--ink);margin-bottom:8px;">修订记录</div>
+  <div style="margin-bottom:6px;"><b>v0.2 · 2026-10-11</b> — 配合《界面与交互设计 v0.1.1》新增的「年龄段 / 赛制」必填字段同步更新：屏 01 球队头卡增加默认年龄段与默认赛制标签、比赛数据入口副标题按赛制拆开；屏 02 比赛数据页顶部增加<b>赛制口径筛选（无"全部"选项）</b>与常驻口径说明；屏 04 球员详情增加赛制/年龄段对投篮分布图、三分弧线半径、计分值口径、场均分组的影响说明；屏 07 对手记录增加"交手记录按赛制拆开"约束；新增<b>球场底图 SVG 必须参数化</b>（接受 format 与 three_point_radius_m 入参）的组件要求。</div>
+  <div style="margin-bottom:14px;"><b>v0.1 · 2026-10-11</b> — 首版，球队页 8 张屏（含对手详情 4 tab）+ 数据来源与空状态策略。</div>
+  <div>本页与《AI篮球分析小程序_界面与交互设计v0.1.html》配合阅读，颜色语言、组件风格一致。</div>
+  <div style="margin-top:6px;">下一步建议：把球队页连同前面的 10 张屏一起拿给教练朋友过一遍，收集反馈后统一出 v0.3。</div>
+</div>
+
+</div>
+</body>
+</html>

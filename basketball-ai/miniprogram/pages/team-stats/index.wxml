@@ -1,0 +1,155 @@
+<view class="page">
+
+  <view wx:if="{{loading}}" class="ts-loading">加载球队数据…</view>
+
+  <block wx:elif="{{loadError}}">
+    <empty-state title="加载失败" desc="{{loadError}}" showAction="{{false}}" />
+  </block>
+
+  <block wx:elif="{{!scopes.length}}">
+    <empty-state
+      scene="noGames"
+      title="还没有比赛数据"
+      desc="录完第一场比赛并补录后，这里会显示战绩与趋势。数据按赛制口径分开统计。"
+      showAction="{{false}}"
+    />
+  </block>
+
+  <block wx:else>
+
+    <!-- ============ 赛制口径筛选：没有「全部」选项 ============ -->
+    <block wx:if="{{showScopeFilter}}">
+      <view class="ts-scope-hd">
+        <text>赛制口径</text>
+        <text class="ts-scope-hd__warn">不可合并</text>
+      </view>
+      <view class="ts-scopes">
+        <view
+          wx:for="{{scopes}}"
+          wx:key="label"
+          class="fchip {{activeScope.format === item.format && activeScope.ageGroup === item.ageGroup ? 'fchip--on' : ''}}"
+          data-format="{{item.format}}"
+          data-agegroup="{{item.ageGroup}}"
+          bindtap="onTapScope"
+        >{{item.format === '5V5' ? '5 对 5' : (item.format === '3V3' ? '3 对 3' : item.format)}} · {{item.count}} 场</view>
+      </view>
+    </block>
+
+    <!-- 口径说明常驻：让教练知道自己看的是哪一部分 -->
+    <view class="scope scope--strong ts-scope-line">
+      当前口径：{{scopeLabel}}
+      <text wx:if="{{otherScopesText}}"> | {{otherScopesText}}</text>
+    </view>
+
+    <!-- 数据完整度：诚实性问题，有未补录必须明示分母 -->
+    <view wx:if="{{completeness && completeness.incomplete}}" class="alert alert--warn ts-complete" bindtap="onGoAttribution">
+      ⚠ {{completeness.text}}，场均数据会偏低 · 点击去补录
+    </view>
+    <view wx:elif="{{completeness}}" class="ts-complete-ok">{{completeness.text}}</view>
+
+    <!-- 时间范围 -->
+    <view class="seg ts-range">
+      <view
+        wx:for="{{timeRanges}}"
+        wx:key="key"
+        class="seg__item {{activeRange === item.key ? 'seg__item--on' : ''}}"
+        data-key="{{item.key}}"
+        bindtap="onTapRange"
+      >{{item.label}}</view>
+    </view>
+
+    <!-- 战绩 -->
+    <view class="card card--fill ts-record" wx:if="{{record}}">
+      <view class="ts-record__row">
+        <view class="ts-record__cell">
+          <view class="ts-record__n ts-record__n--win">{{record.wins}}</view>
+          <view class="ts-record__l">胜</view>
+        </view>
+        <view class="ts-record__vs">:</view>
+        <view class="ts-record__cell">
+          <view class="ts-record__n ts-record__n--loss">{{record.losses}}</view>
+          <view class="ts-record__l">负</view>
+        </view>
+        <view class="ts-record__divider"></view>
+        <view class="ts-record__cell">
+          <view class="ts-record__n">{{record.winRate}}</view>
+          <view class="ts-record__l">胜率</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 得分趋势：只画当前口径场次 -->
+    <view class="card ts-trend" wx:if="{{trend.length > 1}}">
+      <view class="row row--between ts-trend__hd">
+        <text class="card__title">得分趋势</text>
+        <text class="card__sub">{{trend.length}} 场 · 仅当前口径</text>
+      </view>
+      <view class="ts-chart">
+        <polyline points="{{trendPoints}}" fill="none" stroke="#2563eb" stroke-width="2" />
+      </view>
+      <view class="ts-trend__labels">
+        <text>{{trend[0].dateText}}</text>
+        <text>{{trend[trend.length - 1].dateText}}</text>
+      </view>
+    </view>
+    <view wx:elif="{{trend.length === 1}}" class="alert alert--info ts-trend-few">
+      只有 1 场数据，趋势图至少需要 2 场。
+    </view>
+
+    <!-- 关键指标 -->
+    <view class="sec-label">关键指标</view>
+    <view class="statgrid statgrid--3 ts-metrics">
+      <view wx:for="{{metrics}}" wx:key="key" class="stat">
+        <view class="stat__n {{item.value === '—' ? 'stat__n--na' : ''}}">{{item.value}}</view>
+        <view class="stat__l">{{item.label}}</view>
+      </view>
+    </view>
+
+    <!-- 深度数据入口 -->
+    <view class="sec-label">深度数据</view>
+    <view class="ts-deep">
+      <view
+        wx:for="{{deepEntries}}"
+        wx:key="key"
+        class="card card--fill ts-deep__item {{item.disabled ? 'ts-deep__item--off' : ''}}"
+        data-key="{{item.key}}"
+        data-disabled="{{item.disabled}}"
+        data-reason="{{item.reason}}"
+        bindtap="onTapDeep"
+      >
+        <view class="ts-deep__icon">{{item.icon}}</view>
+        <view class="ts-deep__label">{{item.label}}</view>
+      </view>
+    </view>
+
+    <!-- 比赛列表 -->
+    <view class="sec-label">全部比赛 · {{games.length}} 场</view>
+    <view class="ts-games">
+      <view
+        wx:for="{{games}}"
+        wx:key="id"
+        class="item"
+        data-id="{{item.id}}"
+        bindtap="onTapGame"
+      >
+        <view class="item__avatar {{item.won ? 'item__avatar--ok' : 'item__avatar--err'}}">
+          {{item.won ? '胜' : '负'}}
+        </view>
+        <view class="item__body">
+          <view class="item__nm">{{item.dateText}}</view>
+          <view class="item__sub">
+            {{item.attributed ? '数据完整' : '部分待补录'}}
+          </view>
+        </view>
+        <view class="item__val"><view class="item__val-n">{{item.scoreText}}</view></view>
+      </view>
+    </view>
+
+    <view class="ts-note">
+      篮板、助攻、抢断需 AI 逐人识别，第一版不采集；
+      命中率等指标基于已补录的场次计算。
+    </view>
+
+  </block>
+
+</view>

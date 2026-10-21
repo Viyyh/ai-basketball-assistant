@@ -1,0 +1,10 @@
+{
+  "navigationBarTitleText": "事件补录",
+  "usingComponents": {
+    "event-card": "/components/event-card/index",
+    "player-picker": "/components/player-picker/index",
+    "clip-player": "/components/clip-player/index",
+    "scope-badge": "/components/scope-badge/index",
+    "empty-state": "/components/empty-state/index"
+  }
+}

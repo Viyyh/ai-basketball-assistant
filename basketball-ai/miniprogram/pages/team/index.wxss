@@ -1,0 +1,60 @@
+.tm-loading { padding: 160rpx 0; text-align: center; color: var(--ink-3); font-size: var(--fs-sm); }
+
+/* 球队头卡 */
+.tm-head { margin: var(--sp-3); padding: var(--sp-4) var(--sp-3); }
+.tm-head__row { display: flex; align-items: flex-start; gap: var(--sp-2); }
+.tm-head__logo {
+  width: 96rpx; height: 96rpx; border-radius: var(--r-lg);
+  background: #334155; color: #94a3b8;
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--fs-lg); font-weight: 600; flex-shrink: 0;
+}
+.tm-head__main { flex: 1; min-width: 0; }
+.tm-head__name { font-size: 34rpx; font-weight: 600; color: #fff; }
+.tm-head__sub { font-size: var(--fs-xs); color: #94a3b8; margin-top: 6rpx; }
+.tm-head__tags { display: flex; flex-wrap: wrap; gap: 8rpx; margin-top: var(--sp-1); }
+.tm-tag {
+  font-size: 18rpx; padding: 2rpx 14rpx; border-radius: var(--r-pill);
+  background: rgba(255,255,255,0.14); color: #cbd5e1;
+}
+.tm-head__edit { color: #94a3b8; font-size: 32rpx; padding: 0 var(--sp-1); }
+
+.tm-head__stats { display: flex; margin-top: var(--sp-4); }
+.tm-hs { flex: 1; text-align: center; }
+.tm-hs + .tm-hs { border-left: 2rpx solid rgba(255,255,255,0.12); }
+.tm-hs__n { font-size: 34rpx; font-weight: 600; color: #fff; line-height: 1.2; }
+.tm-hs__u { font-size: var(--fs-xs); font-weight: 400; opacity: 0.6; margin: 0 2rpx; }
+.tm-hs__l { font-size: 18rpx; color: #94a3b8; margin-top: 4rpx; }
+
+/* 待补录提醒 */
+.pending {
+  display: flex; align-items: center; gap: var(--sp-2);
+  margin: 0 var(--sp-3) var(--sp-2);
+  padding: var(--sp-3);
+  background: var(--warn-2); border: 2rpx solid var(--warn);
+  border-radius: var(--r-lg);
+}
+.pending--hover { opacity: 0.85; }
+.pending--overdue { background: var(--err-2); border-color: var(--err); }
+.pending__icon {
+  width: 56rpx; height: 56rpx; border-radius: 50%;
+  background: var(--warn); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 30rpx; font-weight: 600; flex-shrink: 0;
+}
+.pending--overdue .pending__icon { background: var(--err); }
+.pending__body { flex: 1; min-width: 0; }
+.pending__title { font-size: var(--fs-md); font-weight: 600; color: var(--warn-ink); }
+.pending--overdue .pending__title { color: var(--err-ink); }
+.pending__desc {
+  font-size: var(--fs-xs); color: var(--warn-ink); opacity: 0.85; margin-top: 4rpx;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pending--overdue .pending__desc { color: var(--err-ink); }
+.pending__arrow { color: var(--warn-ink); font-size: 36rpx; opacity: 0.6; }
+.pending--overdue .pending__arrow { color: var(--err-ink); }
+
+/* 模块入口 */
+.tm-mods { padding: 0 var(--sp-3); }
+.tm-mods .mod-card { margin-bottom: var(--sp-2); }
+.tm-mod--hover { opacity: 0.85; }

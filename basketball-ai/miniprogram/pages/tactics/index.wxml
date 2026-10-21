@@ -1,0 +1,83 @@
+<view class="page">
+
+  <!-- 搜索 + 新建 -->
+  <view class="tc-toolbar">
+    <view class="field tc-search">
+      <input class="field__input" value="{{keyword}}" bindinput="onSearchInput"
+             placeholder="🔍 搜索战术名 / 标签" placeholder-class="field__placeholder" />
+    </view>
+    <view class="btn btn--primary btn--sm" bindtap="onNewTactic">+ 新建</view>
+  </view>
+
+  <!-- 标签筛选 -->
+  <scroll-view class="tc-tags" scroll-x enable-flex>
+    <view
+      wx:for="{{tags}}"
+      wx:key="*this"
+      class="fchip {{activeTag === item ? 'fchip--on' : ''}}"
+      data-tag="{{item}}"
+      bindtap="onTapTag"
+    >{{item}}{{item === '全部' ? ' ' + totalCount : ''}}</view>
+  </scroll-view>
+
+  <view wx:if="{{loading}}" class="tc-loading">加载战术库…</view>
+
+  <block wx:elif="{{!filtered.length}}">
+    <empty-state
+      scene="{{owner === 'OPPONENT' ? '' : 'noTactics'}}"
+      title="{{owner === 'OPPONENT' ? '还没有对手战术' : ''}}"
+      desc="{{owner === 'OPPONENT' ? '从与该对手的交手录像里剪一段，命名后就能在这里随时调出来看。' : ''}}"
+      action="{{owner === 'OPPONENT' ? '剪辑对手战术' : ''}}"
+      bind:action="onNewTactic"
+    />
+  </block>
+
+  <block wx:else>
+    <view class="tc-list">
+      <view
+        wx:for="{{filtered}}"
+        wx:key="id"
+        class="tc-card"
+        data-id="{{item.id}}"
+        bindtap="onTapTactic"
+        hover-class="tc-card--hover"
+      >
+        <view class="vcard vcard--16x9">
+          <view class="vcard__play">▶</view>
+          <view class="vcard__tag">{{item.sourceLabel}}</view>
+          <view class="vcard__dur">{{item.durationText}}</view>
+        </view>
+
+        <view class="tc-card__body">
+          <view class="tc-card__name">{{item.name}}</view>
+          <view class="tc-card__meta">
+            <text wx:for="{{item.tags}}" wx:for-item="tag" wx:key="*this" class="chip chip--tactic tc-card__tag">{{tag}}</text>
+            <text wx:if="{{item.refCount}}" class="tc-card__ref">{{item.refCount}} 次引用</text>
+            <text wx:if="{{item.at}}" class="tc-card__at">{{item.at}}</text>
+          </view>
+          <view wx:if="{{item.note}}" class="tc-card__note">{{item.note}}</view>
+        </view>
+      </view>
+
+      <!-- 点状动画演示占位卡：不实现，但展示路线图 -->
+      <view class="tc-card tc-card--future">
+        <view class="vcard vcard--16x9 tc-future__ph">
+          <view class="tc-future__label">即将支持</view>
+        </view>
+        <view class="tc-card__body">
+          <view class="tc-card__name tc-card__name--muted">点状动画演示</view>
+          <view class="tc-card__meta">
+            <text class="chip chip--muted">后期版本</text>
+            <text class="tc-card__at">把战术卡转成跑位动画</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="tc-note">
+      战术卡以「名称 + 视频片段」为主。素材可来自比赛切片或训练录像，
+      新建时 AI 会推荐本场值得做成战术的回合。
+    </view>
+  </block>
+
+</view>

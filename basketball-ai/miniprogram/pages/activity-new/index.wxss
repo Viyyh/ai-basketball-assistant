@@ -1,0 +1,78 @@
+.form { padding: 0 var(--sp-3); }
+.sec-label { padding: 0 var(--sp-3); }
+.page > .sec-label:first-child { margin-top: var(--sp-2); }
+.form .sec-label { padding: 0; margin: var(--sp-4) 0 var(--sp-2); }
+
+.linkbtn { font-size: var(--fs-sm); color: var(--accent); }
+.linkbtn--inline { display: inline-block; margin-top: 6rpx; text-decoration: underline; }
+
+/* 名单格子 */
+.pgrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-2);
+}
+.pcell {
+  border: 2rpx dashed var(--line);
+  border-radius: var(--r-md);
+  background: var(--card);
+  padding: var(--sp-1) 2rpx;
+  text-align: center;
+  position: relative;
+}
+.pcell--sm { padding: 6rpx 2rpx; }
+.pcell--on {
+  border-style: solid;
+  border-color: var(--accent);
+  background: var(--accent-2);
+}
+.pcell--other { opacity: 0.35; }
+.pcell--disabled { opacity: 0.3; }
+.pcell__num {
+  font-size: var(--fs-md);
+  font-weight: 600;
+  color: var(--ink-2);
+  line-height: 1.2;
+}
+.pcell--on .pcell__num { color: var(--accent); }
+.pcell__name {
+  font-size: 18rpx;
+  color: var(--ink-3);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pcell--on .pcell__name { color: var(--accent); }
+.pcell__pos { font-size: 16rpx; color: var(--ink-3); opacity: 0.8; }
+
+/* 套路 */
+.presets { display: flex; flex-wrap: wrap; gap: var(--sp-1); margin: var(--sp-2) 0; }
+.routine-list { margin-top: var(--sp-2); }
+.routine {
+  display: flex; align-items: center; gap: var(--sp-2);
+  padding: var(--sp-2);
+  background: var(--card);
+  border: 2rpx solid var(--line-2);
+  border-radius: var(--r-md);
+  margin-bottom: 6rpx;
+}
+.routine__name { flex: 1; font-size: var(--fs-md); color: var(--ink); }
+.routine__plan { font-size: var(--fs-xs); color: var(--ink-3); }
+.routine__del { color: var(--ink-3); font-size: var(--fs-md); padding: 0 var(--sp-1); }
+
+/* 提交栏 */
+.submit-bar {
+  position: sticky;
+  bottom: 0;
+  padding: var(--sp-3);
+  padding-bottom: calc(var(--sp-3) + var(--safe-bottom));
+  background: var(--card);
+  border-top: 2rpx solid var(--line-2);
+  margin-top: var(--sp-4);
+}
+.submit-note {
+  font-size: var(--fs-xs);
+  color: var(--ink-3);
+  text-align: center;
+  margin-top: var(--sp-1);
+  line-height: 1.5;
+}

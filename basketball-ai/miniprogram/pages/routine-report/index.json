@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "套路演练报告",
+  "usingComponents": {
+    "scope-badge": "/components/scope-badge/index",
+    "empty-state": "/components/empty-state/index"
+  }
+}

@@ -1,0 +1,67 @@
+<view class="page">
+
+  <view class="field op-search">
+    <input class="field__input" value="{{keyword}}" bindinput="onSearchInput"
+           placeholder="🔍 搜索对手队名" placeholder-class="field__placeholder" />
+  </view>
+
+  <!-- 下次对阵提醒置顶 -->
+  <view wx:if="{{nextOpponent}}" class="card card--warn op-next" bindtap="onTapNext">
+    <view class="op-next__label">下次对阵</view>
+    <view class="op-next__name">{{nextOpponent.name}}</view>
+    <view class="op-next__meta">
+      {{nextOpponent.nextMatchText || '待定'}} · {{nextOpponent.h2hText}}
+    </view>
+    <view class="op-next__cta">查看侦察手册 ›</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="op-loading">加载对手记录…</view>
+
+  <block wx:elif="{{!filtered.length}}">
+    <empty-state
+      scene="{{totalCount ? 'noResult' : 'noOpponents'}}"
+      bind:action="{{totalCount ? 'onSearchInput' : 'onAddOpponent'}}"
+    />
+  </block>
+
+  <block wx:else>
+    <view class="sec-label">交锋历史 · {{totalCount}} 支球队</view>
+
+    <view class="op-list">
+      <view
+        wx:for="{{filtered}}"
+        wx:key="id"
+        class="item op-item"
+        data-id="{{item.id}}"
+        bindtap="onTapOpponent"
+        bindlongpress="onLongPressOpponent"
+      >
+        <view class="item__avatar item__avatar--warn">{{item.shortName}}</view>
+        <view class="item__body">
+          <view class="item__nm">{{item.name}}</view>
+          <!-- 交手记录按赛制拆开，不合并成"交手 N 次" -->
+          <view class="item__sub">{{item.h2hText}}</view>
+          <view class="item__sub op-item__meta">
+            {{item.lastPlayedText}}
+            <text wx:if="{{item.keyPlayerCount}}"> · 重点球员 {{item.keyPlayerCount}}</text>
+            <text wx:if="{{item.tacticCount}}"> · 战术 {{item.tacticCount}}</text>
+          </view>
+        </view>
+        <view class="item__val">
+          <view class="item__val-n op-item__total">{{item.totalPlayed}}</view>
+          <view class="item__val-l">总场次</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="op-add" bindtap="onAddOpponent">+ 手动添加对手</view>
+
+    <view class="alert alert--info op-note">
+      对手记录有两个来源：<br />
+      ① 自动 —— 录了自己球队的比赛后，AI 识别的对手信息自动归档<br />
+      ② 手动 —— 去现场录对手的比赛，上传时指定对手名称<br />
+      交手数据按赛制分开统计，5对5 与 3对3 的胜负不可比。
+    </view>
+  </block>
+
+</view>

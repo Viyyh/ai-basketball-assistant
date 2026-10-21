@@ -1,0 +1,76 @@
+flowchart LR
+    classDef client fill:#dbeafe,stroke:#1e40af,color:#1e293b
+    classDef svc fill:#dcfce7,stroke:#166534,color:#1e293b
+    classDef ai fill:#fef3c7,stroke:#a16207,color:#1e293b
+    classDef store fill:#f3e8ff,stroke:#6b21a8,color:#1e293b
+    classDef placeholder fill:#f1f5f9,stroke:#94a3b8,color:#64748b,stroke-dasharray: 4 3
+
+    subgraph L1[微信小程序端]
+      direction TB
+      M1[登录 · 名单管理]:::client
+      M2[新建活动<br/>比赛 / 团队对抗 / 套路演练]:::client
+      M3[录制 camera API]:::client
+      M4[上传<br/>断点续传 · 进度显示]:::client
+      M5[报告页<br/>热图 · 阵型 · 事件卡片]:::client
+      M6[事件补录 UI<br/>对着片段选人]:::client
+      M7[实时分析入口<br/>灰显占位]:::placeholder
+    end
+
+    subgraph L2[后端服务层]
+      direction TB
+      S1[API Gateway]:::svc
+      S2[上传服务]:::svc
+      S3[活动/名单服务]:::svc
+      S4[报告查询服务]:::svc
+      S5[通知服务]:::svc
+      Q[任务队列<br/>Redis / RabbitMQ]:::svc
+    end
+
+    subgraph L3[AI Pipeline · GPU 服务器]
+      direction TB
+      P1[视频拉流]:::ai
+      P2[场地标定<br/>像素 → 米制]:::ai
+      P3[目标检测<br/>YOLOv8]:::ai
+      P4[多目标跟踪<br/>ByteTrack]:::ai
+      P5[事件识别<br/>投篮 / 命中 / 快攻]:::ai
+      P6[阵型采样<br/>每 5 秒快照]:::ai
+      P7[视频切片<br/>8-15 秒 mp4]:::ai
+    end
+
+    subgraph L4[存储层]
+      direction TB
+      D1[(对象存储<br/>原始视频)]:::store
+      D2[(对象存储<br/>事件切片)]:::store
+      D3[(数据库<br/>教练/球队/活动/事件)]:::store
+      D4[(报告 JSON)]:::store
+      CDN[CDN 分发]:::store
+    end
+
+    M2 --> S1
+    M1 --> S1
+    M3 --> M4
+    M4 --> S2
+    S1 --> S2
+    S1 --> S3
+    S1 --> S4
+    S2 --> D1
+    S2 --> Q
+    Q --> P1
+    P1 --> D1
+    P1 --> P2 --> P3 --> P4 --> P5
+    P4 --> P6
+    P5 --> P7
+    P5 --> D4
+    P6 --> D4
+    P7 --> D2
+    S3 --> D3
+    D3 --> S4
+    D4 --> S4
+    S4 --> M5
+    S5 --> M5
+    P7 --> S5
+    D2 --> CDN --> M5
+    M5 --> M6
+    M6 --> S3
+
+    M7 -.->|不接入| Q

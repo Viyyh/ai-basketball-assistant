@@ -1,0 +1,119 @@
+.hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-3) var(--sp-3) var(--sp-2);
+}
+.hd__greet { font-size: var(--fs-xl); font-weight: 600; color: var(--ink); }
+.hd__sub { font-size: var(--fs-sm); color: var(--ink-3); margin-top: 4rpx; }
+.hd__avatar {
+  width: 72rpx; height: 72rpx; border-radius: 50%;
+  background: var(--fill); color: var(--ink-2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--fs-md); font-weight: 600;
+}
+
+/* 主 CTA */
+.cta {
+  position: relative;
+  margin: 0 var(--sp-3) var(--sp-2);
+  padding: var(--sp-5) var(--sp-4);
+  background: var(--accent);
+  border-radius: var(--r-lg);
+  color: #fff;
+  box-shadow: var(--sh-2);
+}
+.cta--hover { opacity: 0.9; }
+.cta__title { font-size: 36rpx; font-weight: 600; }
+.cta__sub { font-size: var(--fs-sm); opacity: 0.85; margin-top: 6rpx; }
+.cta__realtime {
+  position: absolute;
+  right: var(--sp-3); top: var(--sp-3);
+  font-size: 18rpx;
+  padding: 2rpx 12rpx;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* 待补录提醒 */
+.pending {
+  display: flex; align-items: center; gap: var(--sp-2);
+  margin: 0 var(--sp-3) var(--sp-2);
+  padding: var(--sp-3);
+  background: var(--warn-2);
+  border: 2rpx solid var(--warn);
+  border-radius: var(--r-lg);
+}
+.pending--hover { opacity: 0.85; }
+/* 超 7 天 → 变红并置顶（PRD 屏 01） */
+.pending--overdue { background: var(--err-2); border-color: var(--err); }
+.pending__icon {
+  width: 56rpx; height: 56rpx; border-radius: 50%;
+  background: var(--warn); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 30rpx; font-weight: 600; flex-shrink: 0;
+}
+.pending--overdue .pending__icon { background: var(--err); }
+.pending__body { flex: 1; min-width: 0; }
+.pending__title { font-size: var(--fs-md); font-weight: 600; color: var(--warn-ink); }
+.pending--overdue .pending__title { color: var(--err-ink); }
+.pending__desc {
+  font-size: var(--fs-xs); color: var(--warn-ink); opacity: 0.85;
+  margin-top: 4rpx;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pending--overdue .pending__desc { color: var(--err-ink); }
+.pending__arrow { color: var(--warn-ink); font-size: 36rpx; opacity: 0.6; }
+.pending--overdue .pending__arrow { color: var(--err-ink); }
+
+/* 未上传的本地录像 */
+.local-box {
+  margin: 0 var(--sp-3) var(--sp-2);
+  padding: var(--sp-3);
+  background: var(--card);
+  border: 2rpx dashed var(--line);
+  border-radius: var(--r-lg);
+}
+.local-box__title { font-size: var(--fs-sm); color: var(--ink-2); font-weight: 500; margin-bottom: var(--sp-1); }
+.local-box__item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--sp-1) 0;
+  border-top: 2rpx solid var(--line-2);
+}
+.local-box__name { font-size: var(--fs-sm); color: var(--ink); flex: 1; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.local-box__acts { display: flex; gap: var(--sp-2); flex-shrink: 0; }
+.local-box__act { font-size: var(--fs-sm); color: var(--accent); }
+.local-box__act--dim { color: var(--ink-3); }
+.local-box__note { font-size: var(--fs-xs); color: var(--ink-3); margin-top: var(--sp-1); }
+
+.sec-label { padding: 0 var(--sp-3); }
+
+.loading { padding: var(--sp-6); text-align: center; color: var(--ink-3); font-size: var(--fs-sm); }
+
+/* 活动卡 */
+.act {
+  display: flex; align-items: center; gap: var(--sp-2);
+  margin: 0 var(--sp-3) var(--sp-1);
+  padding: var(--sp-3);
+  background: var(--card);
+  border: 2rpx solid var(--line-2);
+  border-radius: var(--r-lg);
+}
+.act--hover { background: var(--fill); }
+.act__badge {
+  width: 64rpx; height: 64rpx; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--fs-sm); font-weight: 600; flex-shrink: 0;
+}
+.act__badge--win  { background: var(--ok-2);  color: var(--ok); }
+.act__badge--loss { background: var(--err-2); color: var(--err); }
+.act__badge--na   { background: var(--fill);  color: var(--ink-3); }
+.act__body { flex: 1; min-width: 0; }
+.act__name {
+  font-size: var(--fs-md); font-weight: 500; color: var(--ink);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.act__meta { font-size: var(--fs-xs); color: var(--ink-3); margin-top: 4rpx; }
+.act__score { color: var(--ink-2); }

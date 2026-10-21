@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "球员详情",
+  "usingComponents": {
+    "court-svg": "/components/court-svg/index",
+    "empty-state": "/components/empty-state/index"
+  }
+}

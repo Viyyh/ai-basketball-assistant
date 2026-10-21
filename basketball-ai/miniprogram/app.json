@@ -1,0 +1,49 @@
+{
+  "pages": [
+    "pages/home/index",
+    "pages/activity-new/index",
+    "pages/record/index",
+    "pages/upload/index",
+    "pages/processing/index",
+    "pages/report/index",
+    "pages/events/index",
+    "pages/formation/index",
+    "pages/heatmap/index",
+    "pages/routine-report/index",
+    "pages/team/index",
+    "pages/team-stats/index",
+    "pages/players/index",
+    "pages/player-detail/index",
+    "pages/tactics/index",
+    "pages/tactic-new/index",
+    "pages/opponents/index",
+    "pages/opponent-detail/index",
+    "pages/history/index",
+    "pages/profile/index"
+  ],
+
+  "tabBar": {
+    "color": "#94a3b8",
+    "selectedColor": "#2563eb",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      { "pagePath": "pages/home/index",    "text": "首页" },
+      { "pagePath": "pages/team/index",    "text": "球队" },
+      { "pagePath": "pages/history/index", "text": "历史" },
+      { "pagePath": "pages/profile/index", "text": "我的" }
+    ]
+  },
+
+  "window": {
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTitleText": "篮球数据",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f8fafc"
+  },
+
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

@@ -1,0 +1,41 @@
+<!--
+  court-svg 参数化球场底图（P1-F02）
+
+  渲染方式：把 SVG 字符串编码成 data URI 交给 <image>。
+  小程序不支持 innerHTML 注入 SVG，这是唯一干净的做法。
+
+  三种降级态必须处理：
+    · params 缺失 → 拒绝渲染并给出原因（不画一张默认成人全场图糊弄过去）
+    · 几何矛盾   → 同上，并 triggerEvent('invalid')
+    · 越界/点数不符 → 照常渲染但显示告警条
+-->
+<view class="court-wrap">
+
+  <view wx:if="{{errorText}}" class="court-error">
+    <view class="court-error__icon">!</view>
+    <view class="court-error__text">{{errorText}}</view>
+    <view class="court-error__hint">请检查该活动的赛制与年龄段参数是否正确</view>
+  </view>
+
+  <block wx:else>
+    <image
+      wx:if="{{dataUri}}"
+      class="court-img"
+      src="{{dataUri}}"
+      mode="widthFix"
+      style="height:{{height}}rpx;"
+      bindtap="onTapCourt"
+      bindlongpress="onTapCourt"
+    />
+    <view wx:else class="court-loading">球场渲染中…</view>
+
+    <!-- 口径角标：PRD 9.4 #4.8 要求常驻 -->
+    <view wx:if="{{showScope && scopeText}}" class="court-scope">{{scopeText}}</view>
+
+    <!-- 告警条：契约 warnings 或本组件自检发现的问题 -->
+    <view wx:if="{{warnings.length}}" class="court-warn">
+      <view wx:for="{{warnings}}" wx:key="*this" class="court-warn__line">⚠ {{item}}</view>
+    </view>
+  </block>
+
+</view>

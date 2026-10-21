@@ -1,0 +1,153 @@
+<view class="page">
+
+  <view wx:if="{{loading}}" class="rt-loading">加载套路报告…</view>
+
+  <block wx:elif="{{loadError}}">
+    <empty-state title="暂无套路报告" desc="{{loadError}}" action="返回报告" bind:action="onBack" />
+  </block>
+
+  <block wx:else>
+
+    <view class="rt-scope">
+      <scope-badge params="{{params}}" />
+    </view>
+
+    <!-- 汇总：套路演练没有比分与时间轴 -->
+    <view class="card card--fill rt-summary">
+      <view class="rt-summary__row">
+        <view class="rt-summary__cell">
+          <view class="rt-summary__n">{{summary.routineCount}}</view>
+          <view class="rt-summary__l">套路数</view>
+        </view>
+        <view class="rt-summary__cell">
+          <view class="rt-summary__n">{{summary.totalAttempts}}</view>
+          <view class="rt-summary__l">演练次数</view>
+        </view>
+        <view class="rt-summary__cell">
+          <view class="rt-summary__n">{{summary.totalSuccess}}</view>
+          <view class="rt-summary__l">成功</view>
+        </view>
+        <view class="rt-summary__cell">
+          <view class="rt-summary__n">{{summary.rateText}}</view>
+          <view class="rt-summary__l">成功率</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 未分类兜底：教练没标起止时 -->
+    <view wx:if="{{unclassified}}" class="alert alert--warn rt-unclassified">
+      <view>{{unclassified.hint}}</view>
+      <view class="rt-unclassified__n">本场共识别 {{unclassified.count}} 个事件</view>
+    </view>
+
+    <!-- 套路列表：每个套路一行 -->
+    <view class="sec-label">套路明细</view>
+
+    <view wx:if="{{!routines.length}}" class="rt-empty">
+      <empty-state
+        title="还没有套路"
+        desc="可以在下面手动新增套路并框选时间范围，也可以下次录制前先建套路清单。"
+        showAction="{{false}}"
+      />
+    </view>
+
+    <view
+      wx:for="{{routines}}"
+      wx:key="id"
+      class="card rt-item rt-item--{{item.tone}}"
+    >
+      <view class="rt-item__hd" data-id="{{item.id}}" bindtap="onToggleRoutine">
+        <view class="rt-item__main">
+          <view class="rt-item__name">{{item.name}}</view>
+          <view class="rt-item__meta">
+            演练 {{item.actual}} 次 · 成功 {{item.success}} 次 · 平均 {{item.avgText}}
+          </view>
+          <view wx:if="{{item.mismatch}}" class="rt-item__warn">
+            ⚠ 实际演练 {{item.actual}} 次 / 预设 {{item.planned}} 次
+          </view>
+          <view wx:if="{{item.manualRange}}" class="rt-item__range">
+            手动框选 {{item.manualRange.startS}}s ~ {{item.manualRange.endS}}s
+          </view>
+        </view>
+        <view class="rt-item__rate">
+          <view class="chip chip--{{item.tone === 'na' ? 'muted' : item.tone}}">{{item.rateText}}</view>
+          <view class="rt-item__arrow">{{item.expanded ? '▴' : '▾'}}</view>
+        </view>
+      </view>
+
+      <!-- 手动修正次数：AI 第一版不自动识别套路归属 -->
+      <view class="rt-item__edit">
+        <view class="rt-edit__btn" data-id="{{item.id}}" data-field="actual" bindtap="onEditCount">演练 +1</view>
+        <view class="rt-edit__btn" data-id="{{item.id}}" data-field="success" bindtap="onEditCount">成功 +1</view>
+      </view>
+
+      <!-- 展开：该套路的演练片段 -->
+      <view wx:if="{{item.expanded}}" class="rt-item__body">
+        <block wx:if="{{item.clips.length}}">
+          <view
+            wx:for="{{item.clips}}"
+            wx:for-item="clip"
+            wx:key="id"
+            class="rt-clip"
+            data-id="{{clip.id}}"
+            bindtap="onTapClip"
+          >
+            <view class="rt-clip__ph">▶</view>
+            <view class="rt-clip__body">
+              <view class="rt-clip__t">{{clip.timeText}}{{clip.label ? ' · ' + clip.label : ''}}</view>
+              <view class="rt-clip__s">{{clip.madeText || '片段'}}{{clip.durationS ? ' · ' + clip.durationS + 's' : ''}}</view>
+            </view>
+            <view class="rt-clip__arrow">›</view>
+          </view>
+        </block>
+        <view wx:else class="rt-clip__empty">
+          该套路还没有关联片段。可在事件列表里找到对应回合，存为战术卡后自动关联。
+        </view>
+      </view>
+    </view>
+
+    <!-- 新增套路（补救路径） -->
+    <view class="btn btn--ghost btn--block rt-add" bindtap="onOpenAdd">+ 新增套路并框选时间范围</view>
+
+    <view class="rt-note">
+      套路归属第一版靠教练标记与手动修正。后期 AI 会自动从录像里提取套路并分段。
+    </view>
+
+  </block>
+
+  <!-- 新增套路浮层 -->
+  <view wx:if="{{adding}}" class="sheet-mask" bindtap="onCloseAdd"></view>
+  <view wx:if="{{adding}}" class="sheet" catchtap="noop">
+    <view class="sheet__handle"></view>
+    <view class="sheet__title">新增套路</view>
+
+    <view class="field">
+      <view class="field__label">套路名称</view>
+      <input class="field__input" value="{{newName}}" bindinput="onNameInput"
+             placeholder="如：挡拆外弹" placeholder-class="field__placeholder" />
+    </view>
+
+    <view class="row row--gap2">
+      <view class="field flex1">
+        <view class="field__label">开始（秒）</view>
+        <input class="field__input" type="number" value="{{newStartS}}"
+               data-field="newStartS" bindinput="onTimeInput" />
+        <view class="field__label" style="margin-top:4rpx">{{newStartText}}</view>
+      </view>
+      <view class="field flex1">
+        <view class="field__label">结束（秒）</view>
+        <input class="field__input" type="number" value="{{newEndS}}"
+               data-field="newEndS" bindinput="onTimeInput" />
+        <view class="field__label" style="margin-top:4rpx">{{newEndText}}</view>
+      </view>
+    </view>
+
+    <view class="linkbtn rt-swap" bindtap="onSwapTime">交换起止</view>
+
+    <view class="row row--gap2" style="margin-top:24rpx">
+      <view class="btn btn--ghost flex1" bindtap="onCloseAdd">取消</view>
+      <view class="btn btn--primary flex1" bindtap="onSaveRoutine">保存</view>
+    </view>
+  </view>
+
+</view>

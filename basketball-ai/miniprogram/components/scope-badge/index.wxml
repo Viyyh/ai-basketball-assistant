@@ -1,0 +1,11 @@
+<view wx:if="{{text}}" class="scope {{compact ? 'scope--compact' : ''}} {{incomplete ? 'scope--incomplete' : ''}}">
+  <view class="scope__main">
+    <text class="scope__text">{{text}}</text>
+    <text wx:if="{{courtText}}" class="scope__sep">·</text>
+    <text wx:if="{{courtText}}" class="scope__dim">{{courtText}}</text>
+    <text wx:if="{{showRadius && radiusText}}" class="scope__sep">·</text>
+    <text wx:if="{{showRadius && radiusText}}" class="scope__dim">{{radiusText}}</text>
+    <text wx:if="{{is3v3}}" class="scope__tag3v3">弧内 1 分 / 弧外 2 分</text>
+  </view>
+  <view wx:if="{{completenessText}}" class="scope__warn">⚠ {{completenessText}}</view>
+</view>

@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "分析报告",
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "scope-badge": "/components/scope-badge/index",
+    "empty-state": "/components/empty-state/index",
+    "status-tag": "/components/status-tag/index"
+  }
+}

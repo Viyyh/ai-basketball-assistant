@@ -1,0 +1,79 @@
+.od-loading { padding: 160rpx 0; text-align: center; color: var(--ink-3); font-size: var(--fs-sm); }
+
+.od-scope-hd {
+  display: flex; align-items: center; gap: var(--sp-1);
+  padding: var(--sp-2) var(--sp-3) 0;
+  font-size: var(--fs-xs); color: var(--ink-3);
+}
+.od-scope-hd__warn {
+  color: var(--err); font-size: 18rpx;
+  border: 2rpx solid var(--err-2); border-radius: var(--r-pill);
+  padding: 0 10rpx; background: var(--err-2);
+}
+.od-scopes { display: flex; flex-wrap: wrap; gap: var(--sp-1); padding: var(--sp-1) var(--sp-3) 0; }
+.od-scope { margin: var(--sp-2) var(--sp-3) 0; }
+
+/* tabs */
+.od-tabs {
+  display: flex; margin: var(--sp-3) var(--sp-3) var(--sp-2);
+  border-bottom: 2rpx solid var(--line-2);
+}
+.od-tab {
+  flex: 1; text-align: center; padding: var(--sp-2) 0;
+  font-size: var(--fs-sm); color: var(--ink-3);
+  border-bottom: 4rpx solid transparent;
+}
+.od-tab--on { color: var(--warn-ink); border-bottom-color: var(--warn); font-weight: 600; }
+
+.od-empty { padding-top: var(--sp-3); }
+.od-forms { padding: 0 var(--sp-3) var(--sp-2); }
+.prog__name { width: 140rpx; }
+
+.od-insight { margin: 0 var(--sp-3) var(--sp-1); }
+.od-insight__cap { font-size: var(--fs-xs); color: var(--ink-3); }
+.od-insight__body { font-size: var(--fs-sm); color: var(--ink-2); margin-top: 4rpx; line-height: 1.6; }
+
+.od-note {
+  padding: var(--sp-2) var(--sp-4);
+  font-size: var(--fs-xs); color: var(--ink-3); line-height: 1.7;
+}
+
+.od-stats { padding: 0 var(--sp-3); }
+.od-h2h { padding: 0 var(--sp-3); }
+
+/* 重点球员 */
+.od-kp-hd { padding: var(--sp-2) var(--sp-3) var(--sp-1); }
+.od-kps { padding: 0 var(--sp-3); }
+.od-kp { padding: var(--sp-3); }
+.od-kp__row { display: flex; align-items: center; gap: var(--sp-2); }
+.od-kp__num {
+  width: 64rpx; height: 64rpx; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--fs-md); font-weight: 600;
+}
+.od-kp__num--err { background: var(--err-2); color: var(--err); }
+.od-kp__num--warn { background: var(--warn-2); color: var(--warn-ink); }
+.od-kp__num--muted { background: var(--fill); color: var(--ink-3); }
+.od-kp__main { flex: 1; min-width: 0; }
+.od-kp__name { font-size: var(--fs-md); font-weight: 600; color: var(--ink); }
+.od-kp__pos { font-size: var(--fs-xs); color: var(--ink-3); font-weight: 400; margin-left: 8rpx; }
+.od-kp__traits { font-size: var(--fs-xs); color: var(--ink-3); margin-top: 2rpx; }
+.od-kp__stats { font-size: var(--fs-xs); color: var(--ink-2); margin-top: var(--sp-1); line-height: 1.6; }
+.od-kp__note {
+  font-size: var(--fs-xs); color: var(--ink-3); margin-top: 6rpx; line-height: 1.6;
+  background: var(--fill); border-radius: var(--r-sm); padding: 6rpx var(--sp-2);
+}
+.od-add { margin: var(--sp-2) var(--sp-3); width: auto; }
+.od-disclaimer { margin: var(--sp-2) var(--sp-3) var(--sp-4); line-height: 1.7; }
+
+/* 对手战术板 */
+.od-tactics { padding: 0 var(--sp-3); }
+.tc-card {
+  background: var(--card); border: 2rpx solid var(--line-2);
+  border-radius: var(--r-lg); padding: var(--sp-2); margin-bottom: var(--sp-2);
+}
+.tc-card__body { padding-top: var(--sp-2); }
+.tc-card__name { font-size: var(--fs-md); font-weight: 600; color: var(--ink); }
+.tc-card__meta { display: flex; align-items: center; gap: 8rpx; margin-top: 6rpx; }
+.tc-card__at { font-size: var(--fs-xs); color: var(--ink-3); }
+.od-future { margin: var(--sp-2) var(--sp-3) var(--sp-6); }

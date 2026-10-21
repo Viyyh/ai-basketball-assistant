@@ -1,0 +1,99 @@
+<view class="page">
+
+  <view class="pr-hd">
+    <view class="pr-hd__name">{{activityName}}</view>
+    <view class="pr-hd__meta" wx:if="{{videoDurationText}}">录像时长 {{videoDurationText}}</view>
+  </view>
+
+  <!-- ============ 处理中 ============ -->
+  <block wx:if="{{status === 'processing'}}">
+
+    <!-- 队列位置：必须诚实（界面设计 v0.1.1 屏 05） -->
+    <view class="card card--accent pr-queue">
+      <view class="card__title" style="color:var(--accent)">
+        <block wx:if="{{queueAhead > 0}}">你前面还有 {{queueAhead}} 场</block>
+        <block wx:else>正在处理你的录像</block>
+      </view>
+      <view class="card__body" wx:if="{{etaText}}">
+        预计 <text class="pr-strong">{{etaText}}</text> 后完成
+        <text wx:if="{{finishAtText}}"> · 约 {{finishAtText}} 生成</text>
+      </view>
+      <view class="card__body" wx:else>正在估算剩余时间…</view>
+    </view>
+
+    <!-- 六步 stepper -->
+    <view class="sec-label">AI 处理进度</view>
+    <view class="steps">
+      <view wx:for="{{steps}}" wx:key="key" class="step step--{{item.state}}">
+        <view class="step__dot">
+          <block wx:if="{{item.state === 'done'}}">✓</block>
+          <block wx:else>{{item.index}}</block>
+        </view>
+        <view class="step__body">
+          <view class="step__label">{{item.label}}</view>
+          <view wx:if="{{item.state === 'doing'}}" class="step__bar">
+            <view class="step__fill"></view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 「为什么这么慢」：透明化处理时长，降低心理阻力 -->
+    <view class="alert alert--info pr-why">
+      <view class="pr-why__title">为什么要这么久？</view>
+      <view class="pr-why__body">
+        40 分钟 1080p 视频约 72 万帧，需要逐帧跑检测、跟踪与事件识别。
+        内测期只有一台 GPU 服务器，任务按队列串行处理。
+      </view>
+    </view>
+
+    <!-- 停滞告警（PRD 3.13 兜底） -->
+    <view wx:if="{{stalled}}" class="alert alert--err">
+      已 {{elapsedMinutes}} 分钟没有进展，可能出现了异常。原始录像已保留，可以重试。
+      <view class="linkbtn linkbtn--inline" bindtap="onRetry">立即重试</view>
+    </view>
+
+    <!-- 订阅消息 -->
+    <block wx:if="{{!subscribed}}">
+      <view wx:if="{{canSubscribe}}" class="btn btn--primary btn--block pr-sub" bindtap="onSubscribe">
+        开启微信订阅消息 · 完成后通知我
+      </view>
+      <view wx:else class="pr-sub-note">
+        订阅消息未授权，可以在「我的」页面重新开启
+      </view>
+    </block>
+    <view wx:else class="card card--ok pr-sub-done">
+      <view class="card__body" style="color:#14532d">✓ 已开启通知，报告生成后会推送给你</view>
+    </view>
+
+    <view class="pr-leave">
+      <view class="pr-leave__text">也可以现在离开小程序，稍后从首页回来</view>
+      <view class="linkbtn" bindtap="onLeave">回首页</view>
+    </view>
+  </block>
+
+  <!-- ============ 完成 ============ -->
+  <block wx:elif="{{status === 'done'}}">
+    <view class="pr-done">
+      <view class="pr-done__icon">✓</view>
+      <view class="pr-done__title">报告已生成</view>
+      <view class="pr-done__desc">正在跳转…</view>
+      <view class="btn btn--primary" style="margin-top:32rpx" bindtap="onGoReport">立即查看</view>
+    </view>
+  </block>
+
+  <!-- ============ 失败 ============ -->
+  <block wx:else>
+    <view class="pr-fail">
+      <view class="pr-fail__icon">!</view>
+      <view class="pr-fail__title">处理异常</view>
+      <view class="pr-fail__desc">{{errorText || '处理过程中出现异常'}}</view>
+      <view class="row row--gap2" style="margin-top:32rpx">
+        <view class="btn btn--primary flex1" bindtap="onRetry">重试</view>
+        <view class="btn btn--ghost flex1" bindtap="onContact">联系支持</view>
+      </view>
+      <view class="pr-fail__note">原始录像不会被删除，重试不需要重新上传</view>
+    </view>
+  </block>
+
+</view>

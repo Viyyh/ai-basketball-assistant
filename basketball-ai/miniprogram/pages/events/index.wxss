@@ -1,0 +1,96 @@
+.ev-loading { padding: 160rpx 0; text-align: center; color: var(--ink-3); font-size: var(--fs-sm); }
+
+.ev-scope { padding: var(--sp-2) var(--sp-3) 0; }
+
+/* 补录进度 */
+.ev-prog {
+  margin: var(--sp-2) var(--sp-3);
+  padding: var(--sp-3);
+  background: var(--warn-2);
+  border: 2rpx solid var(--warn);
+  border-radius: var(--r-lg);
+}
+.ev-prog--done { background: var(--ok-2); border-color: var(--ok); }
+.ev-prog__row { display: flex; align-items: center; justify-content: space-between; }
+.ev-prog__text { font-size: var(--fs-md); font-weight: 600; color: var(--warn-ink); }
+.ev-prog--done .ev-prog__text { color: #14532d; }
+.ev-prog__pct { font-size: var(--fs-sm); color: var(--warn-ink); opacity: 0.8; }
+.ev-prog__track {
+  height: 10rpx; background: rgba(255,255,255,0.75);
+  border-radius: 5rpx; overflow: hidden; margin-top: var(--sp-2);
+}
+.ev-prog__fill { height: 100%; background: var(--warn); border-radius: 5rpx; }
+.ev-prog--done .ev-prog__fill { background: var(--ok); }
+.ev-prog__note { font-size: var(--fs-xs); color: var(--warn-ink); opacity: 0.85; margin-top: var(--sp-1); }
+
+/* 筛选器 */
+.ev-filters {
+  white-space: nowrap;
+  padding: 0 var(--sp-3) var(--sp-2);
+  display: flex;
+}
+.ev-filters .fchip { margin-right: var(--sp-1); flex-shrink: 0; }
+.fchip--warn { border-color: var(--warn); color: var(--warn-ink); background: var(--warn-2); }
+.fchip--disabled { opacity: 0.4; }
+
+.ev-period {
+  margin: 0 var(--sp-3) var(--sp-2);
+  font-size: var(--fs-xs); color: var(--accent);
+  background: var(--accent-2); border-radius: var(--r-sm);
+  padding: 6rpx var(--sp-2);
+}
+
+.ev-list { padding: 0 var(--sp-3) 200rpx; }
+
+/* 底部工具条 */
+.ev-toolbar {
+  position: fixed; left: 0; right: 0; bottom: 0;
+  display: flex; gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3) calc(var(--sp-2) + var(--safe-bottom));
+  background: var(--card);
+  border-top: 2rpx solid var(--line-2);
+  z-index: 40;
+}
+.ev-toolbar__btn {
+  flex: 1; text-align: center;
+  padding: var(--sp-2);
+  border: 2rpx solid var(--line);
+  border-radius: var(--r-md);
+  font-size: var(--fs-sm); color: var(--ink-2);
+}
+.ev-toolbar__btn--off { opacity: 0.4; }
+
+/* ============ 补录浮层 ============ */
+.ev-sheet { z-index: 101; }
+.ev-sheet__hd {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: var(--sp-2);
+}
+.ev-sheet__title { font-size: var(--fs-lg); font-weight: 600; color: var(--ink); }
+.ev-sheet__time { font-size: var(--fs-sm); color: var(--ink-3); }
+
+.ev-sheet__meta {
+  font-size: var(--fs-xs); color: var(--ink-3);
+  margin: var(--sp-2) 0; line-height: 1.6;
+}
+.ev-sheet__oob { margin: var(--sp-2) 0; }
+
+.ev-sheet__q {
+  font-size: var(--fs-md); font-weight: 600; color: var(--ink);
+  margin: var(--sp-3) 0 var(--sp-2);
+}
+
+.ev-sheet__acts {
+  display: flex; gap: var(--sp-1); margin-top: var(--sp-2);
+}
+.ev-sheet__skip { flex: 1; }
+.ev-sheet__undo { flex: 1; }
+.ev-sheet__save { flex: 2.4; }
+
+.ev-sheet__hint {
+  font-size: var(--fs-xs); color: var(--ink-3);
+  text-align: center; margin-top: var(--sp-2); line-height: 1.6;
+}
+
+.linkbtn { font-size: var(--fs-sm); color: var(--accent); }
+.linkbtn--inline { display: inline-block; margin-left: var(--sp-2); text-decoration: underline; }
