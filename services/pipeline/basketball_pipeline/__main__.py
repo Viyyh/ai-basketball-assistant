@@ -22,7 +22,7 @@ from pathlib import Path
 
 from basketball_params import AgeGroup, CourtType, Format
 
-from .ingest import format_summary, ingest_video, read_tracks, write_tracks
+from .ingest import format_summary, ingest_video, parse_polygon, read_tracks, write_tracks
 from .mock import build_report
 from .render import guess_snapshot, render_tracks_svg
 
@@ -47,6 +47,9 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     ingest.add_argument("--out", required=True, help="轨迹 JSON 输出路径")
     ingest.add_argument("--fps", type=float, default=8.0, help="抽帧帧率，默认 8")
     ingest.add_argument("--max-seconds", type=float, default=None, help="只处理前 N 秒，用于试跑")
+    ingest.add_argument("--start-seconds", type=float, default=0.0, help="从第 N 秒开始处理")
+    ingest.add_argument("--roi", default=None,
+                        help='只统计脚点落在这个多边形里的检测，格式 "x1,y1;x2,y2;x3,y3"')
     ingest.add_argument("--model", default="yolo11n.pt", help="权重文件或模型名")
     ingest.add_argument("--imgsz", type=int, default=960, help="推理分辨率")
     ingest.add_argument("--conf", type=float, default=0.25, help="置信度阈值")
@@ -61,6 +64,7 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     render.add_argument("--tracks", required=True, help="轨迹 JSON")
     render.add_argument("--out", required=True, help="SVG 输出路径")
     render.add_argument("--snapshot", default=None, help="代表帧图片，默认找同名 .jpg")
+    render.add_argument("--min-span", type=float, default=0.0, help="只画在场 ≥N 秒的轨迹")
 
     return parser.parse_args(argv)
 
@@ -104,6 +108,8 @@ def _cmd_ingest(args: argparse.Namespace) -> int:
             detector,
             sampled_fps=args.fps,
             max_seconds=args.max_seconds,
+        start_seconds=args.start_seconds,
+        roi=parse_polygon(args.roi),
             snapshot_path=snapshot,
             expected_players=args.expected_players,
             model_label=args.model,
@@ -121,7 +127,8 @@ def _cmd_ingest(args: argparse.Namespace) -> int:
 
     if not args.no_svg:
         svg = out.with_suffix(".svg")
-        render_tracks_svg(doc, svg, snapshot=snapshot if snapshot.exists() else None)
+        render_tracks_svg(doc, svg, snapshot=snapshot if snapshot.exists() else None,
+                          min_span=args.min_span)
         print(f"轨迹图 {svg}")
 
     if doc["summary"]["person_tracks"] == 0:
@@ -133,7 +140,8 @@ def _cmd_ingest(args: argparse.Namespace) -> int:
 def _cmd_render(args: argparse.Namespace) -> int:
     doc = read_tracks(args.tracks)
     snapshot = Path(args.snapshot) if args.snapshot else guess_snapshot(args.tracks)
-    out = render_tracks_svg(doc, args.out, snapshot=snapshot if snapshot.exists() else None)
+    out = render_tracks_svg(doc, args.out, snapshot=snapshot if snapshot.exists() else None,
+                            min_span=args.min_span)
     print(f"已写入 {out}")
     return 0
 

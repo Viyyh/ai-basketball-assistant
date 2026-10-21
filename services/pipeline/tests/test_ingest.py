@@ -20,6 +20,8 @@ from basketball_pipeline.ingest import (
     Box,
     format_summary,
     ingest_video,
+    parse_polygon,
+    point_in_polygon,
     read_tracks,
     sample_indices,
     write_tracks,
@@ -228,6 +230,30 @@ class TestRender(unittest.TestCase):
             render_tracks_svg(self._doc(30), out, max_legend=5)
             svg = out.read_text(encoding="utf-8")
             self.assertIn("条未列出", svg)
+
+
+class RoiTest(unittest.TestCase):
+    POLY = [(300, 500), (1520, 495), (1600, 780), (260, 900)]
+
+    def test_parse_polygon(self) -> None:
+        self.assertEqual(parse_polygon("1,2;3,4;5,6"), [(1.0, 2.0), (3.0, 4.0), (5.0, 6.0)])
+
+    def test_parse_polygon_none(self) -> None:
+        self.assertIsNone(parse_polygon(None))
+        self.assertIsNone(parse_polygon(""))
+
+    def test_parse_polygon_needs_three_points(self) -> None:
+        with self.assertRaises(ValueError):
+            parse_polygon("1,2;3,4")
+
+    def test_parse_polygon_rejects_garbage(self) -> None:
+        with self.assertRaises(ValueError):
+            parse_polygon("1,2;3;5,6")
+
+    def test_point_in_polygon(self) -> None:
+        self.assertTrue(point_in_polygon(900, 650, self.POLY))
+        self.assertFalse(point_in_polygon(900, 200, self.POLY))   # 观众席
+        self.assertFalse(point_in_polygon(100, 950, self.POLY))   # 画面前景
 
 
 if __name__ == "__main__":

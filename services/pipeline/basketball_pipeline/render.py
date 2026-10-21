@@ -25,6 +25,7 @@ PANEL = "#111C33"
 TEXT = "#E6EDF7"
 MUTED = "#8497B0"
 GRID = "#1E2A44"
+ACCENT = "#F5C542"
 
 
 def render_tracks_svg(
@@ -33,6 +34,7 @@ def render_tracks_svg(
     *,
     snapshot: str | Path | None = None,
     max_legend: int = 14,
+    min_span: float = 0.0,
 ) -> Path:
     video = doc.get("video", {})
     vid_w = float(video.get("width") or 1920)
@@ -40,6 +42,8 @@ def render_tracks_svg(
     tracks = doc.get("tracks", [])
     persons = [t for t in tracks if t.get("cls") == PERSON]
     balls = [t for t in tracks if t.get("cls") == SPORTS_BALL]
+    if min_span > 0:
+        persons = [t for t in persons if t.get("span_s", 0) >= min_span]
 
     panel_w = 640.0
     panel_h = round(panel_w * vid_h / vid_w, 1)
@@ -62,9 +66,15 @@ def render_tracks_svg(
     parts.append(_trajectories(persons, colors, vid_w, vid_h, 24.0, top, panel_w, panel_h))
 
     # --- 代表帧
+    roi = doc.get("ingest", {}).get("roi")
+    if roi:
+        parts.append(_roi_polygon(roi, vid_w, vid_h, 24.0, top, panel_w, panel_h))
+
     parts.append(_panel(24.0, frame_y, panel_w, panel_h, "代表帧（球员最多的一帧）"))
     if snapshot and Path(snapshot).exists():
         parts.append(_snapshot(Path(snapshot), doc, persons, colors, 24.0, frame_y, panel_w, panel_h))
+        if roi:
+            parts.append(_roi_polygon(roi, vid_w, vid_h, 24.0, frame_y, panel_w, panel_h))
     else:
         parts.append(
             f'<text x="{24 + panel_w / 2:.0f}" y="{frame_y + panel_h / 2:.0f}" fill="{MUTED}" '
@@ -224,6 +234,27 @@ def _snapshot(
             f'<text x="{rx:.1f}" y="{max(ry - 4, iy + 10):.1f}" fill="{color}" font-size="10">#{track.get("id")}</text>'
         )
     return "".join(out)
+
+
+def _roi_polygon(
+    roi: list[list[float]],
+    vid_w: float,
+    vid_h: float,
+    x: float,
+    y: float,
+    w: float,
+    h: float,
+) -> str:
+    bx, by, bw, bh = _frame_box(x, y, w, h)
+    _, ox, oy, _, _ = _fit(vid_w, vid_h, bw, bh)
+    scale = min(bw / vid_w, bh / vid_h)
+    pts = []
+    for px, py in roi:
+        pts.append(f"{bx + ox + px * scale:.1f},{by + oy + py * scale:.1f}")
+    return (
+        f'<polygon points="{" ".join(pts)}" fill="none" stroke="{ACCENT}" stroke-width="1.2" '
+        f'stroke-dasharray="5 4" stroke-opacity="0.75"/>'
+    )
 
 
 def _legend(

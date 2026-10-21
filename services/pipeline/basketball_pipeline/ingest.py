@@ -64,6 +64,38 @@ class VideoMeta:
         }
 
 
+def parse_polygon(text: str | None) -> list[tuple[float, float]] | None:
+    """解析 "x1,y1;x2,y2;..."。少于 3 个点视为未提供。"""
+    if not text:
+        return None
+    points: list[tuple[float, float]] = []
+    for chunk in text.replace(" ", "").split(";"):
+        if not chunk:
+            continue
+        try:
+            x_str, y_str = chunk.split(",")
+            points.append((float(x_str), float(y_str)))
+        except ValueError as exc:  # pragma: no cover - 交给 CLI 报错
+            raise ValueError(f"ROI 点格式应为 x,y：{chunk!r}") from exc
+    if len(points) < 3:
+        raise ValueError("ROI 至少需要 3 个点")
+    return points
+
+
+def point_in_polygon(x: float, y: float, polygon: list[tuple[float, float]]) -> bool:
+    """射线法。多边形不需要是凸的。"""
+    inside = False
+    n = len(polygon)
+    for i in range(n):
+        x1, y1 = polygon[i]
+        x2, y2 = polygon[(i + 1) % n]
+        if (y1 > y) != (y2 > y):
+            x_at = (x2 - x1) * (y - y1) / (y2 - y1) + x1
+            if x < x_at:
+                inside = not inside
+    return inside
+
+
 def _cv2():
     """延迟导入 cv2，缺依赖时给出可读的错误。"""
     try:
@@ -316,6 +348,8 @@ def ingest_video(
     *,
     sampled_fps: float = 8.0,
     max_seconds: float | None = None,
+    start_seconds: float = 0.0,
+    roi: list[tuple[float, float]] | None = None,
     snapshot_path: str | Path | None = None,
     expected_players: int | None = None,
     model_label: str | None = None,
@@ -328,9 +362,14 @@ def ingest_video(
     started = time.time()
     meta = probe_video(video_path)
 
+    start_frame = max(0, int(round(start_seconds * meta.fps))) if meta.fps else 0
+    end_frame = None
+    if max_seconds is not None and meta.fps:
+        end_frame = start_frame + int(round(max_seconds * meta.fps))
+
     if meta.frame_count > 0:
         wanted = set(sample_indices(meta.frame_count, meta.fps, sampled_fps))
-        should_process = lambda i, t: i in wanted  # noqa: E731
+        should_process = lambda i, t: i in wanted and i >= start_frame  # noqa: E731
     else:  # pragma: no cover - 少数容器不写帧数
         step_s = 1.0 / sampled_fps
         state = {"next": 0.0}
@@ -353,9 +392,14 @@ def ingest_video(
     index = 0
     try:
         while True:
-            t = index / meta.fps if meta.fps else 0.0
-            if max_seconds is not None and t > max_seconds:
+            if end_frame is not None and index >= end_frame:
                 break
+            t = index / meta.fps if meta.fps else 0.0
+            if index < start_frame:
+                if not cap.grab():
+                    break
+                index += 1
+                continue
             take = should_process(index, t)
 
             ok = cap.grab()
@@ -370,6 +414,10 @@ def ingest_video(
                 break
             boxes = detector.update(frame, index)
             for box in boxes:
+                if roi is not None:
+                    x1, _, x2, y2 = box.xyxy
+                    if not point_in_polygon((x1 + x2) / 2.0, y2, roi):
+                        continue
                 acc.add(box, t, index)
             processed += 1
 
@@ -422,8 +470,10 @@ def ingest_video(
             "imgsz": imgsz,
             "conf": conf_threshold,
             "device": device,
+            "start_seconds": start_seconds,
             "elapsed_s": _round(time.time() - started, 2),
             "snapshot_frame": best_index,
+            "roi": [[round(x, 1), round(y, 1)] for x, y in roi] if roi else None,
         },
         "summary": summary,
         "health": _health(summary, expected_players, meta.duration_s),

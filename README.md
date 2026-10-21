@@ -74,13 +74,23 @@ cd services/api && PYTHONPATH=../../packages/params:. \
 外加一张能一眼看出跟踪有没有碎的 SVG。
 
 ```bash
-# 前 30 秒试跑（先看机位和人数对不对，别一上来跑整场）
-./scripts/ingest.sh --video data/raw/game01.mp4 --out data/tracks/game01.json \
-  --max-seconds 30 --fps 4 --expected-players 10
+# 第 1 步：挑一段 30 秒，先看机位和人数对不对（别一上来跑整场）
+./scripts/ingest.sh --video data/raw/game01.mp4 --out data/tracks/try.json \
+  --start-seconds 300 --max-seconds 30 --fps 4 --expected-players 6
 
-# 整场
+# 第 2 步：视频里有观众席/替补席时，先把球场画成一个多边形（脚点在里面才算场上的人）
+#   x1,y1;x2,y2;... 是画面像素坐标，固定机位只需画一次
+./scripts/ingest.sh --video data/raw/game01.mp4 --out data/tracks/try.json \
+  --start-seconds 300 --max-seconds 30 --expected-players 6 \
+  --roi "300,500;1520,495;1600,780;260,900"
+
+# 第 3 步：整场
 ./scripts/ingest.sh --video data/raw/game01.mp4 --out data/tracks/game01.json \
-  --expected-players 10
+  --expected-players 6 --roi "300,500;1520,495;1600,780;260,900"
+
+# 轨迹太乱时只画活过 5 秒的
+PYTHONPATH=packages/params:services/pipeline python3 -m basketball_pipeline render \
+  --tracks data/tracks/try.json --out data/tracks/try.svg --min-span 5
 ```
 
 产物（`data/` 已在 `.gitignore` 里，视频和轨迹都不进仓库）：
