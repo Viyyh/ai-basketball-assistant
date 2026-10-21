@@ -170,23 +170,49 @@ test('R8 · coverage 与事件数量对不上会被抓出', () => {
 });
 
 // ── 排除机制 ──────────────────────────────────────────────────────
-test('被排除的事件不计入统计，但仍在 events_total 里', () => {
-  const r = mutate((x) => {
-    x.events[8].status = 'EXCLUDED';
-    x.events[8].exclude_reason = '误检';
-  });
-  // 原本 e09 就是 EXCLUDED，这里再排除一次不改数字；验证扣除后仍然自洽
-  assert.deepEqual(checkSemantics(r), []);
+test('被排除的事件不计入统计（独立重算核对）', () => {
+  const active = fixture.events.filter((e) => e.status === 'ACTIVE');
+  const ours = active.filter((e) => e.kind === 'SHOT' && e.team_side === 'OURS');
+  assert.equal(fixture.team_stats.shots_attempted, ours.length);
+  assert.equal(fixture.coverage.events_total, fixture.events.length);
+
+  const excluded = fixture.events.filter((e) => e.status === 'EXCLUDED');
+  assert.ok(excluded.length > 0, '样例里必须有被排除的事件，否则这条路径没被测到');
+  assert.equal(fixture.coverage.events_excluded, excluded.length);
 });
 
 test('把已排除事件改回 ACTIVE 却不改统计 → 必须报错', () => {
   const r = mutate((x) => {
-    x.events[8].status = 'ACTIVE';
-    x.events[8].exclude_reason = null;
+    const e = x.events.find((ev) => ev.status === 'EXCLUDED');
+    e.status = 'ACTIVE';
+    e.exclude_reason = null;
   });
   const found = rules(r);
   assert.ok(found.includes('R7'), '恢复事件后统计应随之变化，否则就是静默错误');
   assert.ok(found.includes('R8'));
+});
+
+// ── 评分块 ────────────────────────────────────────────────────────
+test('合法评分块通过校验', () => {
+  const r = mutate((x) => {
+    x.ratings = [{
+      player_id: 'p01',
+      rating_rules: 'v0',
+      dimensions: [
+        { key: 'FINISHING', grade: 'B', sample_size: 32, make_rate: 0.41, explain_zh: '近筐 32 次出手命中 41%' },
+        { key: 'PERIMETER', grade: 'INSUFFICIENT', sample_size: 4, make_rate: null, explain_zh: '弧外样本 4 次，不足 20 次' },
+        { key: 'INVOLVEMENT', grade: 'C', sample_size: 71, make_rate: null, explain_zh: '参与 71 个回合' },
+      ],
+    }];
+  });
+  assert.deepEqual(validate(schema, r), []);
+});
+
+test('评分等级超出枚举会被抓出', () => {
+  const r = mutate((x) => {
+    x.ratings = [{ player_id: 'p01', rating_rules: 'v0', dimensions: [{ key: 'FINISHING', grade: 'A+', sample_size: 1 }] }];
+  });
+  assert.ok(validate(schema, r).some((i) => i.path.includes('grade')));
 });
 
 // ── 校验器自身 ────────────────────────────────────────────────────

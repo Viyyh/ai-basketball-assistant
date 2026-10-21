@@ -1,0 +1,41 @@
+name: verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # 项目本身零 npm 依赖；这里只装 API 的运行期依赖。
+      - name: 安装依赖
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "fastapi>=0.110" "httpx>=0.27" "uvicorn>=0.27"
+
+      - name: 全量检查
+        run: ./scripts/verify.sh
+
+      # 单元测试通过但契约样例漂移，是最容易被忽略的一种失败：
+      # 代码改了、样例没重生成，前端照着旧样例开发。
+      - name: 上传样例报告（失败时排查用）
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sample-report
+          path: contracts/fixtures/sample-report.json

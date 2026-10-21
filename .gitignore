@@ -29,3 +29,8 @@ venv/
 
 # 审阅截图（临时产物，不入库）
 .dsh-review/
+
+# 本地 SQLite 数据库（运行期产物）
+data/
+*.db
+*.db-journal

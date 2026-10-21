@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "basketball-api"
+version = "0.1.0"
+description = "AI 篮球分析 HTTP 服务（参数解析 / 活动 / 报告寄存）"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.27",
+    "basketball-params",
+]
+
+[tool.setuptools]
+packages = ["app"]
