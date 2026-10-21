@@ -21,6 +21,7 @@
 │   ├── decisions.md              决策记录 ADR（含被否掉的方案与原因）
 │   ├── fiba-conformance.md       FIBA 规则符合性对照（场地尺寸、三分线、标线）
 │   ├── shooting-guide.md         素材怎么拍：机位、距离、设置、现场记录、拍完验收
+│   ├── game-day-checklist.md     比赛日清单：怎么拍完整一场、同时记什么、交回什么
 │   └── architecture.md           仓库结构与数据流
 ├── design/                       界面与架构设计稿（v0.1，参考）
 ├── contracts/                    报告契约 v1.1 + 零依赖校验器 + 样例
