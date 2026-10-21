@@ -36,12 +36,26 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(body["params"]["three_point_geometry"], "ARC_AND_CORNERS")
         self.assertIn("6.75", body["scope_label"])
 
-    def test_resolve_3v3_degrades_geometry(self):
+    def test_resolve_exposes_court_marks_for_rendering(self):
+        """前端画球场必须拿这些数字，不得自己写死 4.9 / 5.8 / 1.8。"""
+        body = self.client.get(
+            "/v1/params/resolve", params={"format": "5V5", "age_group": "U15"}
+        ).json()
+        svg = body["svg"]
+        self.assertAlmostEqual(svg["three_point_radius_m"], 6.75)
+        self.assertAlmostEqual(svg["marks"]["free_throw_line_m"], 5.80)
+        self.assertAlmostEqual(svg["marks"]["restricted_area_width_m"], 4.90)
+        self.assertAlmostEqual(svg["marks"]["center_circle_radius_m"], 1.80)
+        self.assertAlmostEqual(svg["marks"]["no_charge_radius_m"], 1.30)
+
+    def test_resolve_3v3_court_orientation(self):
         body = self.client.get(
             "/v1/params/resolve", params={"format": "3V3", "age_group": "U15"}
         ).json()
-        self.assertEqual(body["params"]["three_point_geometry"], "PURE_ARC")
-        self.assertIsNone(body["params"]["corner_lateral_m"])
+        # FIBA 3x3 场地 15 m 宽 × 11 m 长 → 半宽 7.5 m，底角直线段在场内
+        self.assertEqual(body["params"]["three_point_geometry"], "ARC_AND_CORNERS")
+        self.assertAlmostEqual(body["params"]["y_half_m"], 7.5)
+        self.assertAlmostEqual(body["params"]["court_length_m"], 11.0)
         self.assertEqual(body["params"]["inside_arc_points"], 1)
 
     def test_resolve_4v4_requires_court_type(self):

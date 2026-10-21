@@ -76,7 +76,9 @@ class TestMockContent(unittest.TestCase):
         self.assertTrue(labels)
         for label in labels:
             self.assertNotIn("三分", label)
-        self.assertEqual(report["params"]["three_point_geometry"], "PURE_ARC")
+        # 3x3 场地 15 m 宽 × 11 m 长，半宽 7.5 m > 6.60 m，底角直线段在场内
+        self.assertEqual(report["params"]["three_point_geometry"], "ARC_AND_CORNERS")
+        self.assertEqual(report["params"]["y_half_m"], 7.5)
         self.assertEqual(len(report["periods"]), 1)
 
     def test_every_period_has_attacking_basket(self):

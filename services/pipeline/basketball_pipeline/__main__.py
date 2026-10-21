@@ -19,7 +19,7 @@ from .mock import build_report
 
 
 def _parse_args(argv: list[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(prog="basketball_pipeline", description="AI 篮球分析 pipeline")
+    parser = argparse.ArgumentParser(prog="basketball_pipeline", description="AI Basketball Assistant pipeline")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     sample = sub.add_parser("sample", help="生成一份契约合法的示例报告")

@@ -10,7 +10,7 @@ import os
 from pathlib import Path
 from typing import Optional
 
-from basketball_params import AgeGroup, CourtType, Format, resolve
+from basketball_params import AgeGroup, CourtType, Format, build_court, resolve
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 
@@ -41,7 +41,7 @@ def scope_label(params: dict) -> str:
 
 def create_app(db_path: Optional[str | Path] = None) -> FastAPI:
     app = FastAPI(
-        title="AI 篮球分析 API",
+        title="AI Basketball Assistant API",
         version=API_VERSION,
         description=(
             "教练端后端。参数层是唯一真源，报告契约见 contracts/report.schema.json。"
@@ -81,6 +81,7 @@ def create_app(db_path: Optional[str | Path] = None) -> FastAPI:
         return ParamsOut(
             params=params.to_contract(),
             scope_label=params.scope_label_zh,
+            svg=build_court(params).svg_params(),
             unverified=list(params.unverified),
         )
 

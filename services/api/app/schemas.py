@@ -43,6 +43,10 @@ class ParamsOut(BaseModel):
     params: dict
     scope_label: str
     unverified: list[str]
+    svg: dict = Field(
+        default_factory=dict,
+        description="球场底图绘制参数（含场地标线）。前端不得自己写死尺寸",
+    )
 
 
 class HealthOut(BaseModel):

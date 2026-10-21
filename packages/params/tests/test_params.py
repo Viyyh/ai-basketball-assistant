@@ -46,10 +46,17 @@ class TestResolve(unittest.TestCase):
         baseline = p.court.baseline_to_hoop_m
         self.assertAlmostEqual(junction + baseline, 2.99, places=2)
 
-    def test_3x3_is_pure_arc(self):
+    def test_3x3_court_orientation(self):
+        """FIBA 3x3 场地是 15 m 宽 × 11 m 长 —— 宽比长大，不是反过来。
+
+        写反了 y_half 会变成 5.5 m，几何判定随之退化成纯弧线，
+        整场 3x3 的底角两分会被算成一分。
+        """
         p = resolve(Format.THREE_V_THREE, AgeGroup.U15)
-        self.assertEqual(p.three_point.geometry, ThreePointGeometry.PURE_ARC)
-        self.assertIsNone(p.three_point.corner_lateral_m)
+        self.assertEqual(p.court.length_m, 11.0)
+        self.assertEqual(p.court.width_m, 15.0)
+        self.assertEqual(p.court.y_half_m, 7.5)
+        self.assertEqual(p.three_point.geometry, ThreePointGeometry.ARC_AND_CORNERS)
         self.assertEqual(p.rules.inside_arc_points, 1)
         self.assertEqual(p.rules.outside_arc_points, 2)
         self.assertEqual(p.rules.shot_clock_s, 12)
@@ -83,6 +90,28 @@ class TestCourtGeometry(unittest.TestCase):
         self.assertFalse(self.court.behind_three_point_line(6.74, 0.0))
         self.assertTrue(self.court.behind_three_point_line(6.76, 0.0))
 
+    def test_line_itself_counts_as_two(self):
+        """FIBA 2.5.4：3 分线不是 3 分中篮区域的一部分 —— 踩线算两分。"""
+        on_line = self.court.judge(Shot(x_m=6.75, y_m=0.0, made=True))
+        self.assertFalse(on_line.behind_three_point_line)
+        self.assertEqual(on_line.shot_value, 2)
+
+        just_out = self.court.judge(Shot(x_m=6.7501, y_m=0.0, made=True))
+        self.assertTrue(just_out.behind_three_point_line)
+        self.assertEqual(just_out.shot_value, 3)
+
+        just_in = self.court.judge(Shot(x_m=6.7499, y_m=0.0, made=True))
+        self.assertFalse(just_in.behind_three_point_line)
+
+    def test_corner_line_itself_counts_as_two(self):
+        """底角直线段的 |y| = 6.60 是线的外沿，压线同样算两分。"""
+        on_corner = self.court.judge(Shot(x_m=1.0, y_m=6.60, made=True))
+        self.assertFalse(on_corner.behind_three_point_line)
+        self.assertEqual(on_corner.shot_value, 2)
+
+        outside = self.court.judge(Shot(x_m=1.0, y_m=6.61, made=True))
+        self.assertTrue(outside.behind_three_point_line)
+
     def test_old_demo_point_is_no_longer_a_three(self):
         """原 demo 认为 6.20 m 是三分；按 6.75 m 口径它只是两分。"""
         j = self.court.judge(Shot(x_m=6.2, y_m=0.0, made=True))
@@ -91,7 +120,7 @@ class TestCourtGeometry(unittest.TestCase):
         self.assertEqual(j.label_zh, "二分")
 
     def test_corner_three(self):
-        """底角：|y| >= 6.60 且未过交接点，距离 6.70 m 仍算三分。"""
+        """底角：|y| > 6.60 且未过交接点，距离 6.70 m 仍算三分。"""
         j = self.court.judge(Shot(x_m=1.0, y_m=6.70, made=True))
         self.assertTrue(j.behind_three_point_line)
         self.assertEqual(j.shot_value, 3)
@@ -104,7 +133,8 @@ class TestCourtGeometry(unittest.TestCase):
     def test_geometry_stays_continuous_at_junction(self):
         """交接点两侧不应出现"更远却算两分"的矛盾。"""
         junction = self.court.tp.corner_junction_x_m
-        for y in (6.60, 6.70, 6.90):
+        # 只测底角线之外的 y：6.60 正好压线，按规则是两分，不参与连续性判断
+        for y in (6.66, 6.70, 6.90):
             with self.subTest(y=y):
                 near = self.court.behind_three_point_line(junction - 0.01, y)
                 far = self.court.behind_three_point_line(junction + 0.01, y)
@@ -158,6 +188,37 @@ class TestContractParams(unittest.TestCase):
     def test_scope_label(self):
         p = resolve(Format.FIVE_V_FIVE, AgeGroup.U15)
         self.assertIn("三分线 6.75 m", p.scope_label_zh)
+
+
+class TestFibaCourtMarks(unittest.TestCase):
+    """场地标线尺寸 —— 画错不会报错，只会让教练觉得"这球场怪怪的"。"""
+
+    def test_mark_dimensions(self):
+        p = resolve(Format.FIVE_V_FIVE, AgeGroup.U15)
+        m = p.marks
+        self.assertAlmostEqual(m.free_throw_line_m, 5.80)
+        self.assertAlmostEqual(m.restricted_area_length_m, 5.80)
+        self.assertAlmostEqual(m.restricted_area_width_m, 4.90)   # 不是罚球线长 3.60
+        self.assertAlmostEqual(m.center_circle_radius_m, 1.80)
+        self.assertAlmostEqual(m.no_charge_radius_m, 1.30)
+        self.assertAlmostEqual(m.throw_in_line_offset_m, 8.325)
+        self.assertAlmostEqual(m.line_width_m, 0.05)
+
+    def test_svg_params_expose_marks(self):
+        court = build_court(resolve(Format.FIVE_V_FIVE, AgeGroup.U15))
+        svg = court.svg_params()
+        self.assertIn("marks", svg)
+        self.assertAlmostEqual(svg["marks"]["restricted_area_width_m"], 4.90)
+        self.assertAlmostEqual(svg["marks"]["free_throw_line_m"], 5.80)
+
+    def test_3x3_svg_uses_correct_orientation(self):
+        """3x3 底图：长 11 m、宽 15 m，半宽 7.5 m。"""
+        court = build_court(resolve(Format.THREE_V_THREE, AgeGroup.U15))
+        svg = court.svg_params()
+        self.assertEqual(svg["length_m"], 11.0)
+        self.assertEqual(svg["width_m"], 15.0)
+        self.assertEqual(svg["y_half_m"], 7.5)
+        self.assertEqual(svg["three_point_geometry"], "ARC_AND_CORNERS")
 
 
 if __name__ == "__main__":

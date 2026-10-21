@@ -1,4 +1,7 @@
-# AI 篮球分析
+# AI Basketball Assistant
+
+> 仓库名：`AI Basketball Assistant`（GitHub 上会规范成 `AI-Basketball-Assistant`）
+> 本地路径：`/Users/victor/AI Basketball Assistant`
 
 给青少年球队教练用的比赛视频分析工具：录一场球（或导入一段视频），拿到一份能看、能点开、能信的投篮与阵型报告，并逐步沉淀出每个球员的分析数据。
 
@@ -16,6 +19,7 @@
 │   ├── scope-confirmation.md     第一版范围确认
 │   ├── scope-v1.1.md             本版要做的增量范围（与 prd 冲突处以此为准）
 │   ├── decisions.md              决策记录 ADR（含被否掉的方案与原因）
+│   ├── fiba-conformance.md       FIBA 规则符合性对照（场地尺寸、三分线、标线）
 │   └── architecture.md           仓库结构与数据流
 ├── design/                       界面与架构设计稿（v0.1，参考）
 ├── contracts/                    报告契约 v1.1 + 零依赖校验器 + 样例
@@ -34,7 +38,7 @@
 只依赖 **Node ≥ 20** 与 **Python ≥ 3.11**，不需要 `npm install`，也不需要虚拟环境（标准库 + 已装的 FastAPI）。
 
 ```bash
-./scripts/verify.sh          # 全量检查：契约 + 参数层 + pipeline + API
+./scripts/verify.sh          # 全量检查：契约 + 参数层 + pipeline + API（共 76 项）
 ```
 
 单独跑：
@@ -43,14 +47,14 @@
 # 契约（结构与语义校验，26 项）
 cd contracts && node --test test/validate.test.mjs
 
-# 参数层（19 项）
+# 参数层（24 项）
 cd packages/params && PYTHONPATH=. python3 -m unittest discover -s tests -t .
 
 # mock pipeline（11 项，含跨语言契约校验）
 cd services/pipeline && PYTHONPATH=../../packages/params:. \
   python3 -m unittest discover -s tests -t .
 
-# HTTP API（14 项）
+# HTTP API（15 项）
 cd services/api && PYTHONPATH=../../packages/params:. \
   python3 -m unittest discover -s tests -t .
 

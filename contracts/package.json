@@ -3,7 +3,7 @@
   "version": "1.1.0",
   "private": true,
   "type": "module",
-  "description": "AI 篮球分析报告契约（JSON Schema）与零依赖校验器",
+  "description": "AI Basketball Assistant 报告契约（JSON Schema）与零依赖校验器",
   "exports": {
     ".": "./validate.mjs",
     "./report.schema.json": "./report.schema.json"

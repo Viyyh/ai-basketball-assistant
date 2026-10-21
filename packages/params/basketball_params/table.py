@@ -13,7 +13,7 @@ pipeline 里不允许出现任何硬编码的魔法数字（否则同一场比�
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional
 
@@ -103,10 +103,19 @@ class ThreePointGeometry(str, Enum):
 FIBA_BASELINE_TO_HOOP_M = 1.575
 FIBA_FULL_LENGTH_M = 28.0
 FIBA_FULL_WIDTH_M = 15.0
-FIBA_3X3_LENGTH_M = 15.0
-FIBA_3X3_WIDTH_M = 11.0
+# FIBA 3x3 场地是 **15 m 宽 × 11 m 长**（宽 > 长，与 5v5 的 28×15 同宽）
+FIBA_3X3_LENGTH_M = 11.0
+FIBA_3X3_WIDTH_M = 15.0
 FIBA_3PT_RADIUS_M = 6.75
 FIBA_CORNER_LATERAL_M = 6.60   # 边线内沿 0.90 m 处 → 15/2 - 0.90
+
+# 场地标线（FIBA 规则 2.5）。只用于绘图，不参与分值判定。
+FIBA_FREETHROW_LINE_M = 5.80        # 罚球线外沿距端线内沿
+FIBA_RESTRICTED_AREA_WIDTH_M = 4.90 # 限制区宽 = 2 × 2.45
+FIBA_CENTER_CIRCLE_RADIUS_M = 1.80  # 中圈半径（外沿丈量）
+FIBA_NO_CHARGE_RADIUS_M = 1.30      # 无撞人半圆区半径
+FIBA_THROW_IN_LINE_M = 8.325        # 掷球入界线外沿距最近端线内沿
+FIBA_LINE_WIDTH_M = 0.05            # 所有标线宽 5 cm
 
 
 # ============================================================
@@ -152,6 +161,36 @@ class RulesSpec:
 
 
 @dataclass(frozen=True)
+class CourtMarks:
+    """
+    场地标线尺寸（FIBA 规则 2.5）。
+
+    这些数字决定"球场画得对不对"，不参与二分/三分判定 ——
+    判定只看三分线（`ThreePointSpec`）。分开是因为两者的变更理由不同：
+    线宽/圆圈属于装饰，三分线一改就会动到分值。
+    """
+
+    free_throw_line_m: float = FIBA_FREETHROW_LINE_M
+    restricted_area_length_m: float = FIBA_FREETHROW_LINE_M
+    restricted_area_width_m: float = FIBA_RESTRICTED_AREA_WIDTH_M
+    center_circle_radius_m: float = FIBA_CENTER_CIRCLE_RADIUS_M
+    no_charge_radius_m: float = FIBA_NO_CHARGE_RADIUS_M
+    throw_in_line_offset_m: float = FIBA_THROW_IN_LINE_M
+    line_width_m: float = FIBA_LINE_WIDTH_M
+
+    def as_dict(self) -> dict:
+        return {
+            "free_throw_line_m": self.free_throw_line_m,
+            "restricted_area_length_m": self.restricted_area_length_m,
+            "restricted_area_width_m": self.restricted_area_width_m,
+            "center_circle_radius_m": self.center_circle_radius_m,
+            "no_charge_radius_m": self.no_charge_radius_m,
+            "throw_in_line_offset_m": self.throw_in_line_offset_m,
+            "line_width_m": self.line_width_m,
+        }
+
+
+@dataclass(frozen=True)
 class TrackingSpec:
     players_per_team: int
     formation_points: int
@@ -168,6 +207,7 @@ class ActivityParams:
     three_point: ThreePointSpec
     rules: RulesSpec
     tracking: TrackingSpec
+    marks: CourtMarks = field(default_factory=CourtMarks)
     unverified: tuple[str, ...] = ()
 
     @property
@@ -257,8 +297,8 @@ def resolve_three_point(radius_m: float, court: CourtSpec) -> ThreePointSpec:
     底角直线段能存在的充要条件：
         1. 半径 > 底角横向距离。否则弧线永远碰不到底角线的位置，
            会出现"底角直线段落在弧线内侧"的自相矛盾几何。
-        2. 场地半宽 > 底角横向距离。3x3 的 11 m 宽半场半宽只有 5.5 m，
-           底角直线段根本不在场内。
+        2. 场地半宽 > 底角横向距离。窄场地（半宽 ≤ 6.60 m）上底角直线段
+           根本不在场内，例如 12 m 宽的青少年场地、26×14 的旧规格球场。
 
     任何一条不满足就退化为纯弧线。这条规则同时覆盖了
     "3x3 用纯弧"和"青少年小球场地用纯弧"两种情况，不需要分支特判。
