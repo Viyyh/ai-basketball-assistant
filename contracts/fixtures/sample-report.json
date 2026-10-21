@@ -1,0 +1,438 @@
+{
+  "schema_version": "1.1",
+  "activity_id": "act_20261018_001",
+  "pipeline_version": "mock-1.1.0",
+  "generated_at": "2026-10-18T10:30:00+08:00",
+  "params": {
+    "format": "5V5",
+    "age_group": "U15",
+    "court_type": "FULL",
+    "three_point_radius_m": 5.8,
+    "three_point_geometry": "PURE_ARC",
+    "corner_lateral_m": null,
+    "corner_junction_x_m": null,
+    "period_count": 4,
+    "period_minutes": 8,
+    "shot_clock_s": 24,
+    "inside_arc_points": 2,
+    "outside_arc_points": 3,
+    "fast_break_enabled": true,
+    "formation_points": 5,
+    "court_length_m": 28,
+    "court_width_m": 15,
+    "baseline_to_hoop_m": 1.575,
+    "x_range_m": [
+      -1.575,
+      26.425
+    ],
+    "y_half_m": 7.5
+  },
+  "video": {
+    "key": "videos/act_20261018_001/source.mp4",
+    "duration_s": 1440,
+    "fps": 25,
+    "resolution": [
+      1920,
+      1080
+    ],
+    "source": "ALBUM"
+  },
+  "calibration": {
+    "ok": true,
+    "reproj_error_px": 2.4,
+    "homography": [
+      12.4,
+      0.8,
+      -1820.5,
+      -0.3,
+      11.9,
+      -640.2,
+      0.0008,
+      0.0011,
+      1
+    ],
+    "note": "四角标定，重投影误差 2.4px"
+  },
+  "events": [
+    {
+      "id": "e01",
+      "kind": "SHOT",
+      "timestamp_s": 42.5,
+      "period": 1,
+      "x_m": 6.2,
+      "y_m": 0.0,
+      "distance_m": 6.2,
+      "in_bounds": true,
+      "behind_three_point_line": true,
+      "shot_value": 3,
+      "made": true,
+      "label_zh": "三分·命中",
+      "confidence": 0.91,
+      "clip_key": "clips/e01.mp4",
+      "clip_start_s": 39.0,
+      "clip_duration_s": 10,
+      "player_id": "p01",
+      "attribution_source": "COACH",
+      "team_side": "OURS",
+      "source": "AI",
+      "status": "ACTIVE",
+      "exclude_reason": null
+    },
+    {
+      "id": "e02",
+      "kind": "SHOT",
+      "timestamp_s": 96.0,
+      "period": 1,
+      "x_m": 5.3,
+      "y_m": 1.2,
+      "distance_m": 5.43,
+      "in_bounds": true,
+      "behind_three_point_line": false,
+      "shot_value": 2,
+      "made": false,
+      "label_zh": "二分·未中",
+      "confidence": 0.86,
+      "clip_key": "clips/e02.mp4",
+      "clip_start_s": 92.5,
+      "clip_duration_s": 10,
+      "player_id": "p02",
+      "attribution_source": "COACH",
+      "team_side": "OURS",
+      "source": "AI",
+      "status": "ACTIVE",
+      "exclude_reason": null
+    },
+    {
+      "id": "e03",
+      "kind": "SHOT",
+      "timestamp_s": 508.0,
+      "period": 2,
+      "x_m": 6.6,
+      "y_m": 2.4,
+      "distance_m": 7.02,
+      "in_bounds": true,
+      "behind_three_point_line": true,
+      "shot_value": 3,
+      "made": true,
+      "label_zh": "三分·命中",
+      "confidence": 0.88,
+      "clip_key": "clips/e03.mp4",
+      "clip_start_s": 504.0,
+      "clip_duration_s": 10,
+      "player_id": "p03",
+      "attribution_source": "COACH",
+      "team_side": "OURS",
+      "source": "AI",
+      "status": "ACTIVE",
+      "exclude_reason": null
+    },
+    {
+      "id": "e04",
+      "kind": "SHOT",
+      "timestamp_s": 602.0,
+      "period": 2,
+      "x_m": 4.0,
+      "y_m": -1.0,
+      "distance_m": 4.12,
+      "in_bounds": true,
+      "behind_three_point_line": false,
+      "shot_value": 2,
+      "made": true,
+      "label_zh": "二分·命中",
+      "confidence": 0.79,
+      "clip_key": "clips/e04.mp4",
+      "clip_start_s": 598.5,
+      "clip_duration_s": 10,
+      "player_id": "p01",
+      "attribution_source": "COACH",
+      "team_side": "OURS",
+      "source": "AI",
+      "status": "ACTIVE",
+      "exclude_reason": null
+    },
+    {
+      "id": "e05",
+      "kind": "SHOT",
+      "timestamp_s": 130.0,
+      "period": 1,
+      "x_m": 6.0,
+      "y_m": 1.0,
+      "distance_m": 6.08,
+      "in_bounds": true,
+      "behind_three_point_line": true,
+      "shot_value": 3,
+      "made": true,
+      "label_zh": "三分·命中",
+      "confidence": 0.83,
+      "clip_key": "clips/e05.mp4",
+      "clip_start_s": 126.0,
+      "clip_duration_s": 10,
+      "player_id": null,
+      "attribution_source": "NOT_OUR_TEAM",
+      "team_side": "OPPONENT",
+      "source": "AI",
+      "status": "ACTIVE",
+      "exclude_reason": null
+    },
+    {
+      "id": "e06",
+      "kind": "SHOT",
+      "timestamp_s": 214.0,
+      "period": 1,
+      "x_m": 3.2,
+      "y_m": 2.8,
+      "distance_m": 4.25,
+      "in_bounds": true,
+      "behind_three_point_line": false,
+      "shot_value": 2,
+      "made": false,
+      "label_zh": "二分·未中",
+      "confidence": 0.74,
+      "clip_key": "clips/e06.mp4",
+      "clip_start_s": 210.0,
+      "clip_duration_s": 10,
+      "player_id": null,
+      "attribution_source": "NOT_OUR_TEAM",
+      "team_side": "OPPONENT",
+      "source": "AI",
+      "status": "ACTIVE",
+      "exclude_reason": null
+    },
+    {
+      "id": "e07",
+      "kind": "TURNOVER",
+      "timestamp_s": 302.0,
+      "period": 1,
+      "in_bounds": true,
+      "confidence": 0.7,
+      "clip_key": "clips/e07.mp4",
+      "clip_start_s": 298.0,
+      "clip_duration_s": 10,
+      "player_id": "p04",
+      "attribution_source": "COACH",
+      "team_side": "OURS",
+      "source": "AI",
+      "status": "ACTIVE",
+      "exclude_reason": null
+    },
+    {
+      "id": "e08",
+      "kind": "SHOT",
+      "timestamp_s": 660.0,
+      "period": 2,
+      "x_m": 5.0,
+      "y_m": 2.0,
+      "distance_m": 5.38,
+      "in_bounds": true,
+      "behind_three_point_line": false,
+      "shot_value": 2,
+      "made": false,
+      "label_zh": "二分·未中",
+      "confidence": 0.81,
+      "clip_key": "clips/e08.mp4",
+      "clip_start_s": 656.0,
+      "clip_duration_s": 10,
+      "player_id": null,
+      "attribution_source": null,
+      "team_side": "OURS",
+      "source": "AI",
+      "status": "ACTIVE",
+      "exclude_reason": null
+    },
+    {
+      "id": "e09",
+      "kind": "SHOT",
+      "timestamp_s": 735.0,
+      "period": 2,
+      "x_m": 7.1,
+      "y_m": -2.0,
+      "distance_m": 7.38,
+      "in_bounds": true,
+      "behind_three_point_line": true,
+      "shot_value": 3,
+      "made": false,
+      "label_zh": "三分·未中",
+      "confidence": 0.42,
+      "clip_key": "clips/e09.mp4",
+      "clip_start_s": 731.0,
+      "clip_duration_s": 10,
+      "player_id": null,
+      "attribution_source": null,
+      "team_side": "OURS",
+      "source": "AI",
+      "status": "EXCLUDED",
+      "exclude_reason": "误检：实为传球出界"
+    },
+    {
+      "id": "e10",
+      "kind": "FAST_BREAK",
+      "timestamp_s": 388.0,
+      "period": 1,
+      "in_bounds": true,
+      "confidence": 0.76,
+      "clip_key": "clips/e10.mp4",
+      "clip_start_s": 384.0,
+      "clip_duration_s": 10,
+      "player_id": "p05",
+      "attribution_source": "COACH",
+      "team_side": "OURS",
+      "source": "AI",
+      "status": "ACTIVE",
+      "exclude_reason": null
+    },
+    {
+      "id": "e11",
+      "kind": "SHOT",
+      "timestamp_s": 812.0,
+      "period": 2,
+      "x_m": 3.0,
+      "y_m": 3.0,
+      "distance_m": 4.24,
+      "in_bounds": true,
+      "behind_three_point_line": false,
+      "shot_value": 2,
+      "made": true,
+      "label_zh": "二分·命中",
+      "confidence": 0.61,
+      "clip_key": "clips/e11.mp4",
+      "clip_start_s": 808.0,
+      "clip_duration_s": 10,
+      "player_id": null,
+      "attribution_source": "UNKNOWN",
+      "team_side": "UNKNOWN",
+      "source": "AI",
+      "status": "ACTIVE",
+      "exclude_reason": null
+    }
+  ],
+  "formations": [
+    {
+      "timestamp_s": 120.0,
+      "period": 1,
+      "positions_m": [
+        [
+          5.6,
+          0.0
+        ],
+        [
+          4.2,
+          -5.2
+        ],
+        [
+          4.2,
+          5.2
+        ],
+        [
+          1.9,
+          -2.4
+        ],
+        [
+          1.9,
+          2.4
+        ]
+      ],
+      "ball_m": [
+        5.6,
+        0.0
+      ],
+      "label": null,
+      "confidence": 0.47
+    }
+  ],
+  "periods": [
+    {
+      "index": 1,
+      "start_s": 0,
+      "end_s": 480,
+      "attacking_basket": "LEFT"
+    },
+    {
+      "index": 2,
+      "start_s": 480,
+      "end_s": 960,
+      "attacking_basket": "RIGHT"
+    },
+    {
+      "index": 3,
+      "start_s": 960,
+      "end_s": 1440,
+      "attacking_basket": "LEFT"
+    },
+    {
+      "index": 4,
+      "start_s": 1440,
+      "end_s": 1920,
+      "attacking_basket": "RIGHT"
+    }
+  ],
+  "team_stats": {
+    "shots_made": 3,
+    "shots_attempted": 5,
+    "arc_out_made": 2,
+    "arc_out_attempted": 2,
+    "fast_breaks": 1,
+    "possessions": 12,
+    "turnovers": 1,
+    "points": 8
+  },
+  "opponent_stats": {
+    "shots_made": 1,
+    "shots_attempted": 2,
+    "arc_out_made": 1,
+    "arc_out_attempted": 1,
+    "turnovers": 0,
+    "points": 3
+  },
+  "coverage": {
+    "events_total": 11,
+    "events_attributed": 6,
+    "events_excluded": 1,
+    "events_side_unknown": 1
+  },
+  "ratings": [
+    {
+      "player_id": "p01",
+      "rating_rules": "v0",
+      "dimensions": [
+        {
+          "key": "FINISHING",
+          "grade": "B",
+          "sample_size": 1,
+          "make_rate": 1.0,
+          "explain_zh": "篮下 1 投 1 中，样本不足，仅供参考"
+        },
+        {
+          "key": "PERIMETER",
+          "grade": "A",
+          "sample_size": 1,
+          "make_rate": 1.0,
+          "explain_zh": "弧外 1 投 1 中"
+        },
+        {
+          "key": "INVOLVEMENT",
+          "grade": "C",
+          "sample_size": 2,
+          "make_rate": null,
+          "explain_zh": "参与 2 个事件，占全队 18%"
+        }
+      ]
+    },
+    {
+      "player_id": "p02",
+      "rating_rules": "v0",
+      "dimensions": [
+        {
+          "key": "FINISHING",
+          "grade": "INSUFFICIENT",
+          "sample_size": 1,
+          "make_rate": 0.0,
+          "explain_zh": "样本不足 20 次，暂不评级"
+        }
+      ]
+    }
+  ],
+  "warnings": [
+    "标定重投影误差 2.4px，处于可用范围",
+    "我方出手 5 次中 1 次未被教练归属"
+  ]
+}

@@ -1,0 +1,393 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://basketball-ai.local/contract/report-schema.json",
+  "title": "BasketballAnalysisReport",
+  "description": "AI Pipeline 产出的分析报告契约。当前版本 1.1。相对 1.0 新增：events[].team_side / source / status、periods[].attacking_basket、opponent_stats、coverage、ratings。变更需升版本号并更新 docs/decisions.md。三条硬规则见 x-hard-rules。",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "activity_id",
+    "params",
+    "video",
+    "calibration",
+    "events",
+    "formations",
+    "periods",
+    "team_stats",
+    "warnings",
+    "pipeline_version"
+  ],
+  "additionalProperties": false,
+
+  "properties": {
+
+    "schema_version": {
+      "const": "1.1",
+      "description": "契约版本。Mock 与真实 pipeline 必须一致"
+    },
+
+    "activity_id": { "type": "string", "minLength": 1 },
+
+    "pipeline_version": { "type": "string" },
+
+    "generated_at": { "type": "string" },
+
+    "params": {
+      "description": "由 packages/params 的 resolve() 产出。硬规则 #1：pipeline 只透传，不得自行填写或修改",
+      "type": "object",
+      "required": [
+        "format",
+        "age_group",
+        "court_type",
+        "three_point_radius_m",
+        "three_point_geometry",
+        "period_count",
+        "period_minutes",
+        "shot_clock_s",
+        "inside_arc_points",
+        "outside_arc_points",
+        "fast_break_enabled",
+        "formation_points",
+        "court_length_m",
+        "court_width_m"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "format": { "enum": ["5V5", "4V4", "3V3", "CUSTOM"] },
+        "age_group": { "enum": ["U8", "U12", "U15", "U18", "SENIOR"] },
+        "court_type": { "enum": ["FULL", "HALF"] },
+        "three_point_radius_m": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "三分线弧线半径。青少年常见 5.80，成人 6.75。禁止硬编码"
+        },
+        "three_point_geometry": {
+          "enum": ["ARC_AND_CORNERS", "PURE_ARC"],
+          "description": "ARC_AND_CORNERS=弧线+底角直线（FIBA 成人 5v5）；PURE_ARC=纯弧线（FIBA 3x3、青少年小半径场地）。两者判定逻辑不可混用"
+        },
+        "corner_lateral_m": {
+          "type": ["number", "null"],
+          "description": "底角直线段横向距离，FIBA 为 6.60。PURE_ARC 时必须为 null"
+        },
+        "corner_junction_x_m": {
+          "type": ["number", "null"],
+          "description": "弧线与底角直线交接点 x 坐标 = sqrt(radius^2 - corner_lateral^2)。PURE_ARC 时为 null"
+        },
+        "period_count": { "type": "integer", "minimum": 1 },
+        "period_minutes": { "type": "number", "exclusiveMinimum": 0 },
+        "shot_clock_s": {
+          "type": ["integer", "null"],
+          "description": "5v5=24，3x3=12，4v4/自定义可能为 null"
+        },
+        "inside_arc_points": { "type": "integer", "enum": [1, 2] },
+        "outside_arc_points": { "type": "integer", "enum": [2, 3] },
+        "fast_break_enabled": {
+          "type": "boolean",
+          "description": "3x3 第一版必须为 false（PRD 6.3 降级处理）"
+        },
+        "formation_points": { "type": "integer", "minimum": 3, "maximum": 5 },
+        "court_length_m": { "type": "number", "exclusiveMinimum": 0 },
+        "court_width_m": { "type": "number", "exclusiveMinimum": 0 },
+        "baseline_to_hoop_m": { "type": "number", "default": 1.575 },
+        "x_range_m": {
+          "type": "array",
+          "items": { "type": "number" },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "y_half_m": { "type": "number" }
+      }
+    },
+
+    "video": {
+      "type": "object",
+      "required": ["key", "duration_s"],
+      "additionalProperties": false,
+      "properties": {
+        "key": { "type": "string", "description": "对象存储键。不暴露公开 URL（PRD 7.3）" },
+        "duration_s": { "type": "number", "exclusiveMinimum": 0 },
+        "fps": { "type": "number", "exclusiveMinimum": 0 },
+        "resolution": {
+          "type": "array",
+          "items": { "type": "integer" },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "source": {
+          "enum": ["CAMERA", "ALBUM"],
+          "description": "video.camera=录制，album=相册导入。v1.1 新增"
+        }
+      }
+    },
+
+    "calibration": {
+      "type": "object",
+      "required": ["ok"],
+      "additionalProperties": false,
+      "properties": {
+        "ok": { "type": "boolean" },
+        "reproj_error_px": { "type": ["number", "null"] },
+        "homography": {
+          "type": ["array", "null"],
+          "items": { "type": "number" },
+          "minItems": 9,
+          "maxItems": 9
+        },
+        "note": { "type": "string" }
+      }
+    },
+
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "timestamp_s",
+          "period",
+          "player_id",
+          "team_side",
+          "source",
+          "status"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "kind": {
+            "enum": ["SHOT", "TURNOVER", "FAST_BREAK", "REBOUND", "OTHER"],
+            "description": "FAST_BREAK 在 3x3 下不得出现（PRD 9.2 #2.12）"
+          },
+          "timestamp_s": { "type": "number", "minimum": 0 },
+          "period": { "type": "integer", "minimum": 1 },
+
+          "x_m": { "type": ["number", "null"], "description": "标定后米制坐标，不是像素" },
+          "y_m": { "type": ["number", "null"] },
+          "distance_m": { "type": ["number", "null"] },
+          "in_bounds": { "type": "boolean" },
+
+          "behind_three_point_line": { "type": ["boolean", "null"] },
+          "shot_value": {
+            "type": ["integer", "null"],
+            "enum": [1, 2, 3, null],
+            "description": "硬规则 #2：由 CourtGeometry.judge() 产出。实际计分值，5v5 为 2/3，3x3 为 1/2"
+          },
+          "made": { "type": ["boolean", "null"] },
+          "label_zh": {
+            "type": ["string", "null"],
+            "description": "硬规则 #2：由 judge() 产出。3x3 下必须是「远投(2分)」「近投(1分)」"
+          },
+
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+
+          "clip_key": { "type": ["string", "null"] },
+          "clip_start_s": { "type": ["number", "null"] },
+          "clip_duration_s": { "type": ["number", "null"], "minimum": 8, "maximum": 15 },
+
+          "player_id": {
+            "type": ["string", "null"],
+            "description": "硬规则 #3：AI 恒为 null，由教练补录写入。null 时界面显示「—」"
+          },
+          "attribution_source": {
+            "enum": ["AI", "COACH", "UNKNOWN", "NOT_OUR_TEAM", null]
+          },
+
+          "team_side": {
+            "enum": ["OURS", "OPPONENT", "UNKNOWN"],
+            "description": "v1.1 新增。OURS=我方；OPPONENT=对方；UNKNOWN=未标注。默认 UNKNOWN，由补录确定，AI 不做颜色聚类推断"
+          },
+          "source": {
+            "enum": ["AI", "COACH"],
+            "description": "v1.1 新增。AI=模型识别；COACH=教练补录新增"
+          },
+          "status": {
+            "enum": ["ACTIVE", "EXCLUDED"],
+            "description": "v1.1 新增。EXCLUDED=教练标记为误检，数据保留但不计入任何统计"
+          },
+          "exclude_reason": {
+            "type": ["string", "null"],
+            "description": "v1.1 新增。排除原因，便于复盘 AI 误判类型"
+          }
+        }
+      }
+    },
+
+    "formations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["timestamp_s", "positions_m"],
+        "additionalProperties": false,
+        "properties": {
+          "timestamp_s": { "type": "number", "minimum": 0 },
+          "period": { "type": "integer", "minimum": 1 },
+          "positions_m": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": { "type": "number" },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "description": "长度必须等于 params.formation_points"
+          },
+          "ball_m": {
+            "type": ["array", "null"],
+            "items": { "type": "number" },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "label": { "type": ["string", "null"] },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+        }
+      }
+    },
+
+    "periods": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["index", "start_s", "end_s"],
+        "additionalProperties": false,
+        "properties": {
+          "index": { "type": "integer", "minimum": 1 },
+          "start_s": { "type": "number", "minimum": 0 },
+          "end_s": { "type": "number", "minimum": 0 },
+          "attacking_basket": {
+            "enum": ["LEFT", "RIGHT", "UNKNOWN"],
+            "description": "v1.1 新增。本节我方进攻的篮筐方向。全场两框、上下半场换边，缺此字段会导致热图镜像"
+          }
+        }
+      }
+    },
+
+    "team_stats": {
+      "description": "只统计 team_side=OURS 且 status=ACTIVE 的事件。篮板/助攻/抢断等需补录的字段不在此，由后端聚合",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "shots_made": { "type": "integer", "minimum": 0 },
+        "shots_attempted": { "type": "integer", "minimum": 0 },
+        "arc_out_made": { "type": "integer", "minimum": 0 },
+        "arc_out_attempted": { "type": "integer", "minimum": 0 },
+        "fast_breaks": { "type": "integer", "minimum": 0 },
+        "possessions": { "type": "integer", "minimum": 0 },
+        "turnovers": { "type": "integer", "minimum": 0 },
+        "points": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "v1.1 新增。由 shot_value * made 累加，不单独判定"
+        }
+      }
+    },
+
+    "opponent_stats": {
+      "description": "v1.1 新增。只统计 team_side=OPPONENT 且 status=ACTIVE 的事件。字段与 team_stats 同构",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "shots_made": { "type": "integer", "minimum": 0 },
+        "shots_attempted": { "type": "integer", "minimum": 0 },
+        "arc_out_made": { "type": "integer", "minimum": 0 },
+        "arc_out_attempted": { "type": "integer", "minimum": 0 },
+        "turnovers": { "type": "integer", "minimum": 0 },
+        "points": { "type": "integer", "minimum": 0 }
+      }
+    },
+
+    "coverage": {
+      "description": "v1.1 新增。数据完整度。所有「基于 N/M」的标注都从这里取，不得前端自己数",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "events_total": { "type": "integer", "minimum": 0 },
+        "events_attributed": { "type": "integer", "minimum": 0 },
+        "events_excluded": { "type": "integer", "minimum": 0 },
+        "events_side_unknown": { "type": "integer", "minimum": 0 }
+      }
+    },
+
+    "ratings": {
+      "description": "v1.1 新增。球员分档评分。不做 0-99；每档必须可追溯到输入数据与规则版本",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["player_id", "rating_rules", "dimensions"],
+        "additionalProperties": false,
+        "properties": {
+          "player_id": { "type": "string", "minLength": 1 },
+          "rating_rules": {
+            "const": "v0",
+            "description": "规则版本号。调阈值必须升版本，保证历史可回算"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["key", "grade"],
+              "additionalProperties": false,
+              "properties": {
+                "key": { "enum": ["FINISHING", "PERIMETER", "INVOLVEMENT"] },
+                "grade": {
+                  "enum": ["A", "B", "C", "D", "INSUFFICIENT"],
+                  "description": "INSUFFICIENT=样本不足，不是最低档"
+                },
+                "sample_size": { "type": "integer", "minimum": 0 },
+                "make_rate": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+                "explain_zh": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "标定质量差、越界坐标、检测覆盖率低等。非空时报告页须显示告警条"
+    }
+  },
+
+  "x-hard-rules": {
+    "description": "违反任意一条都等于绕过参数层，重新打开 PRD 风险 7.4 的口子。已由 contracts/validate.mjs 的 checkSemantics 自动检查",
+    "rules": [
+      {
+        "id": 1,
+        "rule": "params 段由 packages/params 的 resolve() 产出，pipeline 只负责透传，不得自行填写或修改"
+      },
+      {
+        "id": 2,
+        "rule": "shot_value 与 label_zh 由 CourtGeometry.judge() 产出，pipeline 不得自行判断几何"
+      },
+      {
+        "id": 3,
+        "rule": "player_id 恒为 null，归属完全由教练补录写入，AI 不做猜测（PRD 决策 9）"
+      },
+      {
+        "id": 4,
+        "rule": "v1.1：team_side 只能由教练补录确定，pipeline 不得按球衣颜色推断；未标注一律 UNKNOWN"
+      },
+      {
+        "id": 5,
+        "rule": "v1.1：team_stats 只统计 OURS，opponent_stats 只统计 OPPONENT，UNKNOWN 不计入任何一方"
+      }
+    ]
+  },
+
+  "x-frontend-consumption-notes": {
+    "description": "前端消费本契约时必须遵守的界面约束",
+    "notes": [
+      "events[].player_id 为 null 时界面显示「—」，不得显示 0 或空字符串（PRD 3.6）",
+      "events[].attribution_source 为 UNKNOWN 时同样显示「—」，不得回填假球员",
+      "events[].status 为 EXCLUDED 时默认不出现在列表，可切换显示；不得物理删除",
+      "formations[].label 为 null 时只显示点位密集度，不显示阵型名（PRD 3.3 屏 08）",
+      "params.format 为 3V3 时：比分卡改为 21 分制/单节；所有「三分」文案改为「远投」",
+      "params.format 为 3V3 时球场底图必须用半场单框模板，y 半宽 5.5 而非 7.5",
+      "periods[].attacking_basket 为 UNKNOWN 时显示「进攻方向未确认」横幅，不画分区线",
+      "warnings 非空时报告页顶部必须显示告警条",
+      "calibration.ok 为 false 时报告页必须阻断，不得展示可能错误的坐标数据",
+      "口径标识（format + age_group + 场次）必须在报告页与球队比赛数据页常驻（PRD 9.4 #4.8）"
+    ]
+  }
+}
