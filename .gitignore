@@ -30,7 +30,12 @@ venv/
 # 审阅截图（临时产物，不入库）
 .dsh-review/
 
-# 本地 SQLite 数据库（运行期产物）
+# 本地数据（SQLite、视频、轨迹，均为运行期产物）
 data/
 *.db
 *.db-journal
+
+# 模型权重与 ultralytics 运行目录
+models/
+runs/
+*.pt

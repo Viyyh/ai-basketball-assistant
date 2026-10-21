@@ -50,7 +50,7 @@ cd contracts && node --test test/validate.test.mjs
 # 参数层（24 项）
 cd packages/params && PYTHONPATH=. python3 -m unittest discover -s tests -t .
 
-# mock pipeline（11 项，含跨语言契约校验）
+# pipeline（25 项：mock 报告 + 轨迹层，含跨语言契约校验）
 cd services/pipeline && PYTHONPATH=../../packages/params:. \
   python3 -m unittest discover -s tests -t .
 
@@ -68,6 +68,39 @@ cd services/api && PYTHONPATH=../../packages/params:. \
   python3 -m uvicorn app.main:create_app --factory --reload
 ```
 
+## 处理真实视频
+
+`ingest` 是这一层唯一的真实能力：把一段手机视频变成"谁在哪几帧、框多大"的轨迹 JSON，
+外加一张能一眼看出跟踪有没有碎的 SVG。
+
+```bash
+# 前 30 秒试跑（先看机位和人数对不对，别一上来跑整场）
+./scripts/ingest.sh --video data/raw/game01.mp4 --out data/tracks/game01.json \
+  --max-seconds 30 --fps 4 --expected-players 10
+
+# 整场
+./scripts/ingest.sh --video data/raw/game01.mp4 --out data/tracks/game01.json \
+  --expected-players 10
+```
+
+产物（`data/` 已在 `.gitignore` 里，视频和轨迹都不进仓库）：
+
+| 文件 | 内容 |
+|---|---|
+| `game01.json` | 轨迹：每条 track 的逐帧框、在场时长、平均框高、平均置信 |
+| `game01.svg` | 轨迹体检图：左上轨迹覆盖、左下代表帧（带框）、右侧轨迹清单 |
+| `game01.jpg` | 代表帧原图（球员最多的一帧） |
+
+需要 `opencv-python` 与 `ultralytics`，首次运行会下载 `yolo11n.pt`（约 5 MB）。
+在 M3 Pro 上 960 分辨率约 60 ms/帧，8 fps 采样跑整场 40 分钟视频约 5 分钟。
+
+**怎么判断这次跑得行不行**：打开 SVG，看是不是"10 个人、线基本连续"。
+如果出现 30 条轨迹、大量 5 秒以下的碎片，先别做统计 —— 那是跟踪在碎，
+先调机位（更高、更正、更全）或降低 `--conf`。
+
+注意：这一层**不做**篮球语义。没有标定就没有"三分线内/外"，没有篮筐位置就没有命中率。
+那些要等事件提取（下一步）。
+
 ## 三层可信度
 
 | 东西 | 状态 | 说明 |
@@ -75,9 +108,9 @@ cd services/api && PYTHONPATH=../../packages/params:. \
 | `contracts/` | ✅ 可用 | 三方（AI / 后端 / 前端）共同遵守的数据形状，结构 + 语义双重校验 |
 | `packages/params/` | ✅ 可用 | 赛制 × 年龄段参数表、三分线判定、分值标签，唯一真源 |
 | `services/api/` | ✅ 可用 | 参数解析、活动增删查、报告寄存（SQLite） |
-| `services/pipeline/` | 🟡 mock | 事件是脚本化的，但坐标、分值、统计都是真实计算 |
+| `services/pipeline/` | 🟢 部分真实 | 事件仍是脚本化的，但**视频 ingest 是真的**：YOLO 检测 + ByteTrack 跟踪，跑真视频 |
 | `reference/legacy-demo/` | ⬜ 参考 | 20 页前端能跑，数据全 mock；已按 FIBA 6.75 m 口径回补并通过其自带校验 |
-| 真实视频推理 | ⬜ 未开始 | 逐人识别尚未验证，见下文"未验证的假设" |
+| 逐人识别（号码 → 身份） | ⬜ 未验证 | 全项目唯一的生死假设，见下文 |
 
 ## 两条底线
 

@@ -32,7 +32,7 @@ step "2/5 参数层：赛制 × 年龄段 / 三分线判定"
   || { tail -40 /tmp/verify-params.log; die "参数层测试失败"; }
 ok "$(grep -Eo 'Ran [0-9]+ tests' /tmp/verify-params.log | grep -Eo '[0-9]+') 项通过"
 
-step "3/5 mock pipeline：产出物必须过真实契约校验"
+step "3/5 pipeline：mock 报告过真实契约 + 轨迹层自检"
 (cd services/pipeline && python3 -m unittest discover -s tests -t . >/tmp/verify-pipeline.log 2>&1) \
   || { tail -40 /tmp/verify-pipeline.log; die "pipeline 测试失败"; }
 ok "$(grep -Eo 'Ran [0-9]+ tests' /tmp/verify-pipeline.log | grep -Eo '[0-9]+') 项通过"
