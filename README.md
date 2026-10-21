@@ -28,7 +28,7 @@
 │   ├── api/                      FastAPI：参数解析、活动、报告寄存
 │   └── pipeline/                 mock 报告生成 CLI（真实几何判定，模拟事件）
 ├── reference/
-│   ├── legacy-demo/              收到的 F 轨前端 demo（只读参考，不参与构建）
+│   ├── legacy-demo/              收到的 F 轨前端 demo（参考用；已按 FIBA 口径回补，见 ADR-016）
 │   └── legacy-poc/               收到的参数层 PoC（历史材料）
 └── scripts/verify.sh             一条命令跑完所有检查
 ```
@@ -76,7 +76,7 @@ cd services/api && PYTHONPATH=../../packages/params:. \
 | `packages/params/` | ✅ 可用 | 赛制 × 年龄段参数表、三分线判定、分值标签，唯一真源 |
 | `services/api/` | ✅ 可用 | 参数解析、活动增删查、报告寄存（SQLite） |
 | `services/pipeline/` | 🟡 mock | 事件是脚本化的，但坐标、分值、统计都是真实计算 |
-| `reference/legacy-demo/` | ⬜ 参考 | 20 页前端能跑，数据全 mock，且与本版需求已有偏差 |
+| `reference/legacy-demo/` | ⬜ 参考 | 20 页前端能跑，数据全 mock；已按 FIBA 6.75 m 口径回补并通过其自带校验 |
 | 真实视频推理 | ⬜ 未开始 | 逐人识别尚未验证，见下文"未验证的假设" |
 
 ## 两条底线
@@ -117,4 +117,4 @@ cd services/api && PYTHONPATH=../../packages/params:. \
 
 ## 授权
 
-`reference/` 下的内容是他人交付物，未包含 LICENSE。商用前必须确认授权范围；在那之前仓库保持私有。
+`reference/` 下的内容是他人交付物，仓库未随附 LICENSE。授权范围已由项目所有者确认；对外分发前仍建议补一份书面授权。

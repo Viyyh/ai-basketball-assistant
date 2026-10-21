@@ -19,18 +19,18 @@
 const FIBA_BASELINE_TO_HOOP = 1.575;
 const FIBA_FULL_LENGTH = 28.0;
 const FIBA_FULL_WIDTH = 15.0;
-const FIBA_3X3_LENGTH = 15.0;
-const FIBA_3X3_WIDTH = 11.0;
+const FIBA_3X3_LENGTH = 11.0;
+const FIBA_3X3_WIDTH = 15.0;
 const FIBA_ADULT_3PT = 6.75;
 const FIBA_CORNER_LATERAL = 6.60;
 
 const GEOMETRY = { ARC_AND_CORNERS: 'ARC_AND_CORNERS', PURE_ARC: 'PURE_ARC' };
 
-/** 三分线半径表。[待核实] 与 packages/params/params.py 的 _youth_or_adult_radius 同步 */
+/** 三分线半径表：FIBA 2.5.4 统一 6.75 m，与 packages/params/params.py 同步 */
 const THREE_PT_RADIUS = {
-  U8: 5.80,
-  U12: 5.80,
-  U15: 5.80,
+  U8: FIBA_ADULT_3PT,
+  U12: FIBA_ADULT_3PT,
+  U15: FIBA_ADULT_3PT,
   U18: FIBA_ADULT_3PT,
   SENIOR: FIBA_ADULT_3PT,
 };
@@ -52,9 +52,10 @@ const PLAYERS = { '5V5': 5, '4V4': 4, '3V3': 3, CUSTOM: 5 };
  * @param {string} format    '5V5' | '4V4' | '3V3' | 'CUSTOM'
  * @param {string} ageGroup  'U8'|'U12'|'U15'|'U18'|'SENIOR'
  * @param {string|null} courtType  'FULL'|'HALF'，4V4/CUSTOM 必填
+ * @param {number|null} radiusM   非标准三分线半径（某联赛自定少年线时才传）
  * @returns {object} 契约 params 段
  */
-function resolveParams(format, ageGroup, courtType = null) {
+function resolveParams(format, ageGroup, courtType = null, radiusM = null) {
   if (!THREE_PT_RADIUS[ageGroup]) {
     throw new Error(`resolveParams: 未知年龄段 ${ageGroup}`);
   }
@@ -79,26 +80,20 @@ function resolveParams(format, ageGroup, courtType = null) {
   }
 
   // ---------- 三分线几何 ----------
-  // 与 Python three_point_spec_for 严格对应：
-  //   3x3 → 纯弧 6.75（FIBA 3x3 规则：整条弧都在 6.75m）
-  //   半径 < 底角横向 6.60 → 几何上退化为纯弧
-  //   否则 → 弧线 + 底角直线
+  // 与 Python three_point_spec_for 严格对应（FIBA 2.5.4）：
+  //   底角直线段存在的充要条件：半径 > 6.60 且场地半宽 > 6.60
+  //   6.75 m + 7.5 m 半宽 → 弧线 + 底角直线（5v5 / 4v4 / 3x3 全场皆然）
+  //   半径或半宽 ≤ 6.60 → 弧线碰不到底角线的位置，退化为纯弧
   let geometry;
-  let radius;
+  let radius = radiusM == null ? THREE_PT_RADIUS[ageGroup] : radiusM;
   let cornerLateral = null;
   let cornerJunctionX = null;
 
-  if (format === '3V3') {
-    geometry = GEOMETRY.PURE_ARC;
-    radius = FIBA_ADULT_3PT;
+  if (radius > FIBA_CORNER_LATERAL && court.width / 2 > FIBA_CORNER_LATERAL) {
+    geometry = GEOMETRY.ARC_AND_CORNERS;
+    cornerLateral = FIBA_CORNER_LATERAL;
   } else {
-    radius = THREE_PT_RADIUS[ageGroup];
-    if (radius < FIBA_CORNER_LATERAL) {
-      geometry = GEOMETRY.PURE_ARC;
-    } else {
-      geometry = GEOMETRY.ARC_AND_CORNERS;
-      cornerLateral = FIBA_CORNER_LATERAL;
-    }
+    geometry = GEOMETRY.PURE_ARC;
   }
 
   if (geometry === GEOMETRY.ARC_AND_CORNERS && cornerLateral != null && radius > cornerLateral) {

@@ -37,7 +37,7 @@ const COURT_MARKINGS = Object.freeze({
   rimRadius: 0.225,       // 篮筐半径（直径 0.45）
   backboardWidth: 1.8,    // 篮板宽度
   backboardOffsetFromBaseline: 1.2,  // 底线到篮板
-  restrictedAreaRadius: 1.25,        // 合理冲撞区半径
+  restrictedAreaRadius: 1.30,        // 无撞人半圆区半径（FIBA 2.5.7）
   centerCircleRadius: 1.8,           // 中圈半径
 });
 
@@ -136,14 +136,15 @@ function createCourt(params, render = {}) {
    * ⚠️ 仅用于一致性测试与交互提示，**不得用于生成分值文案**（见文件头）。
    *
    * 两种几何分别处理，逻辑与 Python court.py 的 behind_three_point_line 严格对应：
-   *   PURE_ARC        → distance >= radius
-   *   ARC_AND_CORNERS → (|y| >= cornerLateral && x <= junctionX) || distance >= radius
+   *   PURE_ARC        → distance > radius
+   *   ARC_AND_CORNERS → (|y| > cornerLateral && x < junctionX) || distance > radius
+   *   FIBA 2.5.4：三分线本身不属于三分中篮区域 —— 恰好踩线算两分，故一律严格大于。
    */
   function behindThreePointLine(xM, yM) {
     const dist = Math.hypot(xM, yM);
 
     if (geometry === TP_GEOMETRY.PURE_ARC) {
-      return dist >= tpRadius;
+      return dist > tpRadius;
     }
 
     if (geometry === TP_GEOMETRY.ARC_AND_CORNERS) {
@@ -151,11 +152,11 @@ function createCourt(params, render = {}) {
         throw new Error('ARC_AND_CORNERS 几何必须提供 corner_lateral_m');
       }
       if (cornerJunctionX != null
-          && Math.abs(yM) >= cornerLateral
-          && xM <= cornerJunctionX) {
+          && Math.abs(yM) > cornerLateral
+          && xM < cornerJunctionX) {
         return true;
       }
-      return dist >= tpRadius;
+      return dist > tpRadius;
     }
 
     throw new Error(`未知的三分线几何：${geometry}`);

@@ -9,7 +9,7 @@
  *   4. 静态完整性检查（页面/组件文件齐全、引用可解析、事件绑定存在、无硬编码几何）
  *
  * 对应开发计划第十七节「定义完成」的第 1、3、4 条：
- *   · 代码通过 CI（ruff + pytest，参数层全绿）
+ *   · 代码通过 CI（参数层全绿）
  *   · 不引入硬编码参数
  *   · 不引入跨赛制聚合
  *
@@ -82,7 +82,7 @@ if (genOk) {
 // ---------- 2. Python 参数层测试 ----------
 header('第 2 步 · Python 参数层测试（PRD 9.1 的 16 条）');
 const pyOk = run(PY, ['-m', 'unittest', 'discover', '-s', 'tests'], { cwd: PARAMS });
-results.push({ step: 'Python 参数层（37 项）', ok: pyOk });
+results.push({ step: 'Python 参数层（38 项）', ok: pyOk });
 
 // ---------- 3. JS 测试 ----------
 header('第 3 步 · 小程序 JS 测试');

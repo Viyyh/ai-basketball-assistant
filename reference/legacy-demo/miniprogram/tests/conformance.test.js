@@ -149,30 +149,18 @@ test('5v5 组合的计分口径为 2/3', () => {
 // 两种三分线几何的分野
 // ============================================================
 
-test('成人 5v5 用「弧线+底角」，青少年与 3x3 用「纯弧线」', () => {
-  const senior = fixture.combos.find((c) => c.key === '5V5_SENIOR');
-  const u12 = fixture.combos.find((c) => c.key === '5V5_U12');
-  const u15 = fixture.combos.find((c) => c.key === '5V5_U15');
-  const three = fixture.combos.find((c) => c.key === '3V3_U15');
-
-  assert.strictEqual(senior.params.three_point_geometry, TP_GEOMETRY.ARC_AND_CORNERS);
-  assert.strictEqual(senior.params.corner_lateral_m, 6.60);
-  assert.strictEqual(senior.params.three_point_radius_m, 6.75);
-
-  // 5.80 < 6.60 → 几何上必须退化为纯弧线
-  [u12, u15].forEach((c) => {
-    assert.strictEqual(c.params.three_point_geometry, TP_GEOMETRY.PURE_ARC,
-      `${c.key}: 半径 ${c.params.three_point_radius_m} < 底角横向 6.60，必须退化为纯弧线`);
-    assert.strictEqual(c.params.corner_lateral_m, null);
-    assert.strictEqual(c.params.corner_junction_x_m, null);
+test('FIBA 2.5.4：所有赛制统一「弧线 + 底角」（6.75 m + 6.60 m）', () => {
+  ['5V5_SENIOR', '5V5_U12', '5V5_U15', '3V3_U15'].forEach((key) => {
+    const c = fixture.combos.find((x) => x.key === key);
+    assert.strictEqual(c.params.three_point_radius_m, 6.75, `${key}: 半径应为 6.75 m`);
+    assert.strictEqual(c.params.three_point_geometry, TP_GEOMETRY.ARC_AND_CORNERS,
+      `${key}: 半径 6.75 > 底角横向 6.60，应为「弧线 + 底角直线」`);
+    assert.strictEqual(c.params.corner_lateral_m, 6.60);
+    assert.ok(c.params.corner_junction_x_m > 0);
   });
-
-  assert.strictEqual(three.params.three_point_geometry, TP_GEOMETRY.PURE_ARC);
-  assert.strictEqual(three.params.three_point_radius_m, 6.75);
-  assert.strictEqual(three.params.corner_lateral_m, null);
 });
 
-test('同一物理出手点在 U12 与一线下分值不同（风险 7.4 实证）', () => {
+test('同一物理出手点在任何年龄段判定一致（口径统一）', () => {
   const u12 = fixture.combos.find((c) => c.key === '5V5_U12');
   const senior = fixture.combos.find((c) => c.key === '5V5_SENIOR');
 
@@ -184,31 +172,44 @@ test('同一物理出手点在 U12 与一线下分值不同（风险 7.4 实证�
   const p62s = probeAt(senior, 6.2, 0.0);
   assert.ok(p62u && p62s, '基准数据应包含弧顶 6.2m 探测点');
 
-  assert.strictEqual(p62u.behind, true, 'U12（弧 5.80m）下 6.2m 应在弧外');
-  assert.strictEqual(p62u.points, 3);
+  // 6.75 m 弧下 6.2 m 是两分，与年龄段无关
+  assert.strictEqual(p62u.behind, false, 'U12（弧 6.75m）下 6.2m 应在弧内');
+  assert.strictEqual(p62u.points, 2);
   assert.strictEqual(p62s.behind, false, '一线（弧 6.75m）下 6.2m 应在弧内');
   assert.strictEqual(p62s.points, 2);
+
+  const p69u = probeAt(u12, 6.8, 0.0);
+  const p69s = probeAt(senior, 6.8, 0.0);
+  if (p69u && p69s) {
+    assert.strictEqual(p69u.behind, true, '6.8m 应在弧外');
+    assert.strictEqual(p69u.points, 3);
+    assert.strictEqual(p69s.points, 3);
+  }
 
   // 前端两侧都必须画对线，否则图与分不符
   const cU12 = createCourt(u12.params);
   const cSenior = createCourt(senior.params);
-  assert.strictEqual(cU12.behindThreePointLine(6.2, 0.0), true);
+  assert.strictEqual(cU12.behindThreePointLine(6.2, 0.0), false);
   assert.strictEqual(cSenior.behindThreePointLine(6.2, 0.0), false);
 });
 
-test('3x3 坐标范围小于全场，越界点被检出', () => {
+test('3x3 场地更短：越界点被检出', () => {
   const full = fixture.combos.find((c) => c.key === '5V5_SENIOR');
   const half = fixture.combos.find((c) => c.key === '3V3_U15');
 
   assert.strictEqual(full.params.court_type, 'FULL');
   assert.strictEqual(half.params.court_type, 'HALF');
-  assert.strictEqual(half.params.y_half_m, 5.5);
+  // FIBA 3x3：15 m 宽（与 5v5 同宽）× 11 m 长
+  assert.strictEqual(half.params.court_width_m, 15);
+  assert.strictEqual(half.params.y_half_m, 7.5);
   assert.strictEqual(full.params.y_half_m, 7.5);
 
   const cHalf = createCourt(half.params);
-  // y=7.0 在全场合法，在 3x3 半场越界
-  assert.strictEqual(cHalf.inBounds(3.0, 7.0), false);
-  assert.strictEqual(createCourt(full.params).inBounds(3.0, 7.0), true);
+  // x=10.0 在全场合法，在 3x3 半场（长 11 m，x_max 9.425）越界
+  assert.strictEqual(cHalf.inBounds(10.0, 3.0), false);
+  assert.strictEqual(createCourt(full.params).inBounds(10.0, 3.0), true);
+  // y=8.0 两种场地都越界（半宽 7.5）
+  assert.strictEqual(cHalf.inBounds(3.0, 8.0), false);
 });
 
 // ============================================================

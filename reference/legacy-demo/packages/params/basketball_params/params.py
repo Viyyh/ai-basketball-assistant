@@ -176,8 +176,8 @@ class ActivityParams:
 FIBA_BASELINE_TO_HOOP_M = 1.575   # 底线内沿到篮筐中心
 FIBA_FULL_LENGTH_M = 28.0
 FIBA_FULL_WIDTH_M = 15.0
-FIBA_3X3_LENGTH_M = 15.0          # 3x3 半场：15 m（底线到中线）
-FIBA_3X3_WIDTH_M = 11.0           # 3x3 半场：11 m 宽
+FIBA_3X3_LENGTH_M = 11.0          # 3x3 半场：11 m（底线到中线）
+FIBA_3X3_WIDTH_M = 15.0           # 3x3 场地：15 m 宽（宽 > 长，与 5v5 同宽）
 FIBA_ADULT_3PT_RADIUS_M = 6.75
 FIBA_CORNER_LATERAL_M = 6.60      # 底角直线段：距边线内沿 0.90 m → 15/2 - 0.90
 
@@ -202,42 +202,61 @@ COURT_HALF_3X3 = CourtSpec(
 # 三分线：几何形态判定
 # ============================================================
 
-def three_point_spec_for(fmt: Format, age_group: AgeGroup) -> ThreePointSpec:
+def _court_for(fmt: Format, court_type: Optional[CourtType] = None) -> CourtSpec:
+    """
+    场地规格由赛制推导。
+
+    4对4 / 自定义赛制没有统一场地，court_type 为 None 时按全场处理；
+    是否"必须显式指定"由 resolve() 负责校验，这里只负责取到尺寸。
+    """
+    if fmt is Format.THREE_V_THREE:
+        return COURT_HALF_3X3
+    if fmt is Format.FIVE_V_FIVE:
+        return COURT_FULL
+    if court_type is CourtType.HALF:
+        return CourtSpec(
+            court_type=CourtType.HALF,
+            length_m=FIBA_FULL_LENGTH_M / 2,
+            width_m=FIBA_FULL_WIDTH_M,
+            hoop_count=1,
+            baseline_to_hoop_m=FIBA_BASELINE_TO_HOOP_M,
+        )
+    return COURT_FULL
+
+
+def three_point_spec_for(fmt: Format, age_group: AgeGroup,
+                         court: Optional[CourtSpec] = None,
+                         radius_m: Optional[float] = None) -> ThreePointSpec:
     """
     查表得出三分线规格。
 
-    几何形态的判定规则（这是 PoC 的核心发现之一）：
-      1. 3x3 一律是纯弧线 —— FIBA 3x3 规则明确"整条弧都在 6.75 m"，无底角直线段
-      2. 5v5 / 4v4 在成人半径（6.75 m）下是"弧线 + 底角直线"
-      3. 青少年半径（5.80 m 等）小于底角横向距离 6.60 m 时，
-         弧线永远碰不到底角直线的位置，几何上只能是纯弧线
+    几何形态由两个量推导，不对赛制做特判（FIBA 2.5.4）：
+      · 底角直线段存在的充要条件：半径 > 6.60 m（底角线到边线内沿 0.90 m）
+        且场地半宽 > 6.60 m
+      · 6.75 m + 7.5 m 半宽 → 弧线 + 底角直线（5v5 / 4v4 / 3x3 全场皆然）
+      · 半径 ≤ 6.60 m 的场地（如某联赛沿用 5.80 m 少年线、12 m 宽小场地）
+        → 弧线永远碰不到底角直线的位置，只能退化为纯弧线
 
-    第 3 条如果没处理，会出现"底角直线段在弧线内侧"的自相矛盾几何，
-    判定逻辑会给出错误结果且不报错。
+    如果对小于 6.60 m 的半径强行走"弧线 + 底角"，会出现"底角直线段在弧线内侧"
+    的自相矛盾几何，判定给出错误结果且不报错 —— 正是风险 7.4 的静默错误。
     """
-    # 3x3：FIBA 规则固定为纯弧 6.75 m
-    if fmt is Format.THREE_V_THREE:
-        return ThreePointSpec(
-            geometry=ThreePointGeometry.PURE_ARC,
-            radius_m=FIBA_ADULT_3PT_RADIUS_M,
-            corner_lateral_m=None,
-            verified=True,
-            note="FIBA 3x3：整条弧 6.75 m，无底角直线段",
-        )
+    radius = radius_m if radius_m is not None else _youth_or_adult_radius(age_group)
+    court = court or _court_for(fmt)
+    # 非 FIBA 标准半径（例如某联赛自定的少年线）仍可用，但要在 unverified 里提示
+    verified = abs(radius - FIBA_ADULT_3PT_RADIUS_M) < 1e-9
+    corner_possible = (
+        radius > FIBA_CORNER_LATERAL_M and court.width_m / 2.0 > FIBA_CORNER_LATERAL_M
+    )
 
-    radius = _youth_or_adult_radius(age_group)
-    verified = age_group in (AgeGroup.U18, AgeGroup.SENIOR)
-
-    # 半径小于底角横向距离 → 只能是纯弧
-    if radius < FIBA_CORNER_LATERAL_M:
+    if not corner_possible:
         return ThreePointSpec(
             geometry=ThreePointGeometry.PURE_ARC,
             radius_m=radius,
             corner_lateral_m=None,
             verified=verified,
             note=(
-                f"半径 {radius} m < 底角横向 {FIBA_CORNER_LATERAL_M} m，"
-                f"几何上退化为纯弧线"
+                f"半径 {radius} m 或半宽 {court.width_m / 2.0} m 未超过底角横向 "
+                f"{FIBA_CORNER_LATERAL_M} m，几何上退化为纯弧线"
             ),
         )
 
@@ -246,7 +265,7 @@ def three_point_spec_for(fmt: Format, age_group: AgeGroup) -> ThreePointSpec:
         radius_m=radius,
         corner_lateral_m=FIBA_CORNER_LATERAL_M,
         verified=verified,
-        note="FIBA 成人标准：弧线 6.75 m + 底角直线段（横向 6.60 m）",
+        note="FIBA 2.5.4：弧线 6.75 m + 底角直线段（横向 6.60 m）",
     )
 
 
@@ -254,14 +273,14 @@ def _youth_or_adult_radius(age_group: AgeGroup) -> float:
     """
     三分线半径查表。
 
-    [待核实] U8 / U12 / U15 的 5.80 m 是《范围确认 v0.2》采用的假设值。
-    各地青少年联赛标准并不统一（常见 5.80 m / 6.00 m / 6.25 m），
-    必须在开发前向教练实际执裁的联赛规则核对，否则二分/三分判定会整场全错。
+    FIBA 2.5.4：三分弧半径 6.75 m（量至弧线外沿），所有赛制、所有年龄段统一。
+    早期版本对 U8 / U12 / U15 采用 5.80 m 假设值，已按 FIBA 规则书作废 ——
+    那个假设会把 5.8~6.75 m 的中距离全部误记成三分，整场口径全错。
     """
     return {
-        AgeGroup.U8: 5.80,
-        AgeGroup.U12: 5.80,
-        AgeGroup.U15: 5.80,
+        AgeGroup.U8: FIBA_ADULT_3PT_RADIUS_M,
+        AgeGroup.U12: FIBA_ADULT_3PT_RADIUS_M,
+        AgeGroup.U15: FIBA_ADULT_3PT_RADIUS_M,
         AgeGroup.U18: FIBA_ADULT_3PT_RADIUS_M,
         AgeGroup.SENIOR: FIBA_ADULT_3PT_RADIUS_M,
     }[age_group]
@@ -341,7 +360,8 @@ def tracking_spec_for(fmt: Format) -> TrackingSpec:
 # ============================================================
 
 def resolve(fmt: Format, age_group: AgeGroup,
-            court_type: Optional[CourtType] = None) -> ActivityParams:
+            court_type: Optional[CourtType] = None,
+            three_point_radius_m: Optional[float] = None) -> ActivityParams:
     """
     把 (赛制, 年龄段) 解析成一场活动的完整参数。
 
@@ -350,27 +370,14 @@ def resolve(fmt: Format, age_group: AgeGroup,
     court_type 为 None 时按赛制推导；4对4 与自定义赛制必须显式传入
     （对应界面设计 v0.1.1：选 4对4 需追问"全场还是半场"）。
     """
-    if fmt is Format.THREE_V_THREE:
-        court = COURT_HALF_3X3
-    elif fmt is Format.FIVE_V_FIVE:
-        court = COURT_FULL
-    elif fmt in (Format.FOUR_V_FOUR, Format.CUSTOM):
-        if court_type is None:
-            raise ValueError(
-                f"{fmt.label_zh} 没有统一规则，必须显式指定 court_type（全场 / 半场）。"
-                f"界面上应在选中后追问一次。"
-            )
-        court = COURT_FULL if court_type is CourtType.FULL else CourtSpec(
-            court_type=CourtType.HALF,
-            length_m=FIBA_FULL_LENGTH_M / 2,
-            width_m=FIBA_FULL_WIDTH_M,
-            hoop_count=1,
-            baseline_to_hoop_m=FIBA_BASELINE_TO_HOOP_M,
+    if fmt in (Format.FOUR_V_FOUR, Format.CUSTOM) and court_type is None:
+        raise ValueError(
+            f"{fmt.label_zh} 没有统一规则，必须显式指定 court_type（全场 / 半场）。"
+            f"界面上应在选中后追问一次。"
         )
-    else:
-        raise ValueError(f"未知赛制：{fmt}")
+    court = _court_for(fmt, court_type)
 
-    three_point = three_point_spec_for(fmt, age_group)
+    three_point = three_point_spec_for(fmt, age_group, court, three_point_radius_m)
     rules = rules_spec_for(fmt, age_group)
     tracking = tracking_spec_for(fmt)
 
@@ -417,7 +424,7 @@ POC_COMBOS: tuple[tuple[str, Format, AgeGroup, Optional[CourtType], str], ...] =
         Format.FIVE_V_FIVE,
         AgeGroup.U12,
         None,
-        "三分线半径 5.80 m 时判定是否仍准确",
+        "FIBA 统一 6.75 m 后，中距离是否还会被误记成三分",
     ),
     (
         "组合 C",

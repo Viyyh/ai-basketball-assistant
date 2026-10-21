@@ -445,7 +445,8 @@ test('新建活动页显示当前组合的真实参数', () => {
 
   sandbox.pickCombo('5V5_U12');
   html = sandbox.SCREENS.activityNew.render();
-  assert.ok(html.includes('5.8'), 'U12 应显示 5.80 m 三分线');
+  assert.ok(html.includes('6.75'), 'U12 与一线同一半径，应显示 6.75 m 三分线');
+  assert.ok(!html.includes('5.8'), 'U12 不应再出现 5.80 m 的旧假设');
 
   sandbox.pickCombo('3V3_U15');
   html = sandbox.SCREENS.activityNew.render();

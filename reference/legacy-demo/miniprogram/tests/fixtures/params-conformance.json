@@ -12,10 +12,10 @@
         "court_length_m": 28.0,
         "court_width_m": 15.0,
         "baseline_to_hoop_m": 1.575,
-        "three_point_radius_m": 5.8,
-        "three_point_geometry": "PURE_ARC",
-        "corner_lateral_m": null,
-        "corner_junction_x_m": null,
+        "three_point_radius_m": 6.75,
+        "three_point_geometry": "ARC_AND_CORNERS",
+        "corner_lateral_m": 6.6,
+        "corner_junction_x_m": 1.415,
         "x_range_m": [
           -1.575,
           26.425
@@ -72,9 +72,9 @@
           "x_m": 5.8,
           "y_m": 0.0,
           "distance_m": 5.8,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -82,9 +82,9 @@
           "x_m": 5.9,
           "y_m": 0.0,
           "distance_m": 5.9,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -92,9 +92,9 @@
           "x_m": 6.2,
           "y_m": 0.0,
           "distance_m": 6.2,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -102,9 +102,9 @@
           "x_m": 6.7,
           "y_m": 0.0,
           "distance_m": 6.7,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -112,9 +112,9 @@
           "x_m": 6.75,
           "y_m": 0.0,
           "distance_m": 6.75,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -152,9 +152,9 @@
           "x_m": 4.53,
           "y_m": 4.53,
           "distance_m": 6.406,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -192,9 +192,9 @@
           "x_m": 0.0,
           "y_m": 6.0,
           "distance_m": 6.0,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -202,9 +202,9 @@
           "x_m": 0.0,
           "y_m": 6.6,
           "distance_m": 6.6,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -232,9 +232,9 @@
           "x_m": -1.5,
           "y_m": 6.0,
           "distance_m": 6.185,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -252,9 +252,9 @@
           "x_m": 1.415,
           "y_m": 6.6,
           "distance_m": 6.75,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -298,10 +298,10 @@
         "court_length_m": 28.0,
         "court_width_m": 15.0,
         "baseline_to_hoop_m": 1.575,
-        "three_point_radius_m": 5.8,
-        "three_point_geometry": "PURE_ARC",
-        "corner_lateral_m": null,
-        "corner_junction_x_m": null,
+        "three_point_radius_m": 6.75,
+        "three_point_geometry": "ARC_AND_CORNERS",
+        "corner_lateral_m": 6.6,
+        "corner_junction_x_m": 1.415,
         "x_range_m": [
           -1.575,
           26.425
@@ -358,9 +358,9 @@
           "x_m": 5.8,
           "y_m": 0.0,
           "distance_m": 5.8,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -368,9 +368,9 @@
           "x_m": 5.9,
           "y_m": 0.0,
           "distance_m": 5.9,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -378,9 +378,9 @@
           "x_m": 6.2,
           "y_m": 0.0,
           "distance_m": 6.2,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -388,9 +388,9 @@
           "x_m": 6.7,
           "y_m": 0.0,
           "distance_m": 6.7,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -398,9 +398,9 @@
           "x_m": 6.75,
           "y_m": 0.0,
           "distance_m": 6.75,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -438,9 +438,9 @@
           "x_m": 4.53,
           "y_m": 4.53,
           "distance_m": 6.406,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -478,9 +478,9 @@
           "x_m": 0.0,
           "y_m": 6.0,
           "distance_m": 6.0,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -488,9 +488,9 @@
           "x_m": 0.0,
           "y_m": 6.6,
           "distance_m": 6.6,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -518,9 +518,9 @@
           "x_m": -1.5,
           "y_m": 6.0,
           "distance_m": 6.185,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -538,9 +538,9 @@
           "x_m": 1.415,
           "y_m": 6.6,
           "distance_m": 6.75,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -684,9 +684,9 @@
           "x_m": 6.75,
           "y_m": 0.0,
           "distance_m": 6.75,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -774,9 +774,9 @@
           "x_m": 0.0,
           "y_m": 6.6,
           "distance_m": 6.6,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -824,9 +824,9 @@
           "x_m": 1.415,
           "y_m": 6.6,
           "distance_m": 6.75,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -970,9 +970,9 @@
           "x_m": 6.75,
           "y_m": 0.0,
           "distance_m": 6.75,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -1060,9 +1060,9 @@
           "x_m": 0.0,
           "y_m": 6.6,
           "distance_m": 6.6,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -1110,9 +1110,9 @@
           "x_m": 1.415,
           "y_m": 6.6,
           "distance_m": 6.75,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -1153,18 +1153,18 @@
         "format": "3V3",
         "age_group": "U15",
         "court_type": "HALF",
-        "court_length_m": 15.0,
-        "court_width_m": 11.0,
+        "court_length_m": 11.0,
+        "court_width_m": 15.0,
         "baseline_to_hoop_m": 1.575,
         "three_point_radius_m": 6.75,
-        "three_point_geometry": "PURE_ARC",
-        "corner_lateral_m": null,
-        "corner_junction_x_m": null,
+        "three_point_geometry": "ARC_AND_CORNERS",
+        "corner_lateral_m": 6.6,
+        "corner_junction_x_m": 1.415,
         "x_range_m": [
           -1.575,
-          13.425
+          9.425
         ],
-        "y_half_m": 5.5,
+        "y_half_m": 7.5,
         "hoop_count": 1,
         "period_count": 1,
         "period_minutes": 10.0,
@@ -1256,9 +1256,9 @@
           "x_m": 6.75,
           "y_m": 0.0,
           "distance_m": 6.75,
-          "behind": true,
-          "points": 2,
-          "label_zh": "远投(2分)",
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
           "in_bounds": true
         },
         {
@@ -1339,7 +1339,7 @@
           "behind": false,
           "points": 1,
           "label_zh": "近投(1分)",
-          "in_bounds": false
+          "in_bounds": true
         },
         {
           "label": "底角 y=6.6",
@@ -1349,7 +1349,7 @@
           "behind": false,
           "points": 1,
           "label_zh": "近投(1分)",
-          "in_bounds": false
+          "in_bounds": true
         },
         {
           "label": "底角 y=7.0",
@@ -1359,7 +1359,7 @@
           "behind": true,
           "points": 2,
           "label_zh": "远投(2分)",
-          "in_bounds": false
+          "in_bounds": true
         },
         {
           "label": "底角 y=7.5",
@@ -1369,7 +1369,7 @@
           "behind": true,
           "points": 2,
           "label_zh": "远投(2分)",
-          "in_bounds": false
+          "in_bounds": true
         },
         {
           "label": "底角 x=-1.5 y=6",
@@ -1379,7 +1379,7 @@
           "behind": false,
           "points": 1,
           "label_zh": "近投(1分)",
-          "in_bounds": false
+          "in_bounds": true
         },
         {
           "label": "篮筐后方",
@@ -1399,7 +1399,7 @@
           "behind": false,
           "points": 1,
           "label_zh": "近投(1分)",
-          "in_bounds": false
+          "in_bounds": true
         },
         {
           "label": "中场附近",
@@ -1409,7 +1409,7 @@
           "behind": true,
           "points": 2,
           "label_zh": "远投(2分)",
-          "in_bounds": true
+          "in_bounds": false
         },
         {
           "label": "越界 y=8.0",
@@ -1439,18 +1439,18 @@
         "format": "3V3",
         "age_group": "SENIOR",
         "court_type": "HALF",
-        "court_length_m": 15.0,
-        "court_width_m": 11.0,
+        "court_length_m": 11.0,
+        "court_width_m": 15.0,
         "baseline_to_hoop_m": 1.575,
         "three_point_radius_m": 6.75,
-        "three_point_geometry": "PURE_ARC",
-        "corner_lateral_m": null,
-        "corner_junction_x_m": null,
+        "three_point_geometry": "ARC_AND_CORNERS",
+        "corner_lateral_m": 6.6,
+        "corner_junction_x_m": 1.415,
         "x_range_m": [
           -1.575,
-          13.425
+          9.425
         ],
-        "y_half_m": 5.5,
+        "y_half_m": 7.5,
         "hoop_count": 1,
         "period_count": 1,
         "period_minutes": 10.0,
@@ -1542,9 +1542,9 @@
           "x_m": 6.75,
           "y_m": 0.0,
           "distance_m": 6.75,
-          "behind": true,
-          "points": 2,
-          "label_zh": "远投(2分)",
+          "behind": false,
+          "points": 1,
+          "label_zh": "近投(1分)",
           "in_bounds": true
         },
         {
@@ -1625,7 +1625,7 @@
           "behind": false,
           "points": 1,
           "label_zh": "近投(1分)",
-          "in_bounds": false
+          "in_bounds": true
         },
         {
           "label": "底角 y=6.6",
@@ -1635,7 +1635,7 @@
           "behind": false,
           "points": 1,
           "label_zh": "近投(1分)",
-          "in_bounds": false
+          "in_bounds": true
         },
         {
           "label": "底角 y=7.0",
@@ -1645,7 +1645,7 @@
           "behind": true,
           "points": 2,
           "label_zh": "远投(2分)",
-          "in_bounds": false
+          "in_bounds": true
         },
         {
           "label": "底角 y=7.5",
@@ -1655,7 +1655,7 @@
           "behind": true,
           "points": 2,
           "label_zh": "远投(2分)",
-          "in_bounds": false
+          "in_bounds": true
         },
         {
           "label": "底角 x=-1.5 y=6",
@@ -1665,7 +1665,7 @@
           "behind": false,
           "points": 1,
           "label_zh": "近投(1分)",
-          "in_bounds": false
+          "in_bounds": true
         },
         {
           "label": "篮筐后方",
@@ -1685,7 +1685,7 @@
           "behind": false,
           "points": 1,
           "label_zh": "近投(1分)",
-          "in_bounds": false
+          "in_bounds": true
         },
         {
           "label": "中场附近",
@@ -1695,7 +1695,7 @@
           "behind": true,
           "points": 2,
           "label_zh": "远投(2分)",
-          "in_bounds": true
+          "in_bounds": false
         },
         {
           "label": "越界 y=8.0",
@@ -1728,10 +1728,10 @@
         "court_length_m": 28.0,
         "court_width_m": 15.0,
         "baseline_to_hoop_m": 1.575,
-        "three_point_radius_m": 5.8,
-        "three_point_geometry": "PURE_ARC",
-        "corner_lateral_m": null,
-        "corner_junction_x_m": null,
+        "three_point_radius_m": 6.75,
+        "three_point_geometry": "ARC_AND_CORNERS",
+        "corner_lateral_m": 6.6,
+        "corner_junction_x_m": 1.415,
         "x_range_m": [
           -1.575,
           26.425
@@ -1788,9 +1788,9 @@
           "x_m": 5.8,
           "y_m": 0.0,
           "distance_m": 5.8,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -1798,9 +1798,9 @@
           "x_m": 5.9,
           "y_m": 0.0,
           "distance_m": 5.9,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -1808,9 +1808,9 @@
           "x_m": 6.2,
           "y_m": 0.0,
           "distance_m": 6.2,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -1818,9 +1818,9 @@
           "x_m": 6.7,
           "y_m": 0.0,
           "distance_m": 6.7,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -1828,9 +1828,9 @@
           "x_m": 6.75,
           "y_m": 0.0,
           "distance_m": 6.75,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -1868,9 +1868,9 @@
           "x_m": 4.53,
           "y_m": 4.53,
           "distance_m": 6.406,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -1908,9 +1908,9 @@
           "x_m": 0.0,
           "y_m": 6.0,
           "distance_m": 6.0,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -1918,9 +1918,9 @@
           "x_m": 0.0,
           "y_m": 6.6,
           "distance_m": 6.6,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -1948,9 +1948,9 @@
           "x_m": -1.5,
           "y_m": 6.0,
           "distance_m": 6.185,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -1968,9 +1968,9 @@
           "x_m": 1.415,
           "y_m": 6.6,
           "distance_m": 6.75,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -2014,10 +2014,10 @@
         "court_length_m": 14.0,
         "court_width_m": 15.0,
         "baseline_to_hoop_m": 1.575,
-        "three_point_radius_m": 5.8,
-        "three_point_geometry": "PURE_ARC",
-        "corner_lateral_m": null,
-        "corner_junction_x_m": null,
+        "three_point_radius_m": 6.75,
+        "three_point_geometry": "ARC_AND_CORNERS",
+        "corner_lateral_m": 6.6,
+        "corner_junction_x_m": 1.415,
         "x_range_m": [
           -1.575,
           12.425
@@ -2074,9 +2074,9 @@
           "x_m": 5.8,
           "y_m": 0.0,
           "distance_m": 5.8,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -2084,9 +2084,9 @@
           "x_m": 5.9,
           "y_m": 0.0,
           "distance_m": 5.9,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -2094,9 +2094,9 @@
           "x_m": 6.2,
           "y_m": 0.0,
           "distance_m": 6.2,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -2104,9 +2104,9 @@
           "x_m": 6.7,
           "y_m": 0.0,
           "distance_m": 6.7,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -2114,9 +2114,9 @@
           "x_m": 6.75,
           "y_m": 0.0,
           "distance_m": 6.75,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -2154,9 +2154,9 @@
           "x_m": 4.53,
           "y_m": 4.53,
           "distance_m": 6.406,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -2194,9 +2194,9 @@
           "x_m": 0.0,
           "y_m": 6.0,
           "distance_m": 6.0,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -2204,9 +2204,9 @@
           "x_m": 0.0,
           "y_m": 6.6,
           "distance_m": 6.6,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -2234,9 +2234,9 @@
           "x_m": -1.5,
           "y_m": 6.0,
           "distance_m": 6.185,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {
@@ -2254,9 +2254,9 @@
           "x_m": 1.415,
           "y_m": 6.6,
           "distance_m": 6.75,
-          "behind": true,
-          "points": 3,
-          "label_zh": "三分",
+          "behind": false,
+          "points": 2,
+          "label_zh": "二分",
           "in_bounds": true
         },
         {

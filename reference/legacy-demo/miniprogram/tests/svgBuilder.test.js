@@ -24,22 +24,27 @@ const p = require('../utils/params');
 
 test('buildCourtSvg: 不同参数产出不同的 SVG（没有硬编码 6.75）', () => {
   const senior = buildCourtSvg(resolveParams('5V5', 'SENIOR', 'FULL'));
-  const u12 = buildCourtSvg(resolveParams('5V5', 'U12', 'FULL'));
+  const half = buildCourtSvg(resolveParams('4V4', 'U15', 'HALF'));
   const three = buildCourtSvg(resolveParams('3V3', 'U15', null));
 
-  // 三张图的 SVG 字符串必须互不相同
-  assert.notStrictEqual(senior.svg, u12.svg);
-  assert.notStrictEqual(u12.svg, three.svg);
+  // 场地不同 → 图必须不同
+  assert.notStrictEqual(senior.svg, half.svg);
+  assert.notStrictEqual(half.svg, three.svg);
 
   // 画布尺寸随场地变化
-  assert.ok(senior.width > three.width, '全场画布应宽于 3x3 半场');
-  assert.ok(senior.height > three.height, '全场画布应高于 3x3 半场');
+  assert.ok(senior.height > three.height, '全场画布应长于 3x3 半场');
 
   // viewBox 与 meta 一致
   assert.strictEqual(senior.data.meta.courtType, 'FULL');
   assert.strictEqual(three.data.meta.courtType, 'HALF');
+  // FIBA 2.5.4：半径不随年龄段变化
   assert.strictEqual(senior.data.meta.threePointRadiusM, 6.75);
-  assert.strictEqual(u12.data.meta.threePointRadiusM, 5.8);
+  assert.strictEqual(three.data.meta.threePointRadiusM, 6.75);
+
+  // 换成联赛自定半径，图像必须跟着变 —— 证明半径来自 params 而非画死
+  const custom = buildCourtSvg(resolveParams('5V5', 'U12', 'FULL', 5.8));
+  assert.notStrictEqual(custom.svg, senior.svg);
+  assert.strictEqual(custom.data.meta.threePointRadiusM, 5.8);
 });
 
 test('buildCourtSvg: 全场画两个篮框，3x3 只画一个', () => {
@@ -58,26 +63,25 @@ test('buildCourtSvg: 全场画两个篮框，3x3 只画一个', () => {
   assert.ok(!half.circles.some((x) => x.role === 'centerCircle'));
 });
 
-test('buildCourtSvg: 成人画底角直线段，青少年与 3x3 不画', () => {
+test('buildCourtSvg: 6.75 m 下所有赛制都画底角直线段；5.80 m 自定线退化为纯弧', () => {
   const senior = buildCourtSvg(resolveParams('5V5', 'SENIOR', 'FULL'));
-  const u12 = buildCourtSvg(resolveParams('5V5', 'U12', 'FULL'));
   const three = buildCourtSvg(resolveParams('3V3', 'U15', null));
+  const custom = buildCourtSvg(resolveParams('5V5', 'U12', 'FULL', 5.8));
 
-  // 成人三分线含 3 段子路径（左底角直线 + 弧 + 右底角直线）
-  const seniorTP = senior.data.paths.find((x) => x.role === 'threePoint');
-  const u12TP = u12.data.paths.find((x) => x.role === 'threePoint');
-  const threeTP = three.data.paths.find((x) => x.role === 'threePoint');
-
+  const tpOf = (svg) => svg.data.paths.find((x) => x.role === 'threePoint');
   const countSubpaths = (d) => (d.match(/M /g) || []).length;
-  assert.strictEqual(countSubpaths(seniorTP.d), 3, '成人三分线应有底角直线 + 弧线共 3 段');
-  assert.strictEqual(countSubpaths(u12TP.d), 1, '青少年纯弧线只应有 1 段');
-  assert.strictEqual(countSubpaths(threeTP.d), 1, '3x3 纯弧线只应有 1 段');
+
+  // 6.75 > 6.60：三分线含 3 段子路径（左底角直线 + 弧 + 右底角直线）
+  assert.strictEqual(countSubpaths(tpOf(senior).d), 3, '5v5 三分线应有底角直线 + 弧线共 3 段');
+  assert.strictEqual(countSubpaths(tpOf(three).d), 3, '3x3 场地同为 15 m 宽，也应画底角直线');
+  // 5.80 ≤ 6.60：几何上退化为纯弧
+  assert.strictEqual(countSubpaths(tpOf(custom).d), 1, '5.80 m 自定线只应是 1 段纯弧');
 });
 
 test('buildCourtSvg: 三分线弧线半径真的用了 params 的值', () => {
   // 用两个差异明显的半径，检查弧顶点的 SVG y 坐标不同
   const senior = buildCourtSvg(resolveParams('5V5', 'SENIOR', 'FULL'), { scale: 10, padding: 0 });
-  const u12 = buildCourtSvg(resolveParams('5V5', 'U12', 'FULL'), { scale: 10, padding: 0 });
+  const custom = buildCourtSvg(resolveParams('5V5', 'U12', 'FULL', 5.8), { scale: 10, padding: 0 });
 
   // 弧顶在 court 坐标 (radius, 0)，对应 SVG y = padding + (radius - xMin) * scale。
   // 弧线路径按角度等分采样，顶点不一定正好落在采样点上，
@@ -93,16 +97,16 @@ test('buildCourtSvg: 三分线弧线半径真的用了 params 的值', () => {
 
   const xMin = -1.575;
   const expectedSeniorY = (6.75 - xMin) * 10;   // 83.25
-  const expectedU12Y = (5.8 - xMin) * 10;       // 73.75
+  const expectedCustomY = (5.8 - xMin) * 10;    // 73.75
 
   const gotSenior = maxYOf(senior.data);
-  const gotU12 = maxYOf(u12.data);
+  const gotCustom = maxYOf(custom.data);
 
   assert.ok(Math.abs(gotSenior - expectedSeniorY) < 0.05,
-    `成人弧顶 y 应约为 ${expectedSeniorY}，实际 ${gotSenior}`);
-  assert.ok(Math.abs(gotU12 - expectedU12Y) < 0.05,
-    `U12 弧顶 y 应约为 ${expectedU12Y}，实际 ${gotU12}`);
-  assert.ok(Math.abs((gotSenior - gotU12) - (6.75 - 5.8) * 10) < 0.1,
+    `6.75 m 弧顶 y 应约为 ${expectedSeniorY}，实际 ${gotSenior}`);
+  assert.ok(Math.abs(gotCustom - expectedCustomY) < 0.05,
+    `5.80 m 自定线弧顶 y 应约为 ${expectedCustomY}，实际 ${gotCustom}`);
+  assert.ok(Math.abs((gotSenior - gotCustom) - (6.75 - 5.8) * 10) < 0.1,
     '弧顶位置差应与半径差成正比，证明半径确实取自 params');
 });
 
@@ -171,8 +175,8 @@ test('buildShotDots: 命中绿色、未中红色', () => {
 
 test('buildShotDots: 越界点画成空心并加警示描边，不静默当成正常数据', () => {
   const court = buildCourtSvg(resolveParams('3V3', 'U15', null)).court;
-  // 3x3 半场 y 半宽 5.5，y=7.0 越界
-  const svg = buildShotDots(court, [{ id: 'oob', x_m: 3, y_m: 7.0, made: true }]);
+  // 3x3 场地 15 m 宽 → 半宽 7.5，y=8.0 越界
+  const svg = buildShotDots(court, [{ id: 'oob', x_m: 3, y_m: 8.0, made: true }]);
   assert.ok(svg.includes('fill="none"'), '越界点应为空心');
   assert.ok(svg.includes(`stroke="${PALETTE.miss}"`), '越界点应有警示描边');
 });
@@ -284,7 +288,7 @@ test('buildFullSvg: 越界出手点写入 warnings', () => {
   const res = buildFullSvg(resolveParams('3V3', 'U15', null), {
     shots: [
       { id: 'a', x_m: 3, y_m: 1, made: true },
-      { id: 'b', x_m: 3, y_m: 7, made: true },   // 3x3 越界
+      { id: 'b', x_m: 3, y_m: 8, made: true },   // 3x3 半宽 7.5，y=8 越界
     ],
   });
   assert.ok(res.warnings.some((w) => w.includes('落在场地范围外')),

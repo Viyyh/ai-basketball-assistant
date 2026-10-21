@@ -115,24 +115,26 @@ class CourtGeometry:
             判定：距离 >= radius
 
         用错几何的典型后果：
-            成人几何套到 5.80 m 青少年场地上时，底角直线段（6.60 m）
-            比弧线（5.80 m）还远，会产生"弧线内却是三分"的矛盾判定，
-            而且不报错 —— 正是风险 7.4 描述的静默错误。
+            把两段几何套到半径 ≤ 6.60 m 的场地（例如某联赛自定 5.80 m 少年线）时，
+            底角直线段（6.60 m）比弧线（5.80 m）还远，会产生"弧线内却是三分"
+            的矛盾判定，而且不报错 —— 正是风险 7.4 描述的静默错误。
         """
         dist = math.hypot(x_m, y_m)
 
+        # FIBA 2.5.4：三分线本身不是三分中篮区域的一部分 —— 恰好落在线上算两分，
+        # 所以一律用严格大于。
         if self.tp.geometry is ThreePointGeometry.PURE_ARC:
-            return dist >= self.tp.radius_m
+            return dist > self.tp.radius_m
 
         # ARC_AND_CORNERS
         corner = self.tp.corner_lateral_m
         assert corner is not None, "ARC_AND_CORNERS 几何必须提供 corner_lateral_m"
 
-        if self._corner_junction_x is not None and abs(y_m) >= corner \
-                and x_m <= self._corner_junction_x:
+        if self._corner_junction_x is not None and abs(y_m) > corner \
+                and x_m < self._corner_junction_x:
             return True
 
-        return dist >= self.tp.radius_m
+        return dist > self.tp.radius_m
 
     # ---------- 完整判定 ----------
 

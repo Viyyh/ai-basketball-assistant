@@ -211,7 +211,7 @@ test('Mock 响应参数: 5V5 有节次且快攻开启', () => {
   assert.strictEqual(report.params.fast_break_enabled, true);
 });
 
-test('Mock 响应参数: U12 与 SENIOR 在同样出手点下判定不同', () => {
+test('Mock 响应参数: U12 与 SENIOR 在同样出手点下判定一致（FIBA 统一 6.75 m）', () => {
   // 弧顶 6.2m 附近必有出手点（shotSpots 里有 6.2）
   const u12 = generateMockReport({ format: '5V5', ageGroup: 'U12', seed: 7 });
   const senior = generateMockReport({ format: '5V5', ageGroup: 'SENIOR', seed: 7 });
@@ -224,36 +224,33 @@ test('Mock 响应参数: U12 与 SENIOR 在同样出手点下判定不同', () =
   const seniorShots = near62(senior);
   assert.ok(u12Shots.length > 0 && seniorShots.length > 0, '该区间应有出手样本');
 
-  // 同一种子下坐标一致，判定应因半径不同而不同
+  // 同一三分线半径 → 同一种子下判定必须完全一致
   const u12ArcOut = u12Shots.filter((e) => e.behind_three_point_line).length;
   const seniorArcOut = seniorShots.filter((e) => e.behind_three_point_line).length;
 
-  assert.ok(u12ArcOut > seniorArcOut,
-    `U12（弧 5.80m）在 5.9~6.5m 区间应有更多弧外出手，实际 U12=${u12ArcOut} SENIOR=${seniorArcOut}`);
+  assert.strictEqual(u12ArcOut, seniorArcOut,
+    `FIBA 统一 6.75 m 后，U12 与 SENIOR 判定应一致，实际 U12=${u12ArcOut} SENIOR=${seniorArcOut}`);
 
-  u12Shots.forEach((e) => {
-    if (e.behind_three_point_line) {
-      assert.strictEqual(e.shot_value, 3);
-      assert.strictEqual(e.label_zh, '三分');
-    }
-  });
-  seniorShots.forEach((e) => {
-    if (!e.behind_three_point_line && e.x_m > 5.9) {
-      assert.strictEqual(e.shot_value, 2, '一线 6.75m 弧下 5.9~6.5m 应为二分');
-    }
+  // 6.75 m 弧下 5.9~6.5 m 一律是两分
+  [...u12Shots, ...seniorShots].forEach((e) => {
+    assert.strictEqual(e.behind_three_point_line, false,
+      `5.9~6.5 m 的出手不应被判成三分（${e.x_m}, ${e.y_m}）`);
+    assert.strictEqual(e.shot_value, 2);
+    assert.strictEqual(e.label_zh, '二分');
   });
 });
 
 test('Mock 响应参数: 3V3 用半场坐标，所有事件都在半场范围内', () => {
   const { report } = generateMockReport({ format: '3V3', ageGroup: 'U15' });
   assert.strictEqual(report.params.court_type, 'HALF');
-  assert.strictEqual(report.params.court_width_m, 11);
+  // FIBA 3x3：15 m 宽 × 11 m 长
+  assert.strictEqual(report.params.court_width_m, 15);
 
   report.events.forEach((e) => {
     if (e.x_m == null) return;
-    assert.ok(Math.abs(e.y_m) <= 5.5 + 1e-6,
-      `3x3 事件 y=${e.y_m} 超出半场 ±5.5 范围`);
-    assert.ok(e.x_m <= 13.425 + 1e-6,
+    assert.ok(Math.abs(e.y_m) <= 7.5 + 1e-6,
+      `3x3 事件 y=${e.y_m} 超出半场 ±7.5 范围`);
+    assert.ok(e.x_m <= 9.425 + 1e-6,
       `3x3 事件 x=${e.x_m} 超出半场范围`);
   });
 });

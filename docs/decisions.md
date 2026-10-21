@@ -194,3 +194,20 @@
 **后果**：
 - 前端画球场只有一条路径：拿 `svg` 段，按米转像素，不出现任何字面量。
 - 标线与判定分离：`marks` 只影响绘制，`ThreePointSpec` 才影响分值，两者的测试也分开。
+
+---
+
+## ADR-016 · legacy demo 按 FIBA 口径回补（推翻 ADR-001 的"只读快照"约束）
+
+**背景**：ADR-001 决定 demo 进 `reference/` 作为只读快照，不参与构建。但 demo 里 U8/U12/U15 的三分线仍是 5.80 m 假设值、3x3 场地长短边颠倒、三分判定用 `>=`（踩线算三分），与已确认的 FIBA 口径（ADR-011 / ADR-014）冲突。项目所有者要求把 demo 就地修到与 FIBA 一致，以便它作为可演示的原型继续存在。
+
+**决定**：`reference/legacy-demo/` 从"冻结快照"改为"参考实现 + 已回补"：
+- `packages/params/basketball_params/params.py`：`_youth_or_adult_radius()` 全年龄段 6.75；新增 `_court_for()`；`three_point_spec_for()` 去掉 3x3 特判，几何由「半径 > 6.60 且场地半宽 > 6.60」推导；`resolve()` 增加 `three_point_radius_m` 覆盖参数（非 6.75 时 `verified=False`）。
+- `miniprogram/mock/paramsMirror.js`：同步上述规则，3x3 常量改为 11 × 15，`resolveParams()` 增加第 4 个参数 `radiusM`。
+- `miniprogram/utils/courtGeometry.js`：`behindThreePointLine()` 的 `>=` 收紧为 `>`（FIBA 2.5.4：线本身不属于三分区域）；无撞人半圆半径 1.25 → 1.30。
+- mock 出手点按 6.75 m 弧线重排（含底角三分），保证弧外样本 ≥30%；受影响的 21 个测试改为断言 FIBA 口径，而不是把期望值改成能过。
+
+**后果**：
+- demo 自带校验恢复全绿：Python 38 项、JS 1020 项、预览冒烟 25 项。
+- 新旧两套实现（`packages/params` 与 `reference/legacy-demo`）现在**口径一致**，可以互相作为交叉验证的对照物。
+- 已知残留：`reference/legacy-demo/docs/PRD.md`、`开发计划.md` 是收到的原始文档，其中 5.80 m 的表述**未修改**（历史快照，以本仓库 `docs/` 与 ADR-011/014/016 为准）。

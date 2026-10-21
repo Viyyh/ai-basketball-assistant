@@ -69,19 +69,31 @@ class TestComboA_U15_5v5(unittest.TestCase):
         self.assertEqual(self.p.tracking.formation_points, 5)
         self.assertEqual(self.p.tracking.max_tracked_targets, 10)
 
-    def test_three_point_radius_is_youth_value(self):
-        """U15 用青少年半径，不是成人 6.75。"""
-        self.assertAlmostEqual(self.p.three_point.radius_m, 5.80, places=2)
+    def test_three_point_radius_is_fiba_standard(self):
+        """FIBA 2.5.4：三分弧 6.75 m，不按年龄段分档。"""
+        self.assertAlmostEqual(self.p.three_point.radius_m, 6.75, places=2)
 
-    def test_small_radius_degenerates_to_pure_arc(self):
+    def test_fiba_radius_uses_arc_and_corners(self):
         """
-        半径 5.80 < 底角横向 6.60，几何上只能是纯弧线。
+        半径 6.75 > 底角横向 6.60，场地半宽 7.5 > 6.60，
+        所以 5v5 一定是"弧线 + 底角直线"两段几何。
+        """
+        self.assertIs(self.p.three_point.geometry, ThreePointGeometry.ARC_AND_CORNERS)
+        self.assertAlmostEqual(self.p.three_point.corner_lateral_m, 6.60, places=2)
 
-        如果这里错误地保留"弧线+底角直线"，底角直线段会落在弧线内侧，
-        产生自相矛盾的判定且不报错 —— 静默错误数据的典型来源。
+    def test_small_radius_override_degenerates_to_pure_arc(self):
         """
-        self.assertIs(self.p.three_point.geometry, ThreePointGeometry.PURE_ARC)
-        self.assertIsNone(self.p.three_point.corner_lateral_m)
+        若某联赛自定 5.80 m 少年线，必须退化为纯弧线。
+
+        半径小于底角横向 6.60 m 时仍硬套"弧线+底角直线"，底角直线段会落在
+        弧线内侧，产生自相矛盾的判定且不报错 —— 静默错误数据的典型来源。
+        """
+        small = build_court(
+            resolve(Format.FIVE_V_FIVE, AgeGroup.U15, three_point_radius_m=5.80)
+        )
+        self.assertIs(small.params.three_point.geometry, ThreePointGeometry.PURE_ARC)
+        self.assertIsNone(small.params.three_point.corner_lateral_m)
+        self.assertFalse(small.params.three_point.verified)
 
     def test_coordinate_bounds_full_court(self):
         self.assertAlmostEqual(self.court.x_min, -1.575, places=3)
@@ -98,11 +110,12 @@ class TestComboA_U15_5v5(unittest.TestCase):
 
 class TestComboB_U12_3pt_sensitivity(unittest.TestCase):
     """
-    验证目标：三分线半径 5.80 m 时判定是否仍准确。
+    验证目标：FIBA 统一 6.75 m 之后，中距离不会被误记成三分。
 
     这是整个 PoC 最关键的一组测试。它证明的是：
-    **同一个物理出手点，在不同年龄段参数下会得到不同的分值判定。**
-    如果 pipeline 用错半径，报告看起来完全正常，数字却全错。
+    **同一个物理出手点，参数取错就会得到不同的分值判定。**
+    早期假设青少年 5.80 m，会把 5.8~6.75 m 的中距离全部算成三分 ——
+    报告看起来完全正常，数字却全错（风险 7.4）。
     """
 
     @classmethod
@@ -111,28 +124,29 @@ class TestComboB_U12_3pt_sensitivity(unittest.TestCase):
         cls.u15 = build_court(resolve(Format.FIVE_V_FIVE, AgeGroup.U15))
         cls.senior = build_court(resolve(Format.FIVE_V_FIVE, AgeGroup.SENIOR))
 
-    def test_same_shot_different_value_across_age_groups(self):
-        """弧顶 6.20 m 处出手：青少年是三分，一线是二分。"""
+    def test_same_shot_same_value_across_age_groups(self):
+        """FIBA 统一 6.75 m：弧顶 6.20 m 在任何年龄段都是二分。"""
         shot = Shot(x_m=6.20, y_m=0.0, made=True)
 
-        j_u12 = self.u12.judge(shot)
-        j_senior = self.senior.judge(shot)
+        for court in (self.u12, self.u15, self.senior):
+            j = court.judge(shot)
+            self.assertFalse(j.behind_three_point_line)
+            self.assertEqual(j.points_awarded, 2)
 
-        self.assertTrue(j_u12.behind_three_point_line,
-                        "U12（5.80 m 弧）下 6.20 m 应为三分")
-        self.assertEqual(j_u12.points_awarded, 3)
+        just_outside = Shot(x_m=6.90, y_m=0.0, made=True)
+        for court in (self.u12, self.u15, self.senior):
+            self.assertEqual(court.judge(just_outside).points_awarded, 3)
 
-        self.assertFalse(j_senior.behind_three_point_line,
-                         "一线（6.75 m 弧）下 6.20 m 应为二分")
-        self.assertEqual(j_senior.points_awarded, 2)
-
-    def test_senior_geometry_applied_to_u12_would_undercount_threes(self):
+    def test_5_80_assumption_would_overcount_threes(self):
         """
         量化"用错参数"的后果 —— 这就是风险 7.4 的实证。
 
-        构造一组典型青少年比赛的出手点，分别用正确半径与错误半径判定，
-        统计三分被漏判的数量。
+        构造一组 5.8 ~ 6.7 m 的出手点，分别用旧假设（5.80 m）与 FIBA 半径
+        （6.75 m）判定，统计被误记成三分的数量。
         """
+        old = build_court(
+            resolve(Format.FIVE_V_FIVE, AgeGroup.U12, three_point_radius_m=5.80)
+        )
         # 青少年比赛中常见的中远距离出手（5.8 ~ 6.7 m 之间）
         shots = [
             Shot(5.90, 0.0, True), Shot(6.10, 0.5, True), Shot(6.30, -0.4, False),
@@ -144,18 +158,18 @@ class TestComboB_U12_3pt_sensitivity(unittest.TestCase):
         correct_threes = sum(
             1 for s in shots if self.u12.behind_three_point_line(s.x_m, s.y_m)
         )
-        wrong_threes = sum(
-            1 for s in shots if self.senior.behind_three_point_line(s.x_m, s.y_m)
+        inflated_threes = sum(
+            1 for s in shots if old.behind_three_point_line(s.x_m, s.y_m)
         )
 
-        self.assertGreater(correct_threes, wrong_threes,
-                           "用成人半径判定青少年比赛，应当漏判大量三分")
+        self.assertGreater(inflated_threes, correct_threes,
+                           "按 5.80 m 判定会把中距离误记成三分")
         # 记录差距，run_poc.py 会把它打印成可读结论
-        TestComboB_U12_3pt_sensitivity.misjudged = correct_threes - wrong_threes
+        TestComboB_U12_3pt_sensitivity.misjudged = inflated_threes - correct_threes
         TestComboB_U12_3pt_sensitivity.total = len(shots)
 
     def test_u12_and_u15_share_same_radius(self):
-        """U12 与 U15 在默认表中同为 5.80 m，判定应完全一致。"""
+        """所有年龄段都用 FIBA 6.75 m，判定必须完全一致。"""
         shot = Shot(x_m=6.00, y_m=0.0, made=True)
         self.assertEqual(
             self.u12.judge(shot).points_awarded,
@@ -193,15 +207,16 @@ class TestComboC_3v3_halfcourt(unittest.TestCase):
 
     def test_court_is_half_single_hoop(self):
         self.assertIs(self.p.court.court_type, CourtType.HALF)
-        self.assertEqual(self.p.court.length_m, 15.0)
-        self.assertEqual(self.p.court.width_m, 11.0)
+        # FIBA 3x3：场地 15 m 宽 × 11 m 长（宽 > 长）
+        self.assertEqual(self.p.court.length_m, 11.0)
+        self.assertEqual(self.p.court.width_m, 15.0)
         self.assertEqual(self.p.court.hoop_count, 1)
 
     def test_coordinate_bounds_half_court(self):
         """半场坐标范围必须与全场不同，否则标定会整体偏移。"""
         self.assertAlmostEqual(self.court.x_min, -1.575, places=3)
-        self.assertAlmostEqual(self.court.x_max, 13.425, places=3)
-        self.assertAlmostEqual(self.court.y_half, 5.5, places=3)
+        self.assertAlmostEqual(self.court.x_max, 9.425, places=3)
+        self.assertAlmostEqual(self.court.y_half, 7.5, places=3)
 
     def test_shot_clock_is_12_seconds(self):
         self.assertEqual(self.p.rules.shot_clock_s, 12)
@@ -226,11 +241,11 @@ class TestComboC_3v3_halfcourt(unittest.TestCase):
         self.assertEqual(inside.label_zh, "近投(1分)")
         self.assertNotIn("三分", outside.label_zh)
 
-    def test_three_point_line_is_pure_arc(self):
-        """FIBA 3x3：整条弧 6.75 m，无底角直线段。"""
-        self.assertIs(self.p.three_point.geometry, ThreePointGeometry.PURE_ARC)
+    def test_three_point_line_is_arc_and_corners(self):
+        """FIBA 2.5.4 对所有赛制统一：弧线 6.75 m + 底角直线（横向 6.60 m）。"""
+        self.assertIs(self.p.three_point.geometry, ThreePointGeometry.ARC_AND_CORNERS)
         self.assertAlmostEqual(self.p.three_point.radius_m, 6.75, places=2)
-        self.assertIsNone(self.p.three_point.corner_lateral_m)
+        self.assertAlmostEqual(self.p.three_point.corner_lateral_m, 6.60, places=2)
 
     def test_fast_break_disabled_in_v1(self):
         """范围确认 v0.2 第六节：3对3 第一版关闭快攻识别。"""
@@ -433,31 +448,37 @@ class TestSvgParamsAreNotHardcoded(unittest.TestCase):
     """对应球队页设计 v0.2：球场底图 SVG 必须参数化，不能画死 6.75 m 弧线。"""
 
     def test_different_combos_yield_different_render_params(self):
+        """
+        FIBA 统一半径后，三分线不再随年龄段变化，差异只来自场地本身。
+        底图仍必须参数化：全场 / 半场的长度、篮筐数、x 范围各不相同。
+        """
         a = build_court(resolve(Format.FIVE_V_FIVE, AgeGroup.SENIOR)).svg_render_params()
         b = build_court(resolve(Format.FIVE_V_FIVE, AgeGroup.U12)).svg_render_params()
         c = build_court(resolve(Format.THREE_V_THREE, AgeGroup.U15)).svg_render_params()
 
-        self.assertAlmostEqual(a["three_point_radius_m"], 6.75, places=2)
-        self.assertAlmostEqual(b["three_point_radius_m"], 5.80, places=2)
-        self.assertAlmostEqual(c["three_point_radius_m"], 6.75, places=2)
+        # 三分线：所有组合同一半径、同一几何
+        for p in (a, b, c):
+            self.assertAlmostEqual(p["three_point_radius_m"], 6.75, places=2)
+            self.assertEqual(p["three_point_geometry"], "ARC_AND_CORNERS")
+            self.assertAlmostEqual(p["corner_lateral_m"], 6.60, places=2)
 
-        self.assertEqual(a["three_point_geometry"], "ARC_AND_CORNERS")
-        self.assertEqual(b["three_point_geometry"], "PURE_ARC")
-        self.assertEqual(c["three_point_geometry"], "PURE_ARC")
-
+        # 场地差异：全场 vs 半场
         self.assertEqual(a["court_type"], "FULL")
         self.assertEqual(c["court_type"], "HALF")
         self.assertEqual(a["hoop_count"], 2)
         self.assertEqual(c["hoop_count"], 1)
-
-        self.assertEqual(a["y_half_m"], 7.5)
-        self.assertEqual(c["y_half_m"], 5.5)
+        self.assertAlmostEqual(a["length_m"], 28.0, places=2)
+        self.assertAlmostEqual(c["length_m"], 11.0, places=2)
+        self.assertAlmostEqual(a["y_half_m"], 7.5, places=2)
+        self.assertAlmostEqual(c["y_half_m"], 7.5, places=2)
+        self.assertAlmostEqual(a["x_range_m"][1], 26.425, places=2)
+        self.assertAlmostEqual(c["x_range_m"][1], 9.425, places=2)
 
     def test_out_of_bounds_shot_is_flagged(self):
         """越界坐标说明标定有问题，必须被标记而不是静默采纳。"""
         court = build_court(resolve(Format.THREE_V_THREE, AgeGroup.U15))
-        # 3v3 半场宽度 ±5.5，用全场坐标 y=7.0 就是越界
-        j = court.judge(Shot(x_m=5.0, y_m=7.0, made=True))
+        # 3x3 场地 15 m 宽 → 半宽 ±7.5，y=8.0 越界
+        j = court.judge(Shot(x_m=5.0, y_m=8.0, made=True))
         self.assertFalse(j.in_bounds)
 
 
