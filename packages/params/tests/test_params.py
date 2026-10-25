@@ -49,14 +49,15 @@ class TestResolve(unittest.TestCase):
     def test_3x3_court_orientation(self):
         """FIBA 3x3 场地是 15 m 宽 × 11 m 长 —— 宽比长大，不是反过来。
 
-        写反了 y_half 会变成 5.5 m，几何判定随之退化成纯弧线，
-        整场 3x3 的底角两分会被算成一分。
+        半宽 7.5 m > 6.60 m，所以 3x3 和 5v5 一样是「弧线 + 底角」，
+        不是纯弧线（ADR-014 纠正过这个前提）。
         """
         p = resolve(Format.THREE_V_THREE, AgeGroup.U15)
         self.assertEqual(p.court.length_m, 11.0)
         self.assertEqual(p.court.width_m, 15.0)
         self.assertEqual(p.court.y_half_m, 7.5)
         self.assertEqual(p.three_point.geometry, ThreePointGeometry.ARC_AND_CORNERS)
+        self.assertEqual(p.three_point.corner_lateral_m, 6.60)
         self.assertEqual(p.rules.inside_arc_points, 1)
         self.assertEqual(p.rules.outside_arc_points, 2)
         self.assertEqual(p.rules.shot_clock_s, 12)
@@ -70,6 +71,7 @@ class TestResolve(unittest.TestCase):
         p = resolve(Format.FOUR_V_FOUR, AgeGroup.U15, court_type=CourtType.HALF)
         self.assertEqual(p.court.width_m, 15.0)
         self.assertEqual(p.three_point.geometry, ThreePointGeometry.ARC_AND_CORNERS)
+        self.assertEqual(p.three_point.corner_lateral_m, 6.60)
 
     def test_radius_override_degrades_to_pure_arc(self):
         """某个联赛打小球时显式覆盖半径，几何自动退化，不需要特判。"""

@@ -80,7 +80,7 @@ class ThreePointGeometry(str, Enum):
 
     三分线不是"一个半径"能描述的：
         ARC_AND_CORNERS —— 弧线 + 底角直线段（FIBA 成人标准）
-        PURE_ARC        —— 纯弧线，无底角直线段（3x3、窄场地、小半径青少年场地）
+        PURE_ARC        —— 纯弧线，无底角直线段（半宽放不下底角的窄场地、小半径场地）
 
     两者判定逻辑不同，混用会产生"看起来正常但全错"的分值判定。
     """
@@ -209,6 +209,23 @@ class ActivityParams:
     tracking: TrackingSpec
     marks: CourtMarks = field(default_factory=CourtMarks)
     unverified: tuple[str, ...] = ()
+    #: 预设 id（fiba / nba / cba / youth-u15 / three-x-three / half-court）。
+    #: 为空表示由 ``resolve()`` 按「赛制 × 年龄段」推出来，没有预设来源。
+    base_preset: str = ""
+    #: 预设的中文名，报告页「口径」一行用；为空时退回 scope_label_zh。
+    profile_label_zh: str = ""
+    #: 每个参数的来源 (字段, manual / preset:xxx / default / derived)。
+    provenance: tuple[tuple[str, str], ...] = ()
+    #: 用户显式改过的字段。
+    overrides: tuple[str, ...] = ()
+    #: 参数快照 hash，报告据此复算；为空表示旧数据。
+    config_hash: str = ""
+    #: 校验阶段产生的告警（未确认项、预设冲突被降级等），必须展示给用户。
+    warnings: tuple[str, ...] = ()
+
+    @property
+    def has_config_snapshot(self) -> bool:
+        return bool(self.config_hash)
 
     @property
     def scope_label_zh(self) -> str:
@@ -290,9 +307,13 @@ PLAYERS_PER_TEAM: dict[Format, int] = {
 # 几何形态判定
 # ============================================================
 
-def resolve_three_point(radius_m: float, court: CourtSpec) -> ThreePointSpec:
+def resolve_three_point(
+    radius_m: float,
+    court: CourtSpec,
+    corner_lateral_m: Optional[float] = FIBA_CORNER_LATERAL_M,
+) -> ThreePointSpec:
     """
-    由「半径 + 场地」推出三分线几何形态。
+    由「半径 + 底角距离 + 场地」推出三分线几何形态。
 
     底角直线段能存在的充要条件：
         1. 半径 > 底角横向距离。否则弧线永远碰不到底角线的位置，
@@ -301,14 +322,18 @@ def resolve_three_point(radius_m: float, court: CourtSpec) -> ThreePointSpec:
            根本不在场内，例如 12 m 宽的青少年场地、26×14 的旧规格球场。
 
     任何一条不满足就退化为纯弧线。这条规则同时覆盖了
-    "3x3 用纯弧"和"青少年小球场地用纯弧"两种情况，不需要分支特判。
+    "青少年小球场地用纯弧"和"某联赛底角不同（如 NBA 6.71 m）"
+    三种情况，不需要分支特判。
+
+    :param corner_lateral_m: 底角直线段离中轴的距离；``None`` 表示纯弧线。
     """
     if radius_m <= 0:
         raise ValueError(f"三分线半径必须为正数，收到 {radius_m}")
 
     has_corners = (
-        radius_m > FIBA_CORNER_LATERAL_M
-        and court.y_half_m > FIBA_CORNER_LATERAL_M
+        corner_lateral_m is not None
+        and radius_m > corner_lateral_m
+        and court.y_half_m > corner_lateral_m
     )
 
     if not has_corners:
@@ -319,11 +344,11 @@ def resolve_three_point(radius_m: float, court: CourtSpec) -> ThreePointSpec:
             corner_junction_x_m=None,
         )
 
-    junction = math.sqrt(radius_m ** 2 - FIBA_CORNER_LATERAL_M ** 2)
+    junction = math.sqrt(radius_m ** 2 - corner_lateral_m ** 2)
     return ThreePointSpec(
         geometry=ThreePointGeometry.ARC_AND_CORNERS,
         radius_m=radius_m,
-        corner_lateral_m=FIBA_CORNER_LATERAL_M,
+        corner_lateral_m=corner_lateral_m,
         corner_junction_x_m=junction,
     )
 
@@ -332,17 +357,28 @@ def resolve_three_point(radius_m: float, court: CourtSpec) -> ThreePointSpec:
 # 解析入口
 # ============================================================
 
+_UNSET = object()
+
+
 def resolve(
     fmt: Format,
     age_group: AgeGroup,
     court_type: Optional[CourtType] = None,
     three_point_radius_m: Optional[float] = None,
+    corner_lateral_m: object = _UNSET,
 ) -> ActivityParams:
     """
     把 (赛制, 年龄段) 解析成一场活动的完整参数。
 
+    这是"最小口径"入口，只认赛制 / 年龄段 / 场地类型 / 三分线覆盖；
+    需要改场地长宽、节次、分值等完整参数时用
+    ``config.resolve_config()``，它会把每项来源和快照 hash 一并带出来。
+
     :param court_type: 4v4 与自定义赛制必须显式指定（界面上选中后追问一次）。
     :param three_point_radius_m: 覆盖默认 6.75 m。仅在某个联赛确实打小球时使用。
+    :param corner_lateral_m: 底角横向距离；``None`` 表示纯弧线。
+        不传时统一用 FIBA 6.60 m —— 3x3 场地是 15 m 宽 × 11 m 长，
+        半宽 7.5 m > 6.60 m，和 5v5 一样有底角直线段（ADR-014）。
     """
     if fmt is Format.THREE_V_THREE:
         court = COURT_3X3
@@ -358,7 +394,11 @@ def resolve(
         raise ValueError(f"未知赛制：{fmt}")
 
     radius = three_point_radius_m or THREE_POINT_RADIUS_BY_AGE[age_group]
-    three_point = resolve_three_point(radius, court)
+    if corner_lateral_m is _UNSET:
+        corner = FIBA_CORNER_LATERAL_M
+    else:
+        corner = corner_lateral_m  # type: ignore[assignment]
+    three_point = resolve_three_point(radius, court, corner)
 
     if fmt is Format.THREE_V_THREE:
         rules = RulesSpec(

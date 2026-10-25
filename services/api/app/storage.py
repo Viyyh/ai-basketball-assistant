@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS activities (
     court_type           TEXT NOT NULL,
     three_point_radius_m REAL NOT NULL,
     params_json          TEXT NOT NULL,
+    config_json          TEXT,
     created_at           TEXT NOT NULL
 );
 
@@ -59,10 +60,24 @@ class Storage:
     def init(self) -> None:
         with self.connect() as conn:
             conn.executescript(SCHEMA)
+            # 老库补列：SQLite 的 ADD COLUMN 是幂等的常见做法
+            columns = {
+                row["name"]
+                for row in conn.execute("PRAGMA table_info(activities)").fetchall()
+            }
+            if "config_json" not in columns:
+                conn.execute("ALTER TABLE activities ADD COLUMN config_json TEXT")
 
     # ---------- 活动 ----------
 
-    def create_activity(self, *, title: str, opponent: Optional[str], params: dict) -> dict:
+    def create_activity(
+        self,
+        *,
+        title: str,
+        opponent: Optional[str],
+        params: dict,
+        config: Optional[dict] = None,
+    ) -> dict:
         record = {
             "id": _new_id(),
             "title": title,
@@ -72,15 +87,16 @@ class Storage:
             "court_type": params["court_type"],
             "three_point_radius_m": params["three_point_radius_m"],
             "params_json": json.dumps(params, ensure_ascii=False),
+            "config_json": json.dumps(config, ensure_ascii=False) if config else None,
             "created_at": _now(),
         }
         with self.connect() as conn:
             conn.execute(
                 """INSERT INTO activities
                    (id, title, opponent, format, age_group, court_type,
-                    three_point_radius_m, params_json, created_at)
+                    three_point_radius_m, params_json, config_json, created_at)
                    VALUES (:id, :title, :opponent, :format, :age_group, :court_type,
-                           :three_point_radius_m, :params_json, :created_at)""",
+                           :three_point_radius_m, :params_json, :config_json, :created_at)""",
                 record,
             )
         return self.get_activity(record["id"])  # type: ignore[return-value]
@@ -109,6 +125,7 @@ class Storage:
             "title": row["title"],
             "opponent": row["opponent"],
             "params": json.loads(row["params_json"]),
+            "config": json.loads(row["config_json"]) if row["config_json"] else None,
             "has_report": bool(row["has_report"]),
             "created_at": row["created_at"],
         }

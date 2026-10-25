@@ -52,7 +52,7 @@ class ApiTest(unittest.TestCase):
         body = self.client.get(
             "/v1/params/resolve", params={"format": "3V3", "age_group": "U15"}
         ).json()
-        # FIBA 3x3 场地 15 m 宽 × 11 m 长 → 半宽 7.5 m，底角直线段在场内
+        # 3x3 场地 15 m 宽，半宽 7.5 m > 6.60 m，保留底角（ADR-014）
         self.assertEqual(body["params"]["three_point_geometry"], "ARC_AND_CORNERS")
         self.assertAlmostEqual(body["params"]["y_half_m"], 7.5)
         self.assertAlmostEqual(body["params"]["court_length_m"], 11.0)
@@ -78,6 +78,66 @@ class ApiTest(unittest.TestCase):
         ).json()
         self.assertEqual(body["params"]["three_point_geometry"], "PURE_ARC")
         self.assertTrue(any("覆盖值" in u for u in body["unverified"]))
+
+    # ---------- 完整配置 ----------
+
+    def test_config_schema_lists_presets_and_fields(self):
+        body = self.client.get("/v1/config/schema").json()
+        self.assertEqual(body["default_base"], "fiba")
+        keys = {f["key"] for f in body["fields"]}
+        self.assertIn("corner_lateral_m", keys)
+        self.assertIn("period_minutes", keys)
+        self.assertIn("nba", {p["id"] for p in body["presets"]})
+
+    def test_config_resolve_nba(self):
+        body = self.client.get("/v1/config/resolve", params={
+            "base": "nba",
+            "set": ["period_minutes=10"],
+            "unconfirmed": ["period_minutes"],
+        }).json()
+        self.assertEqual(body["values"]["three_point_radius_m"], 7.24)
+        self.assertEqual(body["values"]["corner_lateral_m"], 6.71)
+        self.assertEqual(body["values"]["period_minutes"], 10.0)
+        self.assertEqual(body["sources"]["period_minutes"], "unconfirmed")
+        self.assertEqual(body["params"]["three_point_geometry"], "ARC_AND_CORNERS")
+        self.assertTrue(body["hash"])
+        self.assertTrue(body["warnings"])
+
+    def test_config_resolve_rejects_contradiction(self):
+        res = self.client.get("/v1/config/resolve", params={
+            "base": "nba", "set": ["corner_lateral_m=8"],
+        })
+        self.assertEqual(res.status_code, 400)
+        self.assertIn("底角", res.json()["detail"])
+
+    def test_config_preview_is_svg(self):
+        res = self.client.get("/v1/config/preview", params={"base": "nba"})
+        self.assertEqual(res.status_code, 200)
+        self.assertIn("image/svg+xml", res.headers["content-type"])
+        self.assertIn("<svg", res.text)
+        self.assertIn("7.24", res.text)
+
+    def test_params_resolve_with_base_returns_snapshot(self):
+        body = self.client.get("/v1/params/resolve", params={
+            "format": "5V5", "age_group": "SENIOR", "base": "nba",
+        }).json()
+        self.assertEqual(body["params"]["three_point_radius_m"], 7.24)
+        self.assertEqual(body["config"]["base"], "nba")
+
+    def test_create_activity_with_full_config_persists_snapshot(self):
+        res = self.client.post("/v1/activities", json={
+            "title": "NBA 口径测试",
+            "format": "5V5",
+            "age_group": "SENIOR",
+            "config_base": "nba",
+            "config_overrides": {"period_minutes": 10},
+            "config_unconfirmed": ["period_minutes"],
+        })
+        self.assertEqual(res.status_code, 201, res.text)
+        body = res.json()
+        self.assertEqual(body["config"]["base"], "nba")
+        self.assertEqual(body["config"]["values"]["period_minutes"], 10.0)
+        self.assertEqual(body["params"]["court_length_m"], 28.65)
 
     # ---------- 活动 ----------
 

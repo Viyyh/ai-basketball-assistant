@@ -9,6 +9,10 @@
     # 只重画轨迹图
     python -m basketball_pipeline render --tracks data/tracks/game01.json --out data/tracks/game01.svg
 
+    # 看预设/字段，或解析一份自定义参数（带预览）
+    python -m basketball_pipeline config --list
+    python -m basketball_pipeline config --base nba --set period_minutes=10 --svg court.svg
+
 `sample` 的产物可以直接交给 contracts/bin/validate-report.mjs 校验；
 `ingest` 的产物是轨迹，还没到"报告"那一层。
 """
@@ -20,7 +24,17 @@ import json
 import sys
 from pathlib import Path
 
-from basketball_params import AgeGroup, CourtType, Format
+from basketball_params import (
+    DEFAULT_BASE,
+    AgeGroup,
+    ConfigError,
+    CourtType,
+    Format,
+    parse_override,
+    resolve_config,
+    schema_public,
+)
+from basketball_params.preview import render_court_svg
 
 from .ingest import format_summary, ingest_video, parse_polygon, read_tracks, write_tracks
 from .mock import build_report
@@ -59,6 +73,17 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     ingest.add_argument("--snapshot", default=None,
                         help="代表帧图片路径，默认与 --out 同名 .jpg")
     ingest.add_argument("--no-svg", action="store_true", help="不生成轨迹图")
+    ingest.add_argument("--min-span", type=float, default=0.0, help="轨迹图只画在场 ≥N 秒的轨迹")
+
+    config = sub.add_parser("config", help="查看预设 / 解析参数 / 生成球场预览")
+    config.add_argument("--base", default=DEFAULT_BASE, help="预设 id，默认 fiba")
+    config.add_argument("--set", action="append", default=[], dest="overrides",
+                        help="逐项覆盖 k=v，可重复")
+    config.add_argument("--unconfirmed", action="append", default=[],
+                        help="明确不确定的字段名，可重复")
+    config.add_argument("--list", action="store_true", help="列出预设与字段后退出")
+    config.add_argument("--svg", default=None, help="把球场预览写到这个 .svg 文件")
+    config.add_argument("--out", default="-", help="解析结果 JSON 输出路径，- 表示 stdout")
 
     render = sub.add_parser("render", help="把轨迹 JSON 画成 SVG")
     render.add_argument("--tracks", required=True, help="轨迹 JSON")
@@ -84,6 +109,41 @@ def _cmd_sample(args: argparse.Namespace) -> int:
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(text + "\n", encoding="utf-8")
         print(f"已写入 {out}（{len(report['events'])} 个事件）", file=sys.stderr)
+    return 0
+
+
+def _cmd_config(args: argparse.Namespace) -> int:
+    if args.list:
+        print(json.dumps(schema_public(), ensure_ascii=False, indent=2))
+        return 0
+
+    overrides = {}
+    try:
+        for item in args.overrides:
+            key, value = parse_override(item)
+            overrides[key] = value
+        result = resolve_config(args.base, overrides, unconfirmed=args.unconfirmed)
+    except ConfigError as exc:
+        for error in exc.errors:
+            print(f"× {error}", file=sys.stderr)
+        return 2
+
+    if args.svg:
+        out = Path(args.svg)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(render_court_svg(result.params), encoding="utf-8")
+        print(f"球场预览 {out}", file=sys.stderr)
+
+    payload = result.to_public()
+    payload["params"] = result.params.to_contract()
+    text = json.dumps(payload, ensure_ascii=False, indent=2)
+    if args.out == "-":
+        print(text)
+    else:
+        out = Path(args.out)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(text + "\n", encoding="utf-8")
+        print(f"已写入 {out}", file=sys.stderr)
     return 0
 
 
@@ -154,6 +214,8 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_ingest(args)
     if args.cmd == "render":
         return _cmd_render(args)
+    if args.cmd == "config":
+        return _cmd_config(args)
     return 2
 
 
