@@ -5,7 +5,7 @@
 
 给青少年球队教练用的比赛视频分析工具：录一场球（或导入一段视频），拿到一份能看、能点开、能信的投篮与阵型报告，并逐步沉淀出每个球员的分析数据。
 
-当前状态：**v1.1 骨架可运行**。契约、参数层、mock pipeline、HTTP API 都是真实代码且有测试；真实视频推理尚未开始。
+当前状态：**v1.1 骨架可运行**。契约、参数层、可配置赛前参数、mock pipeline、HTTP API 都是真实代码且有测试；真实视频推理尚未开始。
 
 ---
 
@@ -20,12 +20,14 @@
 │   ├── scope-v1.1.md             本版要做的增量范围（与 prd 冲突处以此为准）
 │   ├── decisions.md              决策记录 ADR（含被否掉的方案与原因）
 │   ├── fiba-conformance.md       FIBA 规则符合性对照（场地尺寸、三分线、标线）
+│   ├── field-config.md           可配置赛前参数：预设、逐项覆盖、校验、快照
+│   ├── video-delivery-spec.md    实拍交付规范：像素预算、机位、标定、标准答案、验收门槛
 │   ├── shooting-guide.md         素材怎么拍：机位、距离、设置、现场记录、拍完验收
 │   ├── game-day-checklist.md     比赛日清单：怎么拍完整一场、同时记什么、交回什么
 │   └── architecture.md           仓库结构与数据流
 ├── design/                       界面与架构设计稿（v0.1，参考）
 ├── contracts/                    报告契约 v1.1 + 零依赖校验器 + 样例
-├── packages/params/              参数层：赛制 × 年龄段 → 场地／三分线／规则
+├── packages/params/              参数层：预设 + 逐项覆盖 → 场地／三分线／规则
 ├── services/
 │   ├── api/                      FastAPI：参数解析、活动、报告寄存
 │   └── pipeline/                 mock 报告生成 CLI（真实几何判定，模拟事件）
@@ -40,7 +42,7 @@
 只依赖 **Node ≥ 20** 与 **Python ≥ 3.11**，不需要 `npm install`，也不需要虚拟环境（标准库 + 已装的 FastAPI）。
 
 ```bash
-./scripts/verify.sh          # 全量检查：契约 + 参数层 + pipeline + API（共 76 项）
+./scripts/verify.sh          # 全量检查：契约 + 参数层 + pipeline + API（共 133 项）
 ```
 
 单独跑：
@@ -49,14 +51,14 @@
 # 契约（结构与语义校验，26 项）
 cd contracts && node --test test/validate.test.mjs
 
-# 参数层（24 项）
+# 参数层（56 项：固定口径 + 完整配置/校验/预览）
 cd packages/params && PYTHONPATH=. python3 -m unittest discover -s tests -t .
 
-# pipeline（25 项：mock 报告 + 轨迹层，含跨语言契约校验）
+# pipeline（30 项：mock 报告 + 轨迹层，含跨语言契约校验）
 cd services/pipeline && PYTHONPATH=../../packages/params:. \
   python3 -m unittest discover -s tests -t .
 
-# HTTP API（15 项）
+# HTTP API（21 项）
 cd services/api && PYTHONPATH=../../packages/params:. \
   python3 -m unittest discover -s tests -t .
 
@@ -113,16 +115,18 @@ PYTHONPATH=packages/params:services/pipeline python3 -m basketball_pipeline rend
 注意：这一层**不做**篮球语义。没有标定就没有"三分线内/外"，没有篮筐位置就没有命中率。
 那些要等事件提取（下一步）。
 
-**自己拍素材之前，先读 [`docs/shooting-guide.md`](docs/shooting-guide.md)**：机位、距离、相机设置、
-现场要记的东西、拍完当场验收的 5 条。这条链路里最贵的一次错误是拍完 40 分钟才发现号码认不出来。
+**自己拍素材之前，先读 [`docs/video-delivery-spec.md`](docs/video-delivery-spec.md)**：4K 像素预算、
+看台长焦机位、标定与测量、标准答案、开拍前 10 条验收。这条链路里最贵的一次错误是拍完 40 分钟
+才发现球只有 15 px、号码认不出来。旧版 [`docs/shooting-guide.md`](docs/shooting-guide.md) 里的
+场边 2–3 m 机位只适合远端快速验证，覆盖完整半场以新规范为准。
 
 ## 三层可信度
 
 | 东西 | 状态 | 说明 |
 |---|---|---|
 | `contracts/` | ✅ 可用 | 三方（AI / 后端 / 前端）共同遵守的数据形状，结构 + 语义双重校验 |
-| `packages/params/` | ✅ 可用 | 赛制 × 年龄段参数表、三分线判定、分值标签，唯一真源 |
-| `services/api/` | ✅ 可用 | 参数解析、活动增删查、报告寄存（SQLite） |
+| `packages/params/` | ✅ 可用 | 预设（FIBA/NBA/CBA/青少年/3x3/半场）+ 逐项覆盖 + 校验 + 快照，唯一真源 |
+| `services/api/` | ✅ 可用 | 参数解析、球场预览、活动增删查、报告寄存（SQLite） |
 | `services/pipeline/` | 🟢 部分真实 | 事件仍是脚本化的，但**视频 ingest 是真的**：YOLO 检测 + ByteTrack 跟踪，跑真视频 |
 | `reference/legacy-demo/` | ⬜ 参考 | 20 页前端能跑，数据全 mock；已按 FIBA 6.75 m 口径回补并通过其自带校验 |
 | 逐人识别（号码 → 身份） | ⬜ 未验证 | 全项目唯一的生死假设，见下文 |
@@ -159,7 +163,7 @@ PYTHONPATH=packages/params:services/pipeline python3 -m basketball_pipeline rend
 1. **单机位能不能做出逐人分析**——产品成立的前提。号码即身份只是 v0 权宜，同场次跨帧跟踪还没验证过。
 2. **相机长录是否可靠**——40 分钟、切后台、发热、中断，未真机验证。
 3. **上传链路**——2GB 视频在弱网下的进度、断点、重试。
-4. **单节时长的默认值**——参数表里 U8 6 分钟、U12/U15 8 分钟、U18/一线 10 分钟是默认值，需按实际联赛确认（会在 `unverified` 里提示）。
+4. **单节时长的默认值**——参数表里 U8 6 分钟、U12/U15 8 分钟、U18/一线 10 分钟是默认值；现在可以在新建活动时按预设或逐项覆盖，未确认项会写进 `warnings`。
 
 > 三分线口径已确认：**统一 FIBA 成人标准 6.75 m + 底角直线段 6.60 m**（ADR-011）。原 demo 里 U8~U15 的 5.80 m 假设作废。
 

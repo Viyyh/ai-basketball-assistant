@@ -88,9 +88,9 @@ API 寄存 → 前端渲染
 
 | 层 | 位置 | 数量 | 抓什么 |
 |---|---|---|---|
-| 参数层单测 | `packages/params/tests/` | 19 | 半径/几何/分值/标签/契约键 |
+| 参数层单测 | `packages/params/tests/` | 56 | 半径/几何/分值/标签/契约键/预设覆盖/校验/预览 |
 | 契约结构 + 语义 | `contracts/test/` | 26 | 字段缺失、枚举越界、统计对不上 |
-| pipeline（含跨语言校验） | `services/pipeline/tests/` | 11 | mock 产出物是否能被独立校验器接受 |
-| API | `services/api/tests/` | 14 | 参数解析、活动持久化、报告寄存 |
+| pipeline（含跨语言校验） | `services/pipeline/tests/` | 30 | mock 产出物、轨迹层、SVG 体检 |
+| API | `services/api/tests/` | 21 | 参数解析、配置快照、球场预览、活动持久化、报告寄存 |
 
 `scripts/verify.sh` 依次跑完这四层，并检查 `contracts/fixtures/sample-report.json` 是否与参数层同步 —— fixture 漂移意味着契约样例已经不代表真实逻辑。
