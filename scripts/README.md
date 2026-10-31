@@ -30,3 +30,7 @@
 | 验证 | `verify.sh`、`check-local.sh`、`test_*.py` | 区分纯逻辑与本地媒体集成测试 |
 
 实验脚本输入/输出详见各文件顶部说明及 datasets/、docs/ 对应文档。不要在不了解标签用途、媒体可用性和训练批准状态时直接启动训练。
+
+新增：`prepare_revision_proposals.py` 生成待确认修订；`export_training.py` 导出不可覆盖的训练快照；`intake_video.py` 登记新原片；`test_training_export.py` 和 `test_revision_proposals.py` 检查质量门槛及不自动批准。
+
+拍摄任务书：`python3 scripts/build_shooting_guide.py --font /path/to/CJK.ttf` 从 `docs/video-delivery-spec.md` 生成 `output/pdf/shooting-task-v2.pdf`，需另装reportlab（非推理运行依赖）。默认字体路径适用于本机macOS；其他环境通过 `--font` 指定支持中文的TrueType字体。审阅PDF渲染后，将同一文件复制到 `docs/shooting-task-v2.pdf` 发布；原始私有附件不入库。

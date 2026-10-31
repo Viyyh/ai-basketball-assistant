@@ -40,6 +40,7 @@ from .schemas import (
     ParamsOut,
 )
 from .storage import Storage
+from .report_validation import InvalidReport, ValidatorUnavailable, validate_report
 
 API_VERSION = "0.2.0"
 CONTRACT_VERSION = "1.1"
@@ -111,8 +112,8 @@ def create_app(db_path: Optional[str | Path] = None) -> FastAPI:
                     fmt=Format(format),
                     age_group=AgeGroup(age_group),
                 )
-            except ConfigError as err:
-                raise HTTPException(status_code=400, detail="；".join(err.errors)) from err
+            except (ConfigError, ValueError) as err:
+                raise HTTPException(status_code=400, detail="；".join(getattr(err, "errors", [str(err)]))) from err
             return ParamsOut(
                 params=result.params.to_contract(),
                 scope_label=result.label_zh,
@@ -158,8 +159,8 @@ def create_app(db_path: Optional[str | Path] = None) -> FastAPI:
     ) -> ConfigResolveOut:
         try:
             result = _config_query(base, overrides, unconfirmed)
-        except ConfigError as err:
-            raise HTTPException(status_code=400, detail="；".join(err.errors)) from err
+        except (ConfigError, ValueError) as err:
+            raise HTTPException(status_code=400, detail="；".join(getattr(err, "errors", [str(err)]))) from err
         return ConfigResolveOut(**result.to_public(), params=result.params.to_contract())
 
     @app.get("/v1/config/preview", tags=["config"])
@@ -172,8 +173,8 @@ def create_app(db_path: Optional[str | Path] = None) -> FastAPI:
         """球场预览 SVG。保存前先看一眼，几何矛盾在图上很显眼。"""
         try:
             result = _config_query(base, overrides, unconfirmed)
-        except ConfigError as err:
-            raise HTTPException(status_code=400, detail="；".join(err.errors)) from err
+        except (ConfigError, ValueError) as err:
+            raise HTTPException(status_code=400, detail="；".join(getattr(err, "errors", [str(err)]))) from err
         svg = render_court_svg(result.params, width=width)
         return Response(content=svg, media_type="image/svg+xml")
 
@@ -210,8 +211,8 @@ def create_app(db_path: Optional[str | Path] = None) -> FastAPI:
                     age_group=AgeGroup(body.age_group),
                     unconfirmed=body.config_unconfirmed or (),
                 )
-            except ConfigError as err:
-                raise HTTPException(status_code=400, detail="；".join(err.errors)) from err
+            except (ConfigError, ValueError) as err:
+                raise HTTPException(status_code=400, detail="；".join(getattr(err, "errors", [str(err)]))) from err
             params = result.params
             config_payload = result.to_public()
         else:
@@ -234,7 +235,7 @@ def create_app(db_path: Optional[str | Path] = None) -> FastAPI:
         return _to_out(activity)
 
     @app.get("/v1/activities", response_model=list[ActivityOut], tags=["activities"])
-    def list_activities(limit: int = 50) -> list[ActivityOut]:
+    def list_activities(limit: int = Query(default=50, ge=1, le=200)) -> list[ActivityOut]:
         return [_to_out(a) for a in store.list_activities(limit=limit)]
 
     @app.get("/v1/activities/{activity_id}", response_model=ActivityOut, tags=["activities"])
@@ -263,6 +264,14 @@ def create_app(db_path: Optional[str | Path] = None) -> FastAPI:
             if key not in report:
                 raise HTTPException(status_code=422, detail=f"缺少必填段 {key}")
 
+        if report['params'] != activity['params']:
+            raise HTTPException(status_code=422, detail="报告参数与活动参数快照不一致")
+        try:
+            validate_report(report)
+        except InvalidReport as err:
+            raise HTTPException(status_code=422, detail=str(err)) from err
+        except ValidatorUnavailable as err:
+            raise HTTPException(status_code=503, detail=str(err)) from err
         store.save_report(activity_id, report)
         return JSONResponse(status_code=201, content={"activity_id": activity_id, "saved": True})
 

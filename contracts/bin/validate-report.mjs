@@ -29,7 +29,7 @@ const schemaFile = schemaPath ?? join(here, '..', 'report.schema.json');
 let report;
 let schema;
 try {
-  report = JSON.parse(readFileSync(resolve(reportPath), 'utf8'));
+  report = JSON.parse(readFileSync(reportPath === '-' ? 0 : resolve(reportPath), 'utf8'));
 } catch (err) {
   console.error(`读取报告失败: ${err.message}`);
   process.exit(2);

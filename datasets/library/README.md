@@ -18,3 +18,5 @@
 复核了 19 张篮筐裁剪图、3 张篮球局部框、9 个事件片段的 54 张时序分镜、12 张战术样本；这是助手视觉复核，不是独立人类签字。未完整观看所有原片，不保证全片无坏帧、不宣称所有标签准确无误。
 
 运行 `python3 scripts/check_material_library.py` 检查标注输入快照、43 个媒体哈希与入库规则。输入变化需重新审核。`scripts/build_material_library_report.py` 可重建当前目录页。history/ 保存此前原片不可读时的审核结果，当前结果以 summary-v0.1.json 为准。
+
+上述25/6/12是素材登记时的助手视觉分级，并非最新用户投票。当前用户审核与修订进度以 docs/STATUS.md 和运行时 organized-summary.json 为准；本轮用户继续提交审核后为36通过、7驳回、0需修改。

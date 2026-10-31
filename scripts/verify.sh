@@ -11,6 +11,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
+if [[ -x "$ROOT/data/tools/node/bin/node" ]]; then export PATH="$ROOT/data/tools/node/bin:$PATH"; fi
 
 GREEN=$'\033[32m'; RED=$'\033[31m'; DIM=$'\033[2m'; BOLD=$'\033[1m'; OFF=$'\033[0m'
 step() { printf '\n%s▸ %s%s\n' "$BOLD" "$1" "$OFF"; }

@@ -175,16 +175,11 @@ class ApiTest(unittest.TestCase):
         return res.json()["id"]
 
     def _report(self, activity_id: str) -> dict:
-        return {
-            "schema_version": "1.1",
-            "activity_id": activity_id,
-            "pipeline_version": "mock-1.1.0",
-            "params": {"format": "5V5"},
-            "events": [],
-            "periods": [],
-            "team_stats": {},
-            "warnings": [],
-        }
+        import json
+        from pathlib import Path
+        report = json.loads((Path(__file__).resolve().parents[3] / 'contracts/fixtures/sample-report.json').read_text())
+        report['activity_id'] = activity_id
+        return report
 
     def test_report_roundtrip(self):
         activity_id = self._create()

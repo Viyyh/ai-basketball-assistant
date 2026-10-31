@@ -1,11 +1,15 @@
 """Validate versioned annotations or export only eligible, exhaustively reviewed frames."""
-import argparse,json,math
+import argparse,json,math,re
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 
 def validate(manifest,records):
  sources={s['id']:s for s in manifest['sources']};ids=set();groups={};counts={}
+ if len(sources)!=len(manifest['sources']):raise ValueError('duplicate source ID')
+ if not manifest['classes'] or len(set(manifest['classes']))!=len(manifest['classes']):raise ValueError('invalid classes')
  for row in records:
+  if not re.fullmatch(r'[A-Za-z0-9_.:-]+',row['id']) or row['id'] in ['.','..']:raise ValueError('unsafe annotation ID')
+  if row['split'] not in ['train','val','test','development']:raise ValueError('invalid split')
   if row['id'] in ids:raise ValueError('duplicate annotation ID')
   ids.add(row['id']);source=sources[row['source_id']]
   if row['group_id']!=source['group_id'] or row['split']!=source['split']:raise ValueError('source split mismatch')
@@ -13,10 +17,11 @@ def validate(manifest,records):
   groups[row['group_id']]=row['split'];counts[row['status']]=counts.get(row['status'],0)+1
   a=row['annotation']
   if row['kind']=='frame':
+   if any(type(a[k]) is not int or a[k]<=0 for k in ['width','height']):raise ValueError('invalid dimensions')
    for box in a['objects']:
     if box['class'] not in manifest['classes']:raise ValueError('unknown class')
     x1,y1,x2,y2=box['xyxy']
-    if not all(math.isfinite(v) for v in box['xyxy']) or not 0<=x1<x2<=a['width'] or not 0<=y1<y2<=a['height']:raise ValueError('invalid box')
+    if not all(type(v) in [int,float] and math.isfinite(v) for v in box['xyxy']) or not 0<=x1<x2<=a['width'] or not 0<=y1<y2<=a['height']:raise ValueError('invalid box')
   elif row['kind']=='shot':
    w=a['window'];start=w['start_seconds'];end=w['end_seconds']
    if not math.isfinite(start) or not math.isfinite(end) or not 0<=start<end:raise ValueError('invalid event window')

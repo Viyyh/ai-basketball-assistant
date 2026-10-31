@@ -1,5 +1,5 @@
 """Loopback-only, revision-aware human review workbench."""
-import json,hashlib,secrets,sqlite3,subprocess,os
+import json,hashlib,secrets,sqlite3,subprocess,os,math
 from pathlib import Path
 from datetime import datetime,timezone
 from contextlib import contextmanager
@@ -50,7 +50,14 @@ def create_app(db_path=None):
    decisions={r['annotation_id']:dict(r) for r in c.execute('SELECT * FROM human_decisions WHERE id IN (SELECT MAX(id) FROM human_decisions GROUP BY annotation_id)')}
   results=[]
   for r in rows:
-   item=get(r['id']);previous=decisions.get(r['id']);item['human_review']=previous if previous and previous['revision']==item['revision'] else None;results.append(item)
+   item=get(r['id']);previous=decisions.get(r['id']);item['human_review']=previous if previous and previous['revision']==item['revision'] else None
+   item['proposal']=None
+   with conn() as c:
+    exists=c.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='revision_proposals'").fetchone()
+    if exists and previous:
+     proposal=c.execute('SELECT * FROM revision_proposals WHERE annotation_id=? AND human_review_id=?',(item['id'],previous['id'])).fetchone()
+     if proposal and proposal['annotation_hash']==hashlib.sha256(item['annotation_json'].encode()).hexdigest():item['proposal']=json.loads(proposal['proposed_json'])
+   results.append(item)
   return results
  @app.get('/api/media/{record}')
  def media(record:str):
@@ -77,10 +84,12 @@ def create_app(db_path=None):
   if not body.confirmed:raise HTTPException(422,'请先确认已查看证据')
   item=get(record)
   if item['revision']!=body.revision:raise HTTPException(409,'标注已更新，请刷新后重审')
+  if 'shot_type' in body.correction and (item['kind']!='shot' or body.correction['shot_type'] not in ['unknown','layup','floater','jump_shot','dunk','putback','free_throw']):raise HTTPException(422,'无效出手方式')
+  if 'object_definition' in body.correction and (item['kind']!='hoop_crop' or body.correction['object_definition']!='hoop_region'):raise HTTPException(422,'当前标注仅支持篮圈加篮网区域')
   if body.decision=='approved' and item['kind']=='tactic_sample':
    label=body.correction.get('tactic');start=body.correction.get('start_seconds');end=body.correction.get('end_seconds');window=item['payload']['review_window']
    if label not in ['baseline_cut','screen','give_and_go','drive_and_kick','off_ball_cut']:raise HTTPException(422,'请选择明确的战术标签；无法判断时请暂缓')
-   if not isinstance(start,(int,float)) or not isinstance(end,(int,float)) or not window['start_seconds']<=start<end<=window['end_seconds']:raise HTTPException(422,'动作起止须在展示的视频区间内')
+   if type(start) not in [int,float] or type(end) not in [int,float] or not math.isfinite(start) or not math.isfinite(end) or not window['start_seconds']<=start<end<=window['end_seconds']:raise HTTPException(422,'动作起止须在展示的视频区间内')
    if not body.note.strip():raise HTTPException(422,'请描述参与者和动作证据')
   if body.decision!='approved' and not body.note.strip():raise HTTPException(422,'请填写驳回或无法判断的原因')
   with conn() as c:

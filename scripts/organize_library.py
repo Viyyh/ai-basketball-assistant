@@ -35,6 +35,7 @@ def organize():
   for annotation,action in [('tactics-review-04','选项为其他无球切入，但文字描述溜底线；核对是否需要多标签。'),('tactics-review-05','选项为其他无球切入，文字包含借掩护突破与分球；核对掩护/突破分球等关系。')]:
    row=c.execute('SELECT * FROM latest_human_reviews WHERE annotation_id=?',(annotation,)).fetchone()
    if row and row['decision']=='approved':
+    if json.loads(row['correction_json']).get('tactic')!='off_ball_cut':continue
     category='approved_label_consistency';key=hashlib.sha256(f'{row["id"]}:{category}'.encode()).hexdigest()
     c.execute('INSERT OR IGNORE INTO review_tasks VALUES(?,?,?,?,?,?,?)',(key,annotation,row['id'],category,row['note'],action,'open'))
  assert c.execute('SELECT count(*) FROM human_decisions').fetchone()[0]==before
@@ -42,7 +43,7 @@ def organize():
  summary={'sources':c.execute('SELECT count(*) FROM sources').fetchone()[0],'annotation_records':c.execute('SELECT count(*) FROM annotations').fetchone()[0],'human_latest':{r[0]:r[1] for r in c.execute('SELECT decision,count(*) FROM latest_human_reviews GROUP BY decision')},'revision_categories':{r[0]:r[1] for r in c.execute('SELECT category,count(*) FROM revision_queue GROUP BY category')},'release_candidates':c.execute('SELECT count(*) FROM release_candidates').fetchone()[0],'training_ready':c.execute('SELECT count(*) FROM training_annotations').fetchone()[0],'external_records':c.execute('SELECT count(*) FROM external_records').fetchone()[0],'external_events':c.execute('SELECT count(*) FROM external_events').fetchone()[0],'model_candidates':c.execute('SELECT count(*) FROM candidates').fetchone()[0],'scope':'release candidates are scoped approvals, not training-ready or exact gold'}
  out=ROOT/'data/library';(out/'organized-summary.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2)+'\n')
  tasks=[dict(r) for r in c.execute('SELECT * FROM revision_queue ORDER BY category,annotation_id')];(out/'revision-tasks.json').write_text(json.dumps(tasks,ensure_ascii=False,indent=2)+'\n')
- parts=['<meta charset="utf-8"><title>数据库整理与待办</title><style>body{background:#142238;color:white;font:16px/1.7 sans-serif;max-width:1100px;margin:40px auto;padding:20px}article{background:#243951;padding:20px;margin:16px 0;border-radius:12px}pre{white-space:pre-wrap}a{color:#8fe2ca}</style><h1>数据库整理与待办</h1><p>保留全部人类决定；以下为修改提案，不是自动批准。12条可作限定用途发布候选，训练就绪仍为0。</p><pre>'+json.dumps(summary,ensure_ascii=False,indent=2)+'</pre><h2>待处理记录</h2>']
+ parts=['<meta charset="utf-8"><title>数据库整理与待办</title><style>body{background:#142238;color:white;font:16px/1.7 sans-serif;max-width:1100px;margin:40px auto;padding:20px}article{background:#243951;padding:20px;margin:16px 0;border-radius:12px}pre{white-space:pre-wrap}a{color:#8fe2ca}</style><h1>数据库整理与待办</h1><p>保留全部人类决定；以下为修改提案，不是自动批准。当前数量见下方实时汇总；发布候选不等于训练就绪。</p><pre>'+json.dumps(summary,ensure_ascii=False,indent=2)+'</pre><h2>待处理记录</h2>']
  for t in tasks:parts.append('<article><h3>'+t['annotation_id']+'</h3><p>原意见：'+__import__('html').escape(t['original_note'])+'</p><p>处理建议：'+t['proposed_action']+'</p></article>')
  (out/'organized.html').write_text('\n'.join(parts));c.close();print(json.dumps(summary,ensure_ascii=False,indent=2))
 if __name__=='__main__':organize()
