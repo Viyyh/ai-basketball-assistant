@@ -1,0 +1,55 @@
+{
+  "version": "0.1",
+  "annotation_file": "datasets/user-videos/hoop-v0.1.jsonl",
+  "classes": [
+    "hoop"
+  ],
+  "annotation_scope": "manually cropped hoop rim and net",
+  "sources": [
+    {
+      "id": "user-video-01",
+      "filename": "P4-10月19日 (4).mp4",
+      "duration_s": 460.173968,
+      "bytes": 187481325,
+      "split": "train",
+      "group_id": "user-video-01",
+      "usage": "user requested local annotation, training and evaluation; media not redistributed"
+    },
+    {
+      "id": "user-video-02",
+      "filename": "高二篮球决赛录像.mp4",
+      "duration_s": 2646.81898,
+      "bytes": 931258993,
+      "split": "val",
+      "group_id": "user-video-02",
+      "usage": "user requested local annotation, training and evaluation; media not redistributed"
+    },
+    {
+      "id": "user-video-03",
+      "filename": "2026-07-01，张江篮球场录像.mp4",
+      "duration_s": 5885.863764,
+      "bytes": 1410196559,
+      "split": "test",
+      "group_id": "user-video-03",
+      "usage": "user requested local annotation, training and evaluation; media not redistributed"
+    },
+    {
+      "id": "user-video-04",
+      "filename": "2025FIBA3x3亚洲杯决赛_Australiavs中国.mp4",
+      "duration_s": 1621.36,
+      "bytes": 683187529,
+      "split": "train",
+      "group_id": "fiba-asian-cup-2025",
+      "usage": "user requested local annotation, training and evaluation; media not redistributed"
+    },
+    {
+      "id": "user-video-05",
+      "filename": "2025FIBA3x3亚洲杯半决赛_中国vs日本.mp4",
+      "duration_s": 1766.48,
+      "bytes": 364769991,
+      "split": "train",
+      "group_id": "fiba-asian-cup-2025",
+      "usage": "user requested local annotation, training and evaluation; media not redistributed"
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "records_checked": 6408,
+  "events_checked": 31964,
+  "structure_statuses": {
+    "structure_checked_only": 6262,
+    "quarantined_structure": 19,
+    "needs_consistency_review": 127
+  },
+  "flag_occurrences": {
+    "nonpositive_interval": 18,
+    "start_order_requires_review": 15,
+    "identical_annotation_sequence_not_proven_duplicate_video": 119,
+    "label_alias_normalized": 22,
+    "missing_events": 4,
+    "pass_result_score_needs_definition": 1,
+    "unknown_label": 4,
+    "missing_result": 4
+  },
+  "canonical_action_counts": {
+    "Dribble": 10719,
+    "PassBall": 10062,
+    "Steal": 338,
+    "Layup": 2042,
+    "Hold": 1570,
+    "3ptShot": 2155,
+    "DefensiveRebound": 1580,
+    "2ptShot": 853,
+    "HandOff": 562,
+    "Block": 114,
+    "FreeThrow": 599,
+    "JumpBall": 13,
+    "OffensiveRebound": 414,
+    "InboundPass": 528,
+    "PutBack": 120,
+    "Dunk": 291,
+    "unknown": 4
+  },
+  "time_base": "unresolved; no seconds conversion approved",
+  "representative_samples": 29,
+  "samples_with_candidate_local_video": 9,
+  "visual_accuracy": "not measured",
+  "training_ready": 0,
+  "alignment_hypotheses": [
+    {
+      "group": "20240606_BOS_DAL",
+      "matching_sequences": 1,
+      "method": "ordered player+points+outcome sequence; hypothesis, not verified full-possession timing"
+    },
+    {
+      "group": "20240612_DAL_BOS",
+      "matching_sequences": 1,
+      "method": "ordered player+points+outcome sequence; hypothesis, not verified full-possession timing"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "version": "0.1",
+  "annotation_file": "datasets/annotations/v0.1.jsonl",
+  "classes": [
+    "basketball",
+    "hoop",
+    "player",
+    "referee"
+  ],
+  "scope": "seed diagnostic dataset, not training-ready or independent test set",
+  "sources": [
+    {
+      "id": "0042300401",
+      "group_id": "0042300401",
+      "domain": "nba_broadcast",
+      "split": "development",
+      "training_eligible": false,
+      "reason": "used repeatedly in development; no training permission determination"
+    },
+    {
+      "id": "0042300403",
+      "group_id": "0042300403",
+      "domain": "nba_broadcast",
+      "split": "development",
+      "training_eligible": false,
+      "reason": "used repeatedly in development; no training permission determination"
+    }
+  ],
+  "independent_test_sources": 0
+}

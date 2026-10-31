@@ -1,0 +1,39 @@
+{
+  "source": "PL-NBA",
+  "source_url": "https://github.com/holhouse/PL-NBA-Dataset",
+  "archive_sha256": "391948eef9fd8b4cecfc58a6088edf1253b0ce4bc5531edd7147d15a8f94ee48",
+  "imported_possession_records": 6408,
+  "underlying_game_groups": 32,
+  "event_entries": 31964,
+  "event_labels": {
+    "Dribble": 10719,
+    "PassBall": 10062,
+    "Steal": 338,
+    "Layup": 2042,
+    "Hold": 1570,
+    "3ptShot": 2155,
+    "DefensiveRebound": 1580,
+    "2ptShot": 853,
+    "HandOff": 562,
+    "Block": 114,
+    "FreeThrow": 599,
+    "JumpBall": 13,
+    "OffensiveRebound": 414,
+    "InboundPass": 528,
+    "PutBack": 98,
+    "Dunk": 291,
+    "Putback": 22,
+    "nan": 4
+  },
+  "invalid_members": [],
+  "media_files_downloaded": 0,
+  "human_confirmed": 0,
+  "training_ready": 0,
+  "notes": [
+    "External source labels retained verbatim, not independently verified.",
+    "Do not assume action labels equal team tactics.",
+    "Timestamp notation remains raw until time-base definition is verified.",
+    "CC BY-NC 4.0: do not silently incorporate in commercial training.",
+    "No effect on current human decisions or clean annotation view."
+  ]
+}

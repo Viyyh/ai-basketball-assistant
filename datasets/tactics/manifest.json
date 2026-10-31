@@ -1,0 +1,35 @@
+{
+  "version": "0.1",
+  "source_id": "amateur-baseline-compilation-01",
+  "filename": "业余篮球比赛之一：如何溜底线.mp4",
+  "duration_s": 236.28,
+  "fps": 25.0,
+  "width": 1920,
+  "height": 1080,
+  "domain": "edited amateur/university broadcast compilation",
+  "split": "development",
+  "group_id": "baseline-compilation-all-excerpts",
+  "training_status": "not_ready",
+  "label_vocabulary": [
+    "baseline_cut",
+    "screen",
+    "give_and_go",
+    "drive_and_kick",
+    "off_ball_cut",
+    "unknown"
+  ],
+  "annotation_rules": {
+    "temporal_labels": "Require visible action sequence, not title or isolated frame",
+    "roles": "Use local anonymous player IDs; do not infer identity",
+    "outcome": "unknown unless visible",
+    "duplicates": "all replays/related excerpts remain in same split",
+    "graphics": "record arrows/circles/freezes; do not learn label from editorial graphics"
+  },
+  "sample_file": "datasets/tactics/review-queue-v0.1.jsonl",
+  "training_blockers": [
+    "No reviewed temporal boundaries",
+    "No confirmed positive/negative tactic annotations",
+    "Single curated positive-topic compilation; selection bias",
+    "Unknown duplicate underlying games across other sources"
+  ]
+}

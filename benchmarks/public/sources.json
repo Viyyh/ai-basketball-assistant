@@ -1,0 +1,48 @@
+{
+  "checked_at": "2026-11-01",
+  "purpose": "External sourcing and staged ingestion; source annotations are unverified, not human-confirmed",
+  "sources": [
+    {
+      "name": "UVY",
+      "url": "https://zenodo.org/records/21303900",
+      "status": "metadata downloaded; video archive not downloaded",
+      "fit": "User-generated sports videos including basketball, with reviewed tracking annotations",
+      "notes": "Archive 3.3GB across sports. Dataset description says videos collected under CC BY; verify per-video provenance before training or redistribution. Existing annotations do not establish shot outcomes."
+    },
+    {
+      "name": "BASKET",
+      "url": "https://huggingface.co/datasets/yulupan/BASKET",
+      "status": "candidate; requires accepting access terms",
+      "fit": "Basketball skill estimation and diverse players",
+      "notes": "Not assumed to contain ball boxes or shot outcome labels. Do not accept gated terms on behalf of user."
+    },
+    {
+      "name": "BasketHAR",
+      "url": "https://huggingface.co/datasets/Xian-Gao/BasketHAR",
+      "status": "file directory downloaded; no video files found in current tree",
+      "fit": "Basketball training context",
+      "notes": "Current listed files include sensor arrays and physiological measurements, not downloadable video. Do not count as acquired training footage."
+    },
+    {
+      "name": "SPL free throw",
+      "url": "https://github.com/Sport-Performance-Lab/SPL-Open-Data/tree/main/basketball/freethrow",
+      "status": "candidate; raw-video availability not confirmed",
+      "fit": "Biomechanics and ball trajectories",
+      "notes": "Assets include an animation GIF. Do not treat rendered animation as real training video."
+    },
+    {
+      "name": "Basketball-Score-Detection-ComputerVision evaluation videos",
+      "url": "https://github.com/gbikushev/Basketball-Score-Detection-ComputerVision#testing-dataset",
+      "status": "identified; not downloaded or approved for training",
+      "fit": "16 author-recorded indoor/outdoor phone videos",
+      "notes": "Raw media Google Drive links in author table. Existing upstream absence of license does not establish training rights. Keep separate from training-eligible sources."
+    },
+    {
+      "name": "PL-NBA",
+      "url": "https://github.com/holhouse/PL-NBA-Dataset",
+      "status": "6408 possession JSON records actually downloaded and staged; no media downloaded",
+      "fit": "31964 action entries across 32 games",
+      "notes": "CC BY-NC 4.0; research staging only. Not accepted into clean training set."
+    }
+  ]
+}

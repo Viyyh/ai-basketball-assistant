@@ -1,0 +1,83 @@
+{
+  "scope": "first supervised hoop-crop adaptation experiment; no full-video annotations or shot outcome training",
+  "reviewed_crops": 19,
+  "splits": {
+    "train": 10,
+    "val": 3,
+    "test": 6
+  },
+  "candidate_deployed": false,
+  "reason": "No gain on defined crop-localization metric; both baseline and adapted model match 0/3 validation and 0/6 test at confidence .25, IoU .5.",
+  "holdout_limitations": "Six correlated frames from one source; source viewed for annotation before model evaluation, not used in training. This test is now consumed.",
+  "test_config": {
+    "imgsz": 640,
+    "confidence": 0.25,
+    "match_iou": 0.5
+  },
+  "checkpoint": {
+    "checkpoint": "data/training/hoop-v01/weights/best.pt",
+    "sha256": "cbcd2e6d2ae07aa82dac2dbcfa707c71cdec955657312382224d1a2903125997",
+    "selected_using": "validation only",
+    "test_used_for_training": false
+  },
+  "diagnostics": {
+    "user-video-01": {
+      "processed_frames": 80,
+      "frames_with_candidates": 38,
+      "frames_with_multiple_candidates": 1,
+      "tentative_segments": 16,
+      "possible_cut_seconds": [],
+      "elapsed_s": 7.330748541979119,
+      "shots": "not implemented",
+      "made_missed": "not implemented",
+      "warning": "Candidate presence is not detection accuracy. Links and cut flags are unverified. Spectators, replay and camera motion need separate handling."
+    },
+    "user-video-02": {
+      "processed_frames": 80,
+      "frames_with_candidates": 3,
+      "frames_with_multiple_candidates": 0,
+      "tentative_segments": 3,
+      "possible_cut_seconds": [],
+      "elapsed_s": 7.238370665931143,
+      "shots": "not implemented",
+      "made_missed": "not implemented",
+      "warning": "Candidate presence is not detection accuracy. Links and cut flags are unverified. Spectators, replay and camera motion need separate handling."
+    },
+    "user-video-03": {
+      "processed_frames": 80,
+      "frames_with_candidates": 32,
+      "frames_with_multiple_candidates": 12,
+      "tentative_segments": 16,
+      "possible_cut_seconds": [],
+      "elapsed_s": 7.384425458032638,
+      "shots": "not implemented",
+      "made_missed": "not implemented",
+      "warning": "Candidate presence is not detection accuracy. Links and cut flags are unverified. Spectators, replay and camera motion need separate handling."
+    },
+    "user-video-04": {
+      "processed_frames": 80,
+      "frames_with_candidates": 8,
+      "frames_with_multiple_candidates": 1,
+      "tentative_segments": 8,
+      "possible_cut_seconds": [
+        2.5,
+        7.25
+      ],
+      "elapsed_s": 7.817171500064433,
+      "shots": "not implemented",
+      "made_missed": "not implemented",
+      "warning": "Candidate presence is not detection accuracy. Links and cut flags are unverified. Spectators, replay and camera motion need separate handling."
+    },
+    "user-video-05": {
+      "processed_frames": 80,
+      "frames_with_candidates": 21,
+      "frames_with_multiple_candidates": 2,
+      "tentative_segments": 9,
+      "possible_cut_seconds": [],
+      "elapsed_s": 7.292321667075157,
+      "shots": "not implemented",
+      "made_missed": "not implemented",
+      "warning": "Candidate presence is not detection accuracy. Links and cut flags are unverified. Spectators, replay and camera motion need separate handling."
+    }
+  }
+}

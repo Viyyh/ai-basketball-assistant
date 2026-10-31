@@ -1,0 +1,24 @@
+{
+  "version": "0.1",
+  "registered_source_entries": 8,
+  "available_original_sources": 3,
+  "missing_original_sources": 5,
+  "available_original_duration_hours": 3.290835653055556,
+  "unique_file_hashes": 3,
+  "annotation_records": 43,
+  "decisions": {
+    "restricted_missing_original": 19,
+    "accepted_scoped": 12,
+    "quarantined_pending": 12
+  },
+  "machine_candidates_excluded": 5,
+  "full_video_visual_review_completed": false,
+  "independent_human_signoff": false,
+  "automated_checks": [
+    "original SHA-256",
+    "ffprobe headers",
+    "annotation file existence/hash",
+    "unique annotation IDs"
+  ],
+  "review_scope": "19 hoop crops, 3 ball diagnostic frames, 9 event storyboards, 12 tactic stills; approximate/single reviewer only"
+}

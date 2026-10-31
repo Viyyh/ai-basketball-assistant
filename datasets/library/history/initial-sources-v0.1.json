@@ -1,0 +1,77 @@
+[
+  {
+    "id": "user-video-01",
+    "group_id": "user-video-01",
+    "filename": "P4-10月19日 (4).mp4",
+    "admission": "quarantined_missing_original",
+    "sha256": null,
+    "visual_review_scope": "retained derivatives only; original unavailable",
+    "human_signoff": false
+  },
+  {
+    "id": "user-video-02",
+    "group_id": "user-video-02",
+    "filename": "高二篮球决赛录像.mp4",
+    "admission": "quarantined_missing_original",
+    "sha256": null,
+    "visual_review_scope": "retained derivatives only; original unavailable",
+    "human_signoff": false
+  },
+  {
+    "id": "user-video-03",
+    "group_id": "user-video-03",
+    "filename": "2026-07-01，张江篮球场录像.mp4",
+    "admission": "quarantined_missing_original",
+    "sha256": null,
+    "visual_review_scope": "retained derivatives only; original unavailable",
+    "human_signoff": false
+  },
+  {
+    "id": "user-video-04",
+    "group_id": "fiba-asian-cup-2025",
+    "filename": "2025FIBA3x3亚洲杯决赛_Australiavs中国.mp4",
+    "admission": "quarantined_missing_original",
+    "sha256": null,
+    "visual_review_scope": "retained derivatives only; original unavailable",
+    "human_signoff": false
+  },
+  {
+    "id": "user-video-05",
+    "group_id": "fiba-asian-cup-2025",
+    "filename": "2025FIBA3x3亚洲杯半决赛_中国vs日本.mp4",
+    "admission": "quarantined_missing_original",
+    "sha256": null,
+    "visual_review_scope": "retained derivatives only; original unavailable",
+    "human_signoff": false
+  },
+  {
+    "id": "0042300401",
+    "group_id": "nba-finals-2024",
+    "filename": "NBA_20240606_DAL+@+BOS_1080p60_ABC.mkv",
+    "bytes": 5577502347,
+    "sha256": "37b4d93bb0e8e92a3a8a7a575475823e37285818518ae3cc17f22f99be750e89",
+    "admission": "registered_original",
+    "visual_review_scope": "sampled frames/windows only; full video not reviewed",
+    "human_signoff": false
+  },
+  {
+    "id": "0042300403",
+    "group_id": "nba-finals-2024",
+    "filename": "NBA_20240612_BOS+@+DAL_1080p60_ABC.mkv",
+    "bytes": 6013765545,
+    "sha256": "15ae68696c51b550c91615677060d92b133ea5602f70fbf09835ca1a2031d3f8",
+    "admission": "registered_original",
+    "visual_review_scope": "sampled frames/windows only; full video not reviewed",
+    "human_signoff": false
+  },
+  {
+    "id": "amateur-baseline-compilation-01",
+    "group_id": "baseline-compilation-all-excerpts",
+    "filename": "业余篮球比赛之一：如何溜底线.mp4",
+    "bytes": 81653740,
+    "sha256": "b7d2546e68b77daa5901c393edb4487084ec893f3c34bc5af2bbbc6081a5b7e4",
+    "admission": "registered_original",
+    "visual_review_scope": "sampled frames/windows only; full video not reviewed",
+    "human_signoff": false
+  }
+]
