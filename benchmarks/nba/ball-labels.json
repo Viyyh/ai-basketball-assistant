@@ -1,0 +1,35 @@
+{
+  "description": "Three manually located, visibly clear balls; approximate boxes, tiny diagnostic set, not independent accuracy benchmark. Coordinates refer to 1920x1080 source frames. No uncertain/occluded frames treated as negatives.",
+  "frames": [
+    {
+      "game": "game1",
+      "seconds": 600,
+      "xyxy": [
+        831,
+        693,
+        861,
+        723
+      ]
+    },
+    {
+      "game": "game3",
+      "seconds": 604,
+      "xyxy": [
+        1227,
+        364,
+        1268,
+        407
+      ]
+    },
+    {
+      "game": "game3",
+      "seconds": 615,
+      "xyxy": [
+        708,
+        636,
+        738,
+        666
+      ]
+    }
+  ]
+}

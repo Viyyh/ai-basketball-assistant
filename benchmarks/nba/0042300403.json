@@ -1,0 +1,87 @@
+{
+  "game_id": "0042300403",
+  "source_url": "https://statsdmz.nba.com/pdfs/20240612/20240612_BOSDAL_book.pdf",
+  "source_page": 9,
+  "scope": "Q1 selected window only; not complete game",
+  "clock_semantics": "official event clock; not video release timestamp",
+  "video_anchor": {
+    "video_seconds": 600,
+    "period": 1,
+    "clock": "06:50",
+    "score": {
+      "BOS": 7,
+      "DAL": 15
+    },
+    "verification": "manually read scoreboard; no global linear mapping"
+  },
+  "events": [
+    {
+      "id": "0042300403-q1-06:47",
+      "period": 1,
+      "clock": "06:47",
+      "team": "BOS",
+      "player": "Derrick White",
+      "points": 3,
+      "made": false,
+      "video_seconds": null,
+      "video_window": {
+        "start_seconds": 598,
+        "end_seconds": 604,
+        "status": "manually checked coarse event window",
+        "precision": "not frame-accurate; includes action and outcome"
+      },
+      "clip_path": "data/validation/0042300403-q1-06-47.mp4"
+    },
+    {
+      "id": "0042300403-q1-06:37",
+      "period": 1,
+      "clock": "06:37",
+      "team": "DAL",
+      "player": "Kyrie Irving",
+      "points": 2,
+      "made": true,
+      "video_seconds": null,
+      "video_window": {
+        "start_seconds": 610,
+        "end_seconds": 615,
+        "status": "manually checked coarse event window",
+        "precision": "not frame-accurate; includes action and outcome"
+      },
+      "clip_path": "data/validation/0042300403-q1-06-37.mp4"
+    },
+    {
+      "id": "0042300403-q1-06:26",
+      "period": 1,
+      "clock": "06:26",
+      "team": "BOS",
+      "player": "Jayson Tatum",
+      "points": 2,
+      "made": true,
+      "video_seconds": null,
+      "video_window": {
+        "start_seconds": 621,
+        "end_seconds": 627,
+        "status": "manually checked coarse event window",
+        "precision": "not frame-accurate; includes action and outcome"
+      },
+      "clip_path": "data/validation/0042300403-q1-06-26.mp4"
+    },
+    {
+      "id": "0042300403-q1-06:10",
+      "period": 1,
+      "clock": "06:10",
+      "team": "DAL",
+      "player": "Luka Doncic",
+      "points": 2,
+      "made": true,
+      "video_seconds": null,
+      "video_window": {
+        "start_seconds": 636,
+        "end_seconds": 642,
+        "status": "manually checked coarse event window",
+        "precision": "not frame-accurate; includes action and outcome"
+      },
+      "clip_path": "data/validation/0042300403-q1-06-10.mp4"
+    }
+  ]
+}

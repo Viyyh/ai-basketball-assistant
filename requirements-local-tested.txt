@@ -1,0 +1,5 @@
+# Versions verified on this Mac (Python 3.12). torch uses CPU here.
+ultralytics==8.3.227
+opencv-python==4.12.0.88
+torch==2.9.0
+numpy==2.2.6

@@ -94,3 +94,13 @@ API 寄存 → 前端渲染
 | API | `services/api/tests/` | 21 | 参数解析、配置快照、球场预览、活动持久化、报告寄存 |
 
 `scripts/verify.sh` 依次跑完这四层，并检查 `contracts/fixtures/sample-report.json` 是否与参数层同步 —— fixture 漂移意味着契约样例已经不代表真实逻辑。
+
+## 本地分析验证入口（2026-10-31）
+
+- `scripts/analyze_local.py` → `basketball_pipeline.ball` → 本地模型推理 → JSON / 带框 MP4 / HTML。
+- `tools/ocr_scoreboard.swift` + `scripts/scoreboard_local.py` → 本地记分牌读数与得分变化。
+- `benchmarks/nba` + `scripts/validate_scoreboard.py` → 官方答案的事后对照；不参与预测。
+- `scripts/build_local_report.py` 汇总已生成的结果，输出 `data/final/index.html`。
+- `apps/miniprogram` 经 API 的 `/v1/review/*` 访问本地片段与人工记录；与正式报告契约分开。
+
+这是检测与验证链路，尚不具备完整自动投篮或逐人统计。媒体、模型和数据库保持本地，不进入 Git。当前能力、依赖和命令以根目录 README 与 `docs/local-analysis.md` 为准。

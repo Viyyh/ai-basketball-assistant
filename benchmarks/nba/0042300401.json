@@ -1,0 +1,104 @@
+{
+  "game_id": "0042300401",
+  "source_url": "https://statsdmz.nba.com/pdfs/20240606/20240606_DALBOS_book.pdf",
+  "source_page": 9,
+  "scope": "Q1 selected window only; not complete game",
+  "clock_semantics": "official event clock; not video release timestamp",
+  "video_anchor": {
+    "video_seconds": 600,
+    "period": 1,
+    "clock": "06:43",
+    "score": {
+      "BOS": 14,
+      "DAL": 13
+    },
+    "verification": "manually read scoreboard; no global linear mapping"
+  },
+  "events": [
+    {
+      "id": "0042300401-q1-06:38",
+      "period": 1,
+      "clock": "06:38",
+      "team": "DAL",
+      "player": "Luka Doncic",
+      "points": 2,
+      "made": true,
+      "video_seconds": null,
+      "video_window": {
+        "start_seconds": 601,
+        "end_seconds": 606,
+        "status": "manually checked coarse event window",
+        "precision": "not frame-accurate; includes action and outcome"
+      },
+      "clip_path": "data/validation/0042300401-q1-06-38.mp4"
+    },
+    {
+      "id": "0042300401-q1-06:19",
+      "period": 1,
+      "clock": "06:19",
+      "team": "BOS",
+      "player": "Derrick White",
+      "points": 3,
+      "made": true,
+      "video_seconds": null,
+      "video_window": {
+        "start_seconds": 620,
+        "end_seconds": 625,
+        "status": "manually checked coarse event window",
+        "precision": "not frame-accurate; includes action and outcome"
+      },
+      "clip_path": "data/validation/0042300401-q1-06-19.mp4"
+    },
+    {
+      "id": "0042300401-q1-06:04",
+      "period": 1,
+      "clock": "06:04",
+      "team": "DAL",
+      "player": "Derrick Jones Jr.",
+      "points": 3,
+      "made": false,
+      "video_seconds": null,
+      "video_window": {
+        "start_seconds": 635,
+        "end_seconds": 640,
+        "status": "manually checked coarse event window",
+        "precision": "not frame-accurate; includes action and outcome"
+      },
+      "clip_path": "data/validation/0042300401-q1-06-04.mp4"
+    },
+    {
+      "id": "0042300401-q1-05:55",
+      "period": 1,
+      "clock": "05:55",
+      "team": "BOS",
+      "player": "Derrick White",
+      "points": 3,
+      "made": true,
+      "video_seconds": null,
+      "video_window": {
+        "start_seconds": 644,
+        "end_seconds": 650,
+        "status": "manually checked coarse event window",
+        "precision": "not frame-accurate; includes action and outcome"
+      },
+      "clip_path": "data/validation/0042300401-q1-05-55.mp4"
+    },
+    {
+      "id": "0042300401-q1-05:41",
+      "period": 1,
+      "clock": "05:41",
+      "team": "DAL",
+      "player": "Derrick Jones Jr.",
+      "points": 2,
+      "made": false,
+      "video_seconds": null,
+      "video_window": {
+        "start_seconds": 658,
+        "end_seconds": 664,
+        "status": "manually checked coarse event window",
+        "precision": "not frame-accurate; includes action and outcome"
+      },
+      "clip_path": "data/validation/0042300401-q1-05-41.mp4"
+    }
+  ]
+}

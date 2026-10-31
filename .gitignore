@@ -39,3 +39,9 @@ data/
 models/
 runs/
 *.pt
+
+# 原始录像与可视化视频（不进入源码仓库）
+*.mkv
+*.mp4
+*.mov
+*.avi

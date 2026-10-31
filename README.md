@@ -1,172 +1,114 @@
 # AI Basketball Assistant
 
-> 仓库名：`AI Basketball Assistant`（GitHub 上会规范成 `AI-Basketball-Assistant`）
-> 本地路径：`/Users/victor/AI Basketball Assistant`
+面向球队教练的篮球录像分析项目：从比赛视频中提取可核对的数据，让每个统计数字都能回到对应片段。
 
-给青少年球队教练用的比赛视频分析工具：录一场球（或导入一段视频），拿到一份能看、能点开、能信的投篮与阵型报告，并逐步沉淀出每个球员的分析数据。
+**当前重心是本地模型验证。** 已跑通篮球专用检测、可视化、记分牌 OCR 和测试基准；完整投篮识别、命中判断与逐人统计仍在开发。微信小程序保留为人工复核原型，暂不作为主线。
 
-当前状态：**v1.1 骨架可运行**。契约、参数层、可配置赛前参数、mock pipeline、HTTP API 都是真实代码且有测试；真实视频推理尚未开始。
+## 现在能做什么
 
----
+| 能力 | 当前状态 |
+| --- | --- |
+| 真实视频分析 | 本地 CPU 推理，支持指定时间区间 |
+| 篮球、篮筐、球员、裁判检测 | 已接入 E-BARD 专用模型，仍有漏检、误检 |
+| 球候选关联与可视化 | 输出逐帧 JSON、带框 MP4、HTML 报告；关联未经逐帧验收 |
+| 转播记分牌 OCR | macOS Vision，本地运行；裁剪针对当前 ESPN 素材 |
+| 官方事件对照 | 两场 NBA 的局部出手答案、短片和评分脚本 |
+| 参数与报告契约 | 场地/规则配置、快照、结构及统计一致性校验 |
+| HTTP API | 活动、参数、报告寄存，以及人工投篮复核 |
+| 微信小程序 | 两段测试视频播放、人工记录、统计和回看；未完成开发工具验收 |
 
-## 目录
+尚不支持可靠的全场自动投篮/命中统计、跨镜头身份识别、回放去重和手拍视频泛化。官方数据仅用于事后对照，不输入模型预测。
 
-```
-.
-├── docs/
-│   ├── prd.md                    收到的产品需求文档 v1.0（冻结，不改）
-│   ├── plan.md                   开发计划 v1.0（冻结）
-│   ├── scope-confirmation.md     第一版范围确认
-│   ├── scope-v1.1.md             本版要做的增量范围（与 prd 冲突处以此为准）
-│   ├── decisions.md              决策记录 ADR（含被否掉的方案与原因）
-│   ├── fiba-conformance.md       FIBA 规则符合性对照（场地尺寸、三分线、标线）
-│   ├── field-config.md           可配置赛前参数：预设、逐项覆盖、校验、快照
-│   ├── video-delivery-spec.md    实拍交付规范：像素预算、机位、标定、标准答案、验收门槛
-│   ├── shooting-guide.md         素材怎么拍：机位、距离、设置、现场记录、拍完验收
-│   ├── game-day-checklist.md     比赛日清单：怎么拍完整一场、同时记什么、交回什么
-│   └── architecture.md           仓库结构与数据流
-├── design/                       界面与架构设计稿（v0.1，参考）
-├── contracts/                    报告契约 v1.1 + 零依赖校验器 + 样例
-├── packages/params/              参数层：预设 + 逐项覆盖 → 场地／三分线／规则
-├── services/
-│   ├── api/                      FastAPI：参数解析、活动、报告寄存
-│   └── pipeline/                 mock 报告生成 CLI（真实几何判定，模拟事件）
-├── reference/
-│   ├── legacy-demo/              收到的 F 轨前端 demo（参考用；已按 FIBA 口径回补，见 ADR-016）
-│   └── legacy-poc/               收到的参数层 PoC（历史材料）
-└── scripts/verify.sh             一条命令跑完所有检查
-```
+## 快速开始：分析本地视频
 
-## 快速开始
-
-只依赖 **Node ≥ 20** 与 **Python ≥ 3.11**，不需要 `npm install`，也不需要虚拟环境（标准库 + 已装的 FastAPI）。
+需要 Python 3.11+、ffmpeg；本机已在 Python 3.12、CPU 环境验证。建议使用独立虚拟环境。
 
 ```bash
-./scripts/verify.sh          # 全量检查：契约 + 参数层 + pipeline + API（共 133 项）
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install -r requirements-local-tested.txt
+./scripts/download-basketball-model.sh
+./scripts/run-local-analysis.sh \
+  --video '/绝对路径/比赛.mp4' \
+  --start 0 --seconds 30 --fps 4 \
+  --out data/my-analysis
 ```
 
-单独跑：
+打开 `data/my-analysis/index.html` 查看结果：
+
+- `annotated.mp4`：带检测框的视频；黄圈为暂定球关联。
+- `analysis.json`：配置、逐帧候选、实体与诊断统计。
+- `index.html`：本地结果页。
+
+下载脚本固定专用模型版本并校验 SHA-256。可选 `--tiled` 开启重叠分块推理；当前小样本未显示收益，默认关闭。完整说明见 [本地分析说明](docs/local-analysis.md)。
+
+## 当前实测结论
+
+使用 2024 年 NBA 总决赛 G1、G3 的局部录像，共 **120 秒、480 帧**：
+
+| 检查 | 结果 | 含义 |
+| --- | --- | --- |
+| 通用 YOLO11m 有球候选的帧数 | 171 / 480 | 候选可用性，不是准确率 |
+| E-BARD 有球候选的帧数 | 365 / 480 | 漏检有所改善，但候选也可能错误 |
+| 人工近似球框诊断集 | 通用模型 1/3；专用模型 3/3 | IoU ≥ 0.25，仅 3 张图，不能推断泛化性能 |
+| 记分牌得分变化 | 6 次与窗口内官方命中对应 | 更新滞后 1–3 秒，不能识别另外 3 次未中 |
+
+这不是完整两场的验收，也不是投篮识别准确率。未在这个小诊断集上训练模型，外部模型的训练数据是否与素材重叠尚未确认。
+
+本机最终报告位于 `data/final/index.html`。视频、模型权重、数据库和分析输出不提交到 Git；新克隆不会自带实验媒体。实验过程和边界见 [测试记录](docs/nba-test-results.md)，官方数据与模型来源见 [基准说明](benchmarks/nba/README.md) 和 [模型来源](benchmarks/nba/MODEL_SOURCES.md)。
+
+## 启动 API 与人工复核原型
 
 ```bash
-# 契约（结构与语义校验，26 项）
-cd contracts && node --test test/validate.test.mjs
-
-# 参数层（56 项：固定口径 + 完整配置/校验/预览）
-cd packages/params && PYTHONPATH=. python3 -m unittest discover -s tests -t .
-
-# pipeline（30 项：mock 报告 + 轨迹层，含跨语言契约校验）
-cd services/pipeline && PYTHONPATH=../../packages/params:. \
-  python3 -m unittest discover -s tests -t .
-
-# HTTP API（21 项）
-cd services/api && PYTHONPATH=../../packages/params:. \
-  python3 -m unittest discover -s tests -t .
-
-# 生成一份示例报告并校验
-PYTHONPATH=packages/params:services/pipeline python3 -m basketball_pipeline sample \
-  --out /tmp/report.json
-node contracts/bin/validate-report.mjs /tmp/report.json
-
-# 起服务（--factory：应用由 create_app() 构造，避免导入即建库）
-cd services/api && PYTHONPATH=../../packages/params:. \
-  python3 -m uvicorn app.main:create_app --factory --reload
+python3 -m pip install 'fastapi>=0.110' 'uvicorn>=0.27' 'httpx>=0.27'
+./scripts/start-local.sh
 ```
 
-## 处理真实视频
+接口文档：<http://127.0.0.1:8000/docs>。启动脚本仅监听本机，数据库存入 `data/app.db`。macOS 也可双击根目录的 `启动篮球助手.command`。
 
-`ingest` 是这一层唯一的真实能力：把一段手机视频变成"谁在哪几帧、框多大"的轨迹 JSON，
-外加一张能一眼看出跟踪有没有碎的 SVG。
+小程序源码在 `apps/miniprogram/`，导入与调试方式见 [小程序说明](apps/miniprogram/README.md)。两段本地播放素材需另行准备在 `data/media/`，上传、登录和部署尚未实现。
+
+## 仓库结构
+
+```text
+apps/miniprogram/          微信小程序人工复核原型
+services/api/             FastAPI 与 SQLite
+services/pipeline/        视频检测、候选关联、轨迹渲染、mock 报告
+packages/params/          场地、规则、预设与配置快照
+contracts/                报告 JSON Schema、语义校验器和样例
+benchmarks/nba/            官方局部事件、人工近似框、来源记录
+scripts/                  启动、分析、导出、评估与检查入口
+tools/                    macOS Vision OCR 工具
+docs/                     产品范围、架构、实验及运行文档
+design/                   界面与架构设计参考
+reference/                历史原型与实现参考
+data/                     本地媒体、数据库与实验输出（Git 忽略）
+models/                   本地模型权重（Git 忽略）
+```
+
+## 测试
+
+完整检查需要 Node ≥ 20、Python ≥ 3.11，以及 API 测试依赖：
 
 ```bash
-# 第 1 步：挑一段 30 秒，先看机位和人数对不对（别一上来跑整场）
-./scripts/ingest.sh --video data/raw/game01.mp4 --out data/tracks/try.json \
-  --start-seconds 300 --max-seconds 30 --fps 4 --expected-players 6
-
-# 第 2 步：视频里有观众席/替补席时，先把球场画成一个多边形（脚点在里面才算场上的人）
-#   x1,y1;x2,y2;... 是画面像素坐标，固定机位只需画一次
-./scripts/ingest.sh --video data/raw/game01.mp4 --out data/tracks/try.json \
-  --start-seconds 300 --max-seconds 30 --expected-players 6 \
-  --roi "300,500;1520,495;1600,780;260,900"
-
-# 第 3 步：整场
-./scripts/ingest.sh --video data/raw/game01.mp4 --out data/tracks/game01.json \
-  --expected-players 6 --roi "300,500;1520,495;1600,780;260,900"
-
-# 轨迹太乱时只画活过 5 秒的
-PYTHONPATH=packages/params:services/pipeline python3 -m basketball_pipeline render \
-  --tracks data/tracks/try.json --out data/tracks/try.svg --min-span 5
+./scripts/verify.sh
 ```
 
-产物（`data/` 已在 `.gitignore` 里，视频和轨迹都不进仓库）：
+仅运行 Python 测试：
 
-| 文件 | 内容 |
-|---|---|
-| `game01.json` | 轨迹：每条 track 的逐帧框、在场时长、平均框高、平均置信 |
-| `game01.svg` | 轨迹体检图：左上轨迹覆盖、左下代表帧（带框）、右侧轨迹清单 |
-| `game01.jpg` | 代表帧原图（球员最多的一帧） |
+```bash
+(cd packages/params && PYTHONPATH=. python3 -m unittest discover -s tests -t .)
+(cd services/pipeline && PYTHONPATH=../../packages/params:. python3 -m unittest discover -s tests -t .)
+(cd services/api && PYTHONPATH=../../packages/params:. python3 -m unittest discover -s tests -t .)
+```
 
-需要 `opencv-python` 与 `ultralytics`，首次运行会下载 `yolo11n.pt`（约 5 MB）。
-在 M3 Pro 上 960 分辨率约 60 ms/帧，8 fps 采样跑整场 40 分钟视频约 5 分钟。
+最近本地验证：**106 项通过、4 项跨语言测试因无 Node 跳过**。另检查了报告链接、MP4 解码、输出帧数与 Python 语法。单元测试通过不代表真实视频识别准确。
 
-**怎么判断这次跑得行不行**：打开 SVG，看是不是"10 个人、线基本连续"。
-如果出现 30 条轨迹、大量 5 秒以下的碎片，先别做统计 —— 那是跟踪在碎，
-先调机位（更高、更正、更全）或降低 `--conf`。
+## 开发原则与后续重点
 
-注意：这一层**不做**篮球语义。没有标定就没有"三分线内/外"，没有篮筐位置就没有命中率。
-那些要等事件提取（下一步）。
+- 场地与计分参数统一由 `packages/params` 提供；报告与界面共用快照。
+- 正式统计需要从有效事件重算；mock 数据与模型输出明确区分。
+- 不确定的检测保留为候选，缺失轨迹不补造成真实结果。
+- 优先完善独立标注集、投篮事件检测、命中判断与回放去重，再恢复小程序主线。
 
-**自己拍素材之前，先读 [`docs/video-delivery-spec.md`](docs/video-delivery-spec.md)**：4K 像素预算、
-看台长焦机位、标定与测量、标准答案、开拍前 10 条验收。这条链路里最贵的一次错误是拍完 40 分钟
-才发现球只有 15 px、号码认不出来。旧版 [`docs/shooting-guide.md`](docs/shooting-guide.md) 里的
-场边 2–3 m 机位只适合远端快速验证，覆盖完整半场以新规范为准。
-
-## 三层可信度
-
-| 东西 | 状态 | 说明 |
-|---|---|---|
-| `contracts/` | ✅ 可用 | 三方（AI / 后端 / 前端）共同遵守的数据形状，结构 + 语义双重校验 |
-| `packages/params/` | ✅ 可用 | 预设（FIBA/NBA/CBA/青少年/3x3/半场）+ 逐项覆盖 + 校验 + 快照，唯一真源 |
-| `services/api/` | ✅ 可用 | 参数解析、球场预览、活动增删查、报告寄存（SQLite） |
-| `services/pipeline/` | 🟢 部分真实 | 事件仍是脚本化的，但**视频 ingest 是真的**：YOLO 检测 + ByteTrack 跟踪，跑真视频 |
-| `reference/legacy-demo/` | ⬜ 参考 | 20 页前端能跑，数据全 mock；已按 FIBA 6.75 m 口径回补并通过其自带校验 |
-| 逐人识别（号码 → 身份） | ⬜ 未验证 | 全项目唯一的生死假设，见下文 |
-
-## 两条底线
-
-**1. 参数只有一个来源。** 三分线半径、场地尺寸、计分规则全部来自 `packages/params`，pipeline 只透传，前端不复制一份 JS 解析器。同一场比赛的报告与界面必须用同一份 `params` 段。
-
-**2. 数字必须能被重算。** `contracts/validate.mjs` 的 R7 要求所有统计量等于「ACTIVE 事件重算」的结果，R8 要求 `coverage` 与事件数量一致。手填的 `points`、混进对手数据的 `shots_made` 都会被抓出来。这是本项目最容易犯、也最难发现的一类错——页面能打开，数字是错的。
-
-## v1.1 要做的功能
-
-完整表见 `docs/scope-v1.1.md`，用户能感知的变化：
-
-**A 层 · 让数字可信**
-
-1. **我方 / 对方分栏**——报告不再混算两队（原 demo 最危险的一处）
-2. **进攻方向**——按节记录，热图不再镜像
-3. **补一次出手 / 这不是投篮**——AI 漏检的 15% 与误检，教练都能修
-4. **从相册导入**——不必现场用小程序录
-
-**B 层 · 让球员可分析**
-
-5. **球员数据卡**——出手分布、命中率、弧外命中率，每个数字可点开到片段
-6. **三维评分**——终结 / 中远投 / 参与度，A–D 分档，样本不足显示 INSUFFICIENT
-7. **数据完整度**——"基于 3/5 场"，缺数据时明确说缺
-
-**C 层 · 缓做**（UI 保留、暂不接后端）：战术板、对手库、套路演练、实时分析、分享导出、3x3 完整规则
-
-## 未验证的假设
-
-按危险程度排：
-
-1. **单机位能不能做出逐人分析**——产品成立的前提。号码即身份只是 v0 权宜，同场次跨帧跟踪还没验证过。
-2. **相机长录是否可靠**——40 分钟、切后台、发热、中断，未真机验证。
-3. **上传链路**——2GB 视频在弱网下的进度、断点、重试。
-4. **单节时长的默认值**——参数表里 U8 6 分钟、U12/U15 8 分钟、U18/一线 10 分钟是默认值；现在可以在新建活动时按预设或逐项覆盖，未确认项会写进 `warnings`。
-
-> 三分线口径已确认：**统一 FIBA 成人标准 6.75 m + 底角直线段 6.60 m**（ADR-011）。原 demo 里 U8~U15 的 5.80 m 假设作废。
-
-## 授权
-
-`reference/` 下的内容是他人交付物，仓库未随附 LICENSE。授权范围已由项目所有者确认；对外分发前仍建议补一份书面授权。
+更多背景：[架构](docs/architecture.md) · [范围](docs/scope-v1.1.md) · [决策记录](docs/decisions.md) · [手拍素材规范](docs/video-delivery-spec.md)

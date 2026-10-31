@@ -1,0 +1,1 @@
+Page({data:{games:[],error:''},onShow(){this.load()},load(){wx.request({timeout:10000,url:getApp().globalData.apiBase+'/v1/review/games',success:r=>{if(r.statusCode===200)this.setData({games:r.data,error:''});else this.setData({error:'加载失败'})},fail:()=>this.setData({error:'无法连接后端，请检查服务地址'})})},open(e){wx.navigateTo({url:'/pages/review/index?id='+e.currentTarget.dataset.id})}})

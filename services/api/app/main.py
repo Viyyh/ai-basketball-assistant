@@ -275,4 +275,6 @@ def create_app(db_path: Optional[str | Path] = None) -> FastAPI:
             raise HTTPException(status_code=404, detail="该活动还没有报告")
         return report
 
+    from .review import install_review
+    install_review(app, store)
     return app
