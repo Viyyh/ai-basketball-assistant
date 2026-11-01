@@ -36,20 +36,29 @@ python3 scripts/review_gateway.py --user alice --disable
 
 这些命令不要求重启服务。账号配置读写使用锁和原子替换，避免隧道网址更新覆盖刚修改的白名单。只向管理员提供本机账号管理，不向远程用户暴露管理接口。
 
-## 启动、守护与关闭
+## 按需开启与关闭（当前默认）
+
+在Finder中进入仓库根目录，双击：
+
+- `开启远程审核.command`：启动分享并显示本次网址；重复开启不会重建已在运行的隧道。
+- `关闭远程审核.command`：关闭网关、临时隧道与该组专用后端；原有本地审核服务、账号、视频和数据库不删除。
+- `查看远程审核状态.command`：显示开启/关闭状态与当前网址。
+
+也可在仓库目录的终端运行：
 
 ```sh
-# 首次生成本地账号配置（已存在则不覆盖）
-python3 scripts/review_gateway.py --setup
-# 安装当前用户的登录启动项，保持服务异常后自动重启
-python3 scripts/install_remote_review_agent.py
-# 移除自动启动并关闭这组远程服务，保留所有数据库和账号文件
-python3 scripts/install_remote_review_agent.py --remove
+python3 scripts/review_remote.py start
+python3 scripts/review_remote.py stop
+python3 scripts/review_remote.py status
 ```
 
-LaunchAgent为 `com.victor.basketball-review`，当前用户登录后运行；supervisor管理网关8014、四个专用后端18010/18011/18012/18013和cloudflared。均仅绑定127.0.0.1。不会把电脑其他服务、磁盘目录或SQLite端口发布出去，也不改变原有8010/8012/8013本机入口。
+此模式的服务定义保存在Git忽略的 `data/access/on-demand-agent.plist`，只在明确开启时交给launchd守护；**不会放进登录启动目录，也不会在下次登录电脑时自动打开**。分享开启期间进程异常仍会恢复，必须用stop明确关闭，不能只关浏览器或终端窗口。
 
-必须电脑开机、联网并处于可运行状态。关机、断网、休眠或部分合盖情形会中断访问；自动启动不等于24小时云服务器。没有为了本功能关闭系统休眠或启用远程唤醒。
+此前安装的登录启动项已移除。旧的 `install_remote_review_agent.py` 仅保留为可选的常驻模式工具，当前不需要运行它；start/stop也会移除本项目遗留的登录启动文件。
+
+supervisor只管理本轮专用后端18010/18011/18012/18013、网关8014与cloudflared。均仅绑定127.0.0.1，不改变原有8010/8012/8013本机入口。账户密码不因开关而变化；新开启的临时网址通常会变化，请重新复制网址给审核者。
+
+必须电脑开机、联网并处于可运行状态。关机、断网、休眠或部分合盖情形会中断访问；没有为了本功能关闭系统休眠或启用远程唤醒。
 
 Cloudflare Quick Tunnel只提供临时随机网址，适用于当前测试分享；不保证生产可用性。官方说明：[Quick Tunnels](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/)。后续取得域名和Cloudflare账号后，可换命名隧道及固定域名，保留同一权限入口。
 

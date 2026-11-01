@@ -38,3 +38,5 @@
 个人复盘：`prepare_player_session.py` 幂等导入版本化的助手候选和本地来源；`start-player-review.sh` 启动8013工作台；`index_video_timestamps.py` 检查全片展示时间戳；`evaluate_shot_events.py` 对完整审核范围计算一对一事件指标。格式与使用边界见 [说明](../docs/player-review-workbench.md)。
 
 远程审核：`review_gateway.py` 管理本地白名单与受保护代理；`remote_review_supervisor.py` 守护专用后端和临时隧道；`install_remote_review_agent.py` 安装/移除当前用户登录启动项。账号、网址和密码只保存在data/access；操作说明见 [远程访问](../docs/remote-review-access.md)。
+
+按需远程控制：`review_remote.py start|stop|status`；仓库根目录三个中文.command文件可在Finder双击。当前默认不用登录自启动工具。
