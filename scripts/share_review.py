@@ -31,5 +31,8 @@ def external_app(db,credentials):
   response=await call_next(request);response.headers['Cache-Control']='no-store';response.headers['X-Robots-Tag']='noindex, nofollow';return response
  return app
 
+def create_shared_app():
+ db,credentials=prepare();return external_app(db,credentials)
+
 if __name__=='__main__':
  db,credentials=prepare();uvicorn.run(external_app(db,credentials),host='127.0.0.1',port=8011)

@@ -36,3 +36,5 @@
 拍摄任务书：`python3 scripts/build_shooting_guide.py --font /path/to/CJK.ttf` 从 `docs/video-delivery-spec.md` 生成 `output/pdf/shooting-task-v2.pdf`，需另装reportlab（非推理运行依赖）。默认字体路径适用于本机macOS；其他环境通过 `--font` 指定支持中文的TrueType字体。审阅PDF渲染后，将同一文件复制到 `docs/shooting-task-v2.pdf` 发布；原始私有附件不入库。
 
 个人复盘：`prepare_player_session.py` 幂等导入版本化的助手候选和本地来源；`start-player-review.sh` 启动8013工作台；`index_video_timestamps.py` 检查全片展示时间戳；`evaluate_shot_events.py` 对完整审核范围计算一对一事件指标。格式与使用边界见 [说明](../docs/player-review-workbench.md)。
+
+远程审核：`review_gateway.py` 管理本地白名单与受保护代理；`remote_review_supervisor.py` 守护专用后端和临时隧道；`install_remote_review_agent.py` 安装/移除当前用户登录启动项。账号、网址和密码只保存在data/access；操作说明见 [远程访问](../docs/remote-review-access.md)。
