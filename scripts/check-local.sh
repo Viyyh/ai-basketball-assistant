@@ -9,6 +9,8 @@ if [[ -x "$ROOT/data/tools/node/bin/node" ]]; then export PATH="$ROOT/data/tools
 python3 scripts/test_dataset.py
 python3 scripts/test_library_db.py
 python3 scripts/test_training_export.py
+python3 scripts/test_player_workbench.py
+python3 scripts/test_shot_evaluation.py
 if [[ -f data/library/library.db && -f data/public-sources/pl-nba-audit/samples.json ]]; then
   python3 scripts/test_review_workbench.py
   python3 scripts/test_external_audit.py
