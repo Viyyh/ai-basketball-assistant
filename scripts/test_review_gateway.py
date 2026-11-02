@@ -21,7 +21,7 @@ class GatewayTests(unittest.TestCase):
             if request.url.path=='/':return httpx.Response(200,text="<html><body><input id='reviewer'><script>fetch('/api/state')</script></body></html>",headers={'Content-Type':'text/html'})
             if request.headers.get('range'):return httpx.Response(206,content=b'2345',headers={'Content-Range':'bytes 2-5/10','Accept-Ranges':'bytes'})
             return httpx.Response(200,json={'saved':True})
-        self.client=TestClient(create_app(self.config,httpx.MockTransport(backend)),base_url='https://testserver')
+        self.client=TestClient(create_app(self.config,httpx.MockTransport(backend),inventory_provider=lambda:{'player':{},'second':{'total':0,'pending':0},'external':{}}),base_url='https://testserver')
         self.client.__enter__()
     def tearDown(self):
         self.client.__exit__(None,None,None);self.temp.cleanup()

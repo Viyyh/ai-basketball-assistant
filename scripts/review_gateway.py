@@ -15,7 +15,7 @@ from pathlib import Path
 import re
 import secrets
 import time
-from urllib.parse import urlsplit
+from urllib.parse import urlsplit, urlencode
 
 import httpx
 from fastapi import FastAPI, Request
@@ -90,7 +90,7 @@ def permitted(app,path,method,role):
         if re.fullmatch('/api/review/'+key,path):return method=='POST'
     return False
 
-def create_app(config_path=DEFAULT_CONFIG,transport=None):
+def create_app(config_path=DEFAULT_CONFIG,transport=None, inventory_provider=None):
     config_path=Path(config_path);read_config(config_path)
     client=httpx.AsyncClient(transport=transport,timeout=httpx.Timeout(100,connect=5),trust_env=False)
     @asynccontextmanager
@@ -165,8 +165,24 @@ def create_app(config_path=DEFAULT_CONFIG,transport=None):
     def portal(request:Request):
         u=request.state.access
         cards=''.join(f'<article><h2>{html.escape(LABELS[k])}</h2><p>{"可审核与纠错" if grant=="review" else "仅查看"}</p><a href="/{k}/">进入</a></article>' for k,grant in u['apps'].items() if k in BACKENDS)
+        from review_manifest import build
+        inventory=inventory_provider() if inventory_provider else build()
+        tasks_html='<h2>本次协作待审核清单</h2><p>先确认身份 → 核对候选 → 连续看完分段并补齐漏掉的事件。以下为实时进度。</p>'
+        if 'player' in u['apps']:
+            queue=inventory['player']
+            tasks_html+=f"<p>个人复盘：{queue.get('players_pending',0)}个身份、{queue.get('event_pending',0)}条候选待确认。</p><details><summary>连续原片分段：{len(queue.get('continuous_tasks',[]))}个待复核区间（每段最多30秒）</summary><ol>"
+            for t in queue.get('continuous_tasks',[]):
+                query=urlencode({k:t[k] for k in ['source_id','start','end']})
+                label=f"{t['name']} · {t['start']:.2f}-{t['end']:.2f}秒"
+                tasks_html+=f'<li><a href="/player/?{html.escape(query,quote=True)}">{html.escape(label)}</a></li>' if t['media_current'] else f'<li>{html.escape(label)}：原片缺失或变化，暂停审核</li>'
+            tasks_html+='</ol></details>'
+        if 'second' in u['apps']:
+            counts=inventory['second'];tasks_html+=f"<p>独立二审：{counts['total']}条素材，{counts['pending']}条尚未提交二审决定。二审不自动覆盖主库。</p>"
+        if 'external' in u['apps']:
+            ext=inventory['external'];tasks_html+=f"<p>外部代表样本：{ext.get('representatives',0)}条，{ext.get('missing_media',0)}条缺少视频，暂缓视觉确认。当前账号的读写权限见上方入口。</p>"
+        tasks_html+='<p>请每人使用独立账号，约定不同区间分工。看不清保留未知；看完整段并补齐事件后登记复核范围，不把候选直接当答案。</p>'
         role='管理员' if u['role']=='admin' else '审核账号'
-        return f'''<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>篮球审核入口</title><style>body{{background:#f2f6f2;color:#163b43;font:17px/1.7 system-ui;max-width:1000px;margin:50px auto;padding:20px}}section{{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}}article{{background:white;border:1px solid #cedfda;padding:24px;border-radius:15px}}a{{background:#087f80;color:white;padding:8px 20px;border-radius:8px;text-decoration:none}}</style><h1>篮球视频复盘与人工审核</h1><p>当前账号：{html.escape(request.state.user)} · {role}</p><section>{cards}</section><p>每次提交会使用你的登录账号署名。审核不自动批准训练；原片和数据库不对匿名访客开放。</p><p>数据库文件与账户管理不通过此网址提供。切换账号请使用新的隐私浏览窗口；退出时关闭该窗口。</p></html>'''
+        return f'''<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>篮球审核入口</title><style>body{{background:#f2f6f2;color:#163b43;font:17px/1.7 system-ui;max-width:1000px;margin:50px auto;padding:20px}}section{{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}}article{{background:white;border:1px solid #cedfda;padding:24px;border-radius:15px}}a{{background:#087f80;color:white;padding:8px 20px;border-radius:8px;text-decoration:none}}</style><h1>篮球视频复盘与人工审核</h1><p>当前账号：{html.escape(request.state.user)} · {role}</p><section>{cards}</section>{tasks_html}<p>每次提交会使用你的登录账号署名。审核不自动批准训练；原片和数据库不对匿名访客开放。</p><p>数据库文件与账户管理不通过此网址提供。切换账号请使用新的隐私浏览窗口；退出时关闭该窗口。</p></html>'''
 
     @app.api_route('/{app_key}/{path:path}',methods=['GET','HEAD','POST','DELETE','PUT','PATCH','OPTIONS'])
     async def proxy(app_key:str,path:str,request:Request):

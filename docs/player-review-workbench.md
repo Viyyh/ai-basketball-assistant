@@ -69,3 +69,9 @@ reference还必须包含 `exhaustive:true` 和 `reviewed_windows:[{"source_id":"
 ## 新会话配置格式（纯合成示意）
 
 本地seed JSON包含sources（已有intake来源ID数组）、players（id/name/cue）、events（id/source_id/player_id/start/end/kind/action/note），可选assistant_observations。比如source-a、athlete-1和event-1等ID均由该会话指定。先用intake_video.py登记实际原片，再准备本地seed，使用 `prepare_player_session.py --seed /本地路径/session.local.json --db data/library/session.db` 导入。候选和人物观察不作为源码公开发布；测试完全使用合成会话。
+
+## 协作待审总表
+
+远程登录首页按账号权限显示实时任务数量。个人复盘中缺少连续复核声明的时间自动拆为最多30秒的任务；点击可直接定位原片并预填复核区间，不会自动确认事件或区间。完成一段后补齐漏掉的事件、保留unknown原因，再登记该段已复核；刷新首页即可更新待办。多人应约定不同分段并使用不同账号，当前不提供自动抢占任务或锁定分工。
+
+`python3 scripts/review_manifest.py` 可重新生成本地 `data/library/collaboration-review/审核清单.md` 和inventory.json。清单包含个人候选/身份、连续分段、历史独立二审、缺媒体的外部代表，以及隔离模型候选/上游规模。清单不产生投票，不把历史通过自动变成精确真值。43条历史展示记录的二审不代表完成所有历史原片逐帧标注。
