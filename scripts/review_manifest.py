@@ -6,12 +6,13 @@ from player_workbench import ROOT, state
 
 
 def db_counts(path):
-    if not Path(path).exists():return {'total':0,'reviewed':0,'pending':0}
+    if not Path(path).exists():return {'total':0,'reviewed':0,'pending':0,'needs_revision':0}
     c=sqlite3.connect('file:'+str(path)+'?mode=ro',uri=True)
     try:
         total=c.execute('SELECT count(*) FROM annotations').fetchone()[0]
         reviewed=c.execute('SELECT count(DISTINCT annotation_id) FROM human_decisions').fetchone()[0]
-        return {'total':total,'reviewed':reviewed,'pending':total-reviewed}
+        needs=c.execute("SELECT count(*) FROM human_decisions WHERE id IN (SELECT max(id) FROM human_decisions GROUP BY annotation_id) AND decision='uncertain'").fetchone()[0]
+        return {'total':total,'reviewed':reviewed,'pending':total-reviewed,'needs_revision':needs}
     finally:c.close()
 
 
@@ -55,7 +56,7 @@ if __name__=='__main__':
     lines=['# 本次协作审核清单','','先确认身份，再审核已有候选，最后连续看完原片并补充漏掉事件。','',
       f"- 个人复盘：{p.get('players_pending',0)}个身份待确认，{p.get('event_pending',0)}条动作待处理。",
       f"- 连续原片：{len(p.get('continuous_tasks',[]))}个不超过30秒的待复核区间。",
-      f"- 独立二审：{second['total']}条，总计{second['pending']}条尚未提交二审决定。",
+      f"- 独立二审：{second['total']}条，总计{second['pending']}条尚未提交二审决定，{second.get('needs_revision',0)}条需修改或再核验。",
       f"- 外部代表样本：{ext.get('representatives',0)}条，其中{ext.get('missing_media',0)}条缺媒体，暂不做视觉确认。",'',
       '开启远程审核后，登录首页会显示实时清单与分段入口。主库审核仅管理员可进入；独立二审不自动覆盖主库。',
       '建议每人使用独立账号；分配不同原片区间避免重复劳动。重叠区间不重复累计。未知结果保留unknown。','', '模型候选独立隔离；上游外部回合不是已经完成画面对照的材料。历史43条二审只覆盖展示记录，不代表已经逐帧核验所有历史原片。', '', '## 连续原片分段']

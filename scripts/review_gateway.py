@@ -77,6 +77,7 @@ def permitted(app,path,method,role):
     if path=='/api/export':return role=='admin' and method in ('GET','HEAD')
     key=r'[A-Za-z0-9_][A-Za-z0-9_.:-]*'
     if app=='player':
+        if path=='/api/settings':return method=='POST'
         if path=='/api/state':return method in ('GET','HEAD')
         if re.fullmatch('/api/media/'+key,path):return method in ('GET','HEAD')
         if re.fullmatch('/api/(players|events)/'+key,path):return method=='POST'
@@ -177,7 +178,7 @@ def create_app(config_path=DEFAULT_CONFIG,transport=None, inventory_provider=Non
                 tasks_html+=f'<li><a href="/player/?{html.escape(query,quote=True)}">{html.escape(label)}</a></li>' if t['media_current'] else f'<li>{html.escape(label)}：原片缺失或变化，暂停审核</li>'
             tasks_html+='</ol></details>'
         if 'second' in u['apps']:
-            counts=inventory['second'];tasks_html+=f"<p>独立二审：{counts['total']}条素材，{counts['pending']}条尚未提交二审决定。二审不自动覆盖主库。</p>"
+            counts=inventory['second'];tasks_html+=f"<p>独立二审：{counts['total']}条素材，{counts['pending']}条尚未提交二审决定，{counts.get('needs_revision',0)}条需修改或再核验。二审不自动覆盖主库。</p>"
         if 'external' in u['apps']:
             ext=inventory['external'];tasks_html+=f"<p>外部代表样本：{ext.get('representatives',0)}条，{ext.get('missing_media',0)}条缺少视频，暂缓视觉确认。当前账号的读写权限见上方入口。</p>"
         tasks_html+='<p>请每人使用独立账号，约定不同区间分工。看不清保留未知；看完整段并补齐事件后登记复核范围，不把候选直接当答案。</p>'
@@ -222,7 +223,7 @@ def create_app(config_path=DEFAULT_CONFIG,transport=None, inventory_provider=Non
             user=json.dumps(request.state.user).replace('<','\\u003c')
             style=''
             if access['role']!='admin':style+='#export,a[href$="/api/export"]{display:none!important}'
-            if grant!='review':style+='[data-decision],[data-vote],#save,#coverageSave,#new,#players button,#coverageList button{display:none!important}'
+            if grant!='review':style+='[data-decision],[data-vote],#save,#settingsSave,#coverageSave,#new,#players button,#coverageList button{display:none!important}'
             banner=f'<div style="padding:12px;background:#e6f3ec"><a href="/">返回入口</a> · {html.escape(request.state.user)} · {"可审核" if grant=="review" else "只读"}</div>'
             content=content.replace('<body>','<body>'+banner,1) if '<body>' in content else content.replace('</style>','</style>'+banner,1)
             content+=f'<style>{style}</style><script>const gatewayReviewer=document.getElementById("reviewer");if(gatewayReviewer){{gatewayReviewer.value={user};gatewayReviewer.readOnly=true;}}</script>'

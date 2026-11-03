@@ -1,0 +1,140 @@
+{
+  "version": "1.0",
+  "sources": [
+    "https://about.fiba.basketball/en/wabc-documents",
+    "https://www.basket.no/contentassets/d5ab4e7dffaa4a1aa20cfc6fe84659c0/fiba-europe-basketball-terminology_2022.pdf"
+  ],
+  "scope": "Annotation vocabulary, not learned model capabilities; action presence is separate from success",
+  "categories": {
+    "传球与持球": [
+      [
+        "pass",
+        "传球"
+      ],
+      [
+        "catch",
+        "接球"
+      ],
+      [
+        "dribble",
+        "运球"
+      ],
+      [
+        "handoff",
+        "手递手"
+      ],
+      [
+        "drive",
+        "持球突破"
+      ]
+    ],
+    "无球移动": [
+      [
+        "baseline_cut",
+        "溜底线"
+      ],
+      [
+        "backdoor_cut",
+        "反跑 / 后门切入"
+      ],
+      [
+        "v_cut",
+        "V字切入"
+      ],
+      [
+        "l_cut",
+        "L字切入"
+      ],
+      [
+        "curl_cut",
+        "绕掩护卷切"
+      ],
+      [
+        "flare_cut",
+        "外弹切出"
+      ],
+      [
+        "off_ball_cut",
+        "其他无球切入"
+      ],
+      [
+        "relocation",
+        "无球换位 / 补位"
+      ]
+    ],
+    "掩护与配合": [
+      [
+        "screen",
+        "掩护（未细分）"
+      ],
+      [
+        "on_ball_screen",
+        "持球掩护"
+      ],
+      [
+        "off_ball_screen",
+        "无球掩护"
+      ],
+      [
+        "pick_and_roll",
+        "挡拆顺下"
+      ],
+      [
+        "pick_and_pop",
+        "挡拆外弹"
+      ],
+      [
+        "screen_slip",
+        "假掩护提前顺下"
+      ],
+      [
+        "give_and_go",
+        "传切"
+      ],
+      [
+        "drive_and_kick",
+        "突破分球"
+      ],
+      [
+        "handoff_action",
+        "手递手配合"
+      ]
+    ],
+    "站位与防守": [
+      [
+        "spacing",
+        "进攻空间 / 站位"
+      ],
+      [
+        "help_defense",
+        "协防"
+      ],
+      [
+        "switch_defense",
+        "换防"
+      ],
+      [
+        "closeout",
+        "扑防"
+      ],
+      [
+        "box_out",
+        "卡位"
+      ],
+      [
+        "transition",
+        "攻防转换"
+      ]
+    ],
+    "其他": [
+      [
+        "no_clear_tactic",
+        "未见明确团队配合"
+      ],
+      [
+        "other",
+        "其他（说明证据）"
+      ]
+    ]
+  }
+}

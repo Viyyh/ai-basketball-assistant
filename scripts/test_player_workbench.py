@@ -134,4 +134,20 @@ class WorkbenchTests(unittest.TestCase):
         self.assertEqual((changed['version'],changed['status']),(2,'uncertain'))
         self.assertTrue(all(p['status']=='unconfirmed' for p in snapshot['players']))
 
+    def test_optional_settings_and_name_fallback(self):
+        payload=dict(reviewer='test',viewed=True,version=0,preferences={'player_names':{'p':'测试姓名'},'format':'2v2','goals':['passing','off_ball']})
+        self.assertEqual(self.client.post('/api/settings',json=payload,headers=self.headers).status_code,200)
+        state=self.client.get('/api/state').json()
+        self.assertEqual(state['players'][0]['display_name'],'测试姓名 · 球员')
+        self.assertIsNone(state['settings']['preferences']['court_length_m'])
+        self.assertEqual(self.client.post('/api/settings',json=payload,headers=self.headers).status_code,409)
+        payload['version']=1;payload['preferences']['player_names']={'p':''}
+        self.assertEqual(self.client.post('/api/settings',json=payload,headers=self.headers).status_code,200)
+        self.assertEqual(self.client.get('/api/state').json()['players'][0]['display_name'],'球员')
+
+    def test_settings_reject_invalid_geometry_and_rules(self):
+        for prefs in [{'court_width_m':-1},{'court_length_m':True},{'inside_points':3,'outside_points':2},{'player_names':{'missing':'name'}}]:
+            r=self.client.post('/api/settings',json=dict(reviewer='test',viewed=True,version=0,preferences=prefs),headers=self.headers)
+            self.assertEqual(r.status_code,422)
+
 if __name__=='__main__':unittest.main()

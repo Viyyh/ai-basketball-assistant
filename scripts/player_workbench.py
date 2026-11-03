@@ -15,12 +15,17 @@ from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from pydantic import BaseModel, ConfigDict, Field
 
+from session_preferences import Preferences
 ROOT = Path(__file__).resolve().parents[1]
 
 class Write(BaseModel):
     model_config = ConfigDict(extra='forbid', allow_inf_nan=False)
     reviewer: str = Field(min_length=1, max_length=80)
     viewed: Literal[True]
+
+class Settings(Write):
+    version: int = Field(ge=0)
+    preferences: Preferences
 
 class Identity(Write):
     version: int = Field(ge=1)
@@ -58,6 +63,7 @@ def initialize(path):
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     with connect(path) as c:
         c.executescript('''
+        CREATE TABLE IF NOT EXISTS settings(id INTEGER PRIMARY KEY CHECK(id=1), payload TEXT NOT NULL, version INTEGER NOT NULL);
         CREATE TABLE IF NOT EXISTS sources(id TEXT PRIMARY KEY, name TEXT NOT NULL,
           path TEXT NOT NULL, sha256 TEXT NOT NULL, duration REAL NOT NULL CHECK(duration>0),
           bytes INTEGER NOT NULL, mtime_ns INTEGER NOT NULL, group_id TEXT NOT NULL);
@@ -96,6 +102,8 @@ def union_seconds(intervals):
 def state(path, include_history=False):
     with connect(path) as c:
         c.execute("BEGIN")
+        setting = c.execute('SELECT payload,version FROM settings WHERE id=1').fetchone() if c.execute("SELECT 1 FROM sqlite_master WHERE name='settings' AND type='table'").fetchone() else None
+        preferences = json.loads(setting['payload']) if setting else Preferences().model_dump()
         sources = [dict(r) for r in c.execute('SELECT * FROM sources ORDER BY id')]
         players = [dict(r) for r in c.execute('SELECT * FROM players ORDER BY id')]
         events = [dict(r) for r in c.execute('SELECT * FROM events ORDER BY source_id,start,id')]
@@ -105,6 +113,9 @@ def state(path, include_history=False):
     valid = {s['id']: current(s) for s in sources}
     reports = []
     for player in players:
+        player['number_label'] = player['name']
+        supplied_name = preferences.get('player_names',{}).get(player['id'],'').strip()
+        player['display_name'] = supplied_name+' · '+player['name'] if supplied_name else player['name']
         player['assistant_observation'] = observations.get(player['id']) if valid and all(valid.values()) else None
         eligible = [e for e in events if e['player_id'] == player['id'] and e['status'] == 'confirmed'
                     and e['kind'] == 'shot' and valid[e['source_id']] and player['status'] == 'confirmed']
@@ -122,7 +133,7 @@ def state(path, include_history=False):
         public_sources.append({k: s[k] for k in ('id', 'name', 'sha256', 'duration', 'group_id')}
                               | {'media_current': valid[s['id']], 'reviewed_seconds': reviewed,
                                  'reviewed_fraction': reviewed/s['duration']})
-    result = {'sources': public_sources, 'players': players, 'events': events, 'coverage': coverage,
+    result = {'settings':{'version':setting['version'] if setting else 0,'preferences':preferences,'scope':'用户提供，未验证；不等同于视频标定，尚不驱动旧参数层或得分计算'},'sources': public_sources, 'players': players, 'events': events, 'coverage': coverage,
             'reports': reports, 'training_ready': False,
             'notice': '候选不是事实；模型置信度不等于准确率；范围复核由审核者声明，不自动成为盲测或训练金标准。'}
     if include_history:
@@ -157,6 +168,21 @@ def create_app(db_path=None):
     @app.get('/api/state')
     def get_state():
         return state(db)
+
+    @app.post('/api/settings')
+    def save_settings(body: Settings, x_review_token: str = Header(default='')):
+        authorize(x_review_token,body.reviewer)
+        with connect(db) as c:
+            c.execute('BEGIN IMMEDIATE')
+            old=c.execute('SELECT * FROM settings WHERE id=1').fetchone()
+            if (old['version'] if old else 0)!=body.version:raise HTTPException(409,'配置已变化，请刷新')
+            ids={r[0] for r in c.execute('SELECT id FROM players')}
+            if set(body.preferences.player_names)-ids:raise HTTPException(422,'姓名只能关联已登记球员')
+            payload=body.preferences.model_dump()
+            version=body.version+1
+            c.execute('INSERT INTO settings VALUES(1,?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload,version=excluded.version',(json.dumps(payload,ensure_ascii=False),version))
+            audit(c,'session_settings','1',body.reviewer.strip(),{'before':dict(old) if old else None,'after':payload,'version':version})
+        return {'saved':True,'version':version}
 
     @app.get('/api/export')
     def export():

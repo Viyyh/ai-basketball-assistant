@@ -8,6 +8,7 @@ from fastapi.responses import HTMLResponse,FileResponse
 from pydantic import BaseModel,Field
 from typing import Literal
 ROOT=Path(__file__).resolve().parents[1]
+TACTIC_LABELS={key for rows in json.loads((ROOT/'datasets/event-taxonomy.json').read_text())['categories'].values() for key,_ in rows}
 def digest(value):return hashlib.sha256(json.dumps(value,sort_keys=True,ensure_ascii=False).encode()).hexdigest()
 class Decision(BaseModel):
  revision: str
@@ -88,7 +89,7 @@ def create_app(db_path=None):
   if 'object_definition' in body.correction and (item['kind']!='hoop_crop' or body.correction['object_definition']!='hoop_region'):raise HTTPException(422,'当前标注仅支持篮圈加篮网区域')
   if body.decision=='approved' and item['kind']=='tactic_sample':
    label=body.correction.get('tactic');start=body.correction.get('start_seconds');end=body.correction.get('end_seconds');window=item['payload']['review_window']
-   if label not in ['baseline_cut','screen','give_and_go','drive_and_kick','off_ball_cut']:raise HTTPException(422,'请选择明确的战术标签；无法判断时请暂缓')
+   if label not in TACTIC_LABELS:raise HTTPException(422,'请选择明确的战术标签；无法判断时请暂缓')
    if type(start) not in [int,float] or type(end) not in [int,float] or not math.isfinite(start) or not math.isfinite(end) or not window['start_seconds']<=start<end<=window['end_seconds']:raise HTTPException(422,'动作起止须在展示的视频区间内')
    if not body.note.strip():raise HTTPException(422,'请描述参与者和动作证据')
   if body.decision!='approved' and not body.note.strip():raise HTTPException(422,'请填写驳回或无法判断的原因')

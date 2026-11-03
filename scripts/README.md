@@ -40,3 +40,5 @@
 远程审核：`review_gateway.py` 管理本地白名单与受保护代理；`remote_review_supervisor.py` 守护专用后端和临时隧道；`install_remote_review_agent.py` 安装/移除当前用户登录启动项。账号、网址和密码只保存在data/access；操作说明见 [远程访问](../docs/remote-review-access.md)。
 
 按需远程控制：`review_remote.py start|stop|status`；仓库根目录三个中文.command文件可在Finder双击。当前默认不用登录自启动工具。
+
+本地统一入口：双击根目录“开启本地审核.command”，或运行 `python3 scripts/local_review.py`。自动打开127.0.0.1:8015，集中进入个人复盘、独立二审、主库和外部来源审核；不会启动公网隧道。
