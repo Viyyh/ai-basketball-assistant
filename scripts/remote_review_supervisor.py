@@ -21,7 +21,7 @@ def main():
     lock.write(str(os.getpid()));lock.flush()
     update_config(DEFAULT_CONFIG,lambda cfg:cfg.update(allowed_hosts=['127.0.0.1','localhost'],public_origin=None))
     env=os.environ.copy();env['PYTHONPATH']=str(ROOT/'scripts')
-    apps=[('materials','review_materials:create_app',18010),('second','share_review:create_shared_app',18011),('external','review_external:create_app',18012),('player','player_workbench:create_app',18013)]
+    apps=[('materials','review_materials:create_app',18010),('second','share_review:create_shared_app',18011),('external','review_external:create_app',18012),('player','player_workbench:create_app',18013),('acquired','review_acquired:create_app',18014)]
     commands={name:[sys.executable,'-m','uvicorn',factory,'--factory','--host','127.0.0.1','--port',str(port),'--no-access-log'] for name,factory,port in apps}
     commands['gateway']=[sys.executable,str(ROOT/'scripts/review_gateway.py')]
     commands['tunnel']=[str(ROOT/'data/tools/cloudflared'),'tunnel','--url','http://127.0.0.1:8014','--protocol','http2','--no-autoupdate']

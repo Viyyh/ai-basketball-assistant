@@ -47,6 +47,15 @@ def build(root=ROOT):
             result['external']={'representatives':len(rows),'missing_media':sum(not p or not (root/p).is_file() for (p,) in rows),
               'note':'缺少媒体的样本不能做视觉通过；全量上游记录不当作已核验。'}
         finally:c.close()
+    acquired=base/'acquired-review.db'
+    result['acquired']={'total':0,'reviewed':0,'pending':0}
+    if acquired.exists():
+        c=sqlite3.connect('file:'+str(acquired)+'?mode=ro',uri=True)
+        try:
+            total=c.execute('SELECT count(*) FROM clips').fetchone()[0]
+            reviewed=c.execute('SELECT count(DISTINCT clip_id) FROM decisions').fetchone()[0]
+            result['acquired']={'total':total,'reviewed':reviewed,'pending':total-reviewed}
+        finally:c.close()
     return result
 
 if __name__=='__main__':

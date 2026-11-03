@@ -24,9 +24,9 @@ from starlette.background import BackgroundTask
 
 ROOT=Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG=ROOT/'data/access/gateway.local.json'
-BACKENDS={'player':'http://127.0.0.1:18013','materials':'http://127.0.0.1:18010',
+BACKENDS={'acquired':'http://127.0.0.1:18014','player':'http://127.0.0.1:18013','materials':'http://127.0.0.1:18010',
           'second':'http://127.0.0.1:18011','external':'http://127.0.0.1:18012'}
-LABELS={'player':'个人视频复盘','materials':'主素材库审核','second':'独立二审','external':'外部来源核验'}
+LABELS={'acquired':'新采集片段审核','player':'个人视频复盘','materials':'主素材库审核','second':'独立二审','external':'外部来源核验'}
 ITERATIONS=600_000
 
 def password_hash(password,salt=None):
@@ -65,7 +65,7 @@ def setup(path=DEFAULT_CONFIG):
     admin=secrets.token_urlsafe(20);reviewer=secrets.token_urlsafe(20)
     users={
       'owner':password_hash(admin)|{'enabled':True,'role':'admin','apps':{k:'review' for k in BACKENDS}},
-      'reviewer':password_hash(reviewer)|{'enabled':True,'role':'reviewer','apps':{'player':'review','second':'review','external':'view'}}}
+      'reviewer':password_hash(reviewer)|{'enabled':True,'role':'reviewer','apps':{'acquired':'review','player':'review','second':'review','external':'view'}}}
     private_write(path,{'users':users,'allowed_hosts':['127.0.0.1','localhost'],'public_origin':None})
     private_write(path.parent/'credentials.local.json',{'owner':admin,'reviewer':reviewer,
       'note':'owner为管理员；reviewer可以个人复盘纠错与独立二审。不要分享owner。可用user命令创建独立账号。'})
@@ -83,7 +83,7 @@ def permitted(app,path,method,role):
         if re.fullmatch('/api/(players|events)/'+key,path):return method=='POST'
         if path=='/api/coverage':return method=='POST'
         if re.fullmatch('/api/coverage/'+key,path):return method=='DELETE'
-    elif app in ('materials','second'):
+    elif app in ('materials','second','acquired'):
         if path=='/api/queue' or re.fullmatch('/api/(media|context)/'+key,path):return method in ('GET','HEAD')
         if re.fullmatch('/api/review/'+key,path):return method=='POST'
     elif app=='external':
@@ -169,6 +169,8 @@ def create_app(config_path=DEFAULT_CONFIG,transport=None, inventory_provider=Non
         from review_manifest import build
         inventory=inventory_provider() if inventory_provider else build()
         tasks_html='<h2>本次协作待审核清单</h2><p>先确认身份 → 核对候选 → 连续看完分段并补齐漏掉的事件。以下为实时进度。</p>'
+        if 'acquired' in u['apps']:
+            acquired=inventory.get('acquired',{});tasks_html+=f"<p>新采集片段：{acquired.get('total',0)}条，{acquired.get('pending',0)}条尚未提交人工决定。只确认所标区间，训练仍需单独批准。</p>"
         if 'player' in u['apps']:
             queue=inventory['player']
             tasks_html+=f"<p>个人复盘：{queue.get('players_pending',0)}个身份、{queue.get('event_pending',0)}条候选待确认。</p><details><summary>连续原片分段：{len(queue.get('continuous_tasks',[]))}个待复核区间（每段最多30秒）</summary><ol>"
@@ -245,7 +247,7 @@ if __name__=='__main__':
             update_config(a.config,lambda c:c['users'][a.user].update(enabled=False));print('Account disabled')
         else:
             password=secrets.token_urlsafe(20);role=a.role or 'reviewer'
-            apps={k:'review' for k in BACKENDS} if role=='admin' else {'player':'review' if role=='reviewer' else 'view','second':'review' if role=='reviewer' else 'view','external':'view'}
+            apps={k:'review' for k in BACKENDS} if role=='admin' else {'acquired':'review' if role=='reviewer' else 'view','player':'review' if role=='reviewer' else 'view','second':'review' if role=='reviewer' else 'view','external':'view'}
             account=password_hash(password)|{'role':role,'enabled':True,'apps':apps}
             update_config(a.config,lambda c:c['users'].update({a.user:account}))
             dest=Path(a.config).parent/'credentials.local.json'

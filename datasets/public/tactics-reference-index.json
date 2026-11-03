@@ -1,0 +1,194 @@
+{
+  "date": "2026-11-04",
+  "scope": "Reference index and annotation guidance only; no acquired videos or approved training labels",
+  "sources": [
+    {
+      "id": "wabc-l1",
+      "url": "https://assets.fiba.basketball/image/upload/documents-corporate-wabc-coaching-level-manuals-level-1-eng.pdf",
+      "title": "FIBA/WABC一级教练手册",
+      "kind": "manual",
+      "inspection": "search_index_inspected",
+      "media_downloaded": false,
+      "training_eligible": false,
+      "usage_status": "not_cleared_for_training"
+    },
+    {
+      "id": "wabc-l2",
+      "url": "https://assets.fiba.basketball/image/upload/documents-corporate-wabc-coaching-manual-level-2-eng.pdf",
+      "title": "FIBA/WABC二级教练手册",
+      "kind": "manual",
+      "inspection": "search_index_inspected",
+      "media_downloaded": false,
+      "training_eligible": false,
+      "usage_status": "not_cleared_for_training"
+    },
+    {
+      "id": "wabc-clinics",
+      "url": "https://about.fiba.basketball/en/wabc-videos",
+      "title": "WABC官方教学视频目录",
+      "kind": "video_directory",
+      "inspection": "search_index_inspected_direct_fetch_403",
+      "media_downloaded": false,
+      "training_eligible": false,
+      "usage_status": "not_cleared_for_training"
+    },
+    {
+      "id": "wabc-development",
+      "url": "https://about.fiba.basketball/en/wabc-coaching-development-project",
+      "title": "WABC教练发展视频系列",
+      "kind": "video_directory",
+      "inspection": "search_index_inspected_direct_fetch_403",
+      "media_downloaded": false,
+      "training_eligible": false,
+      "usage_status": "not_cleared_for_training"
+    },
+    {
+      "id": "finesports",
+      "url": "https://github.com/PKU-ICST-MIPL/FineSports_CVPR2024",
+      "title": "FineSports官方仓库",
+      "kind": "research_dataset",
+      "inspection": "repository_page_inspected",
+      "media_downloaded": false,
+      "training_eligible": false,
+      "usage_status": "not_cleared_for_training"
+    },
+    {
+      "id": "basket",
+      "url": "https://github.com/yulupan00/BASKET",
+      "title": "BASKET官方仓库",
+      "kind": "research_dataset",
+      "inspection": "repository_page_inspected",
+      "media_downloaded": false,
+      "training_eligible": false,
+      "usage_status": "not_cleared_for_training"
+    }
+  ],
+  "topics": [
+    {
+      "label": "give_and_go",
+      "title": "传切",
+      "source_id": "wabc-l1",
+      "locator": "2.1.1",
+      "annotation_guidance": "传球后切入；回传和终结结果分别标注。",
+      "video_time_window": null,
+      "visually_verified": false
+    },
+    {
+      "label": "spacing",
+      "title": "进攻空间",
+      "source_id": "wabc-l1",
+      "locator": "2.1.1–2.1.3",
+      "annotation_guidance": "记录站位与移动时机；不从单帧认定好坏。",
+      "video_time_window": null,
+      "visually_verified": false
+    },
+    {
+      "label": "relocation",
+      "title": "切入后补位",
+      "source_id": "wabc-l1",
+      "locator": "2.1.2",
+      "annotation_guidance": "记录切入者和补位者连续路径。",
+      "video_time_window": null,
+      "visually_verified": false
+    },
+    {
+      "label": "pass",
+      "title": "转移球",
+      "source_id": "wabc-l1",
+      "locator": "2.1.4",
+      "annotation_guidance": "记录出球者、接球者和方向，区分成功与未知。",
+      "video_time_window": null,
+      "visually_verified": false
+    },
+    {
+      "label": "drive_and_kick",
+      "title": "突破与接应",
+      "source_id": "wabc-l1",
+      "locator": "2.1.5",
+      "annotation_guidance": "突破、接应位置和分球作为关联事件。",
+      "video_time_window": null,
+      "visually_verified": false
+    },
+    {
+      "label": "off_ball_screen",
+      "title": "无球掩护",
+      "source_id": "wabc-l1",
+      "locator": "2.2.1–2.2.5",
+      "annotation_guidance": "至少记录掩护者、使用者和相关防守者。",
+      "video_time_window": null,
+      "visually_verified": false
+    },
+    {
+      "label": "curl_cut",
+      "title": "卷切",
+      "source_id": "wabc-l1",
+      "locator": "2.2.3",
+      "annotation_guidance": "用连续路径确认绕掩护向内切入。",
+      "video_time_window": null,
+      "visually_verified": false
+    },
+    {
+      "label": "backdoor_cut",
+      "title": "反跑切入",
+      "source_id": "wabc-l1",
+      "locator": "2.2.4",
+      "annotation_guidance": "记录切入方向和防守者位置，不靠标题判定。",
+      "video_time_window": null,
+      "visually_verified": false
+    },
+    {
+      "label": "flare_cut",
+      "title": "外弹切出",
+      "source_id": "wabc-l1",
+      "locator": "2.2.5",
+      "annotation_guidance": "区分向外切出与普通走位。",
+      "video_time_window": null,
+      "visually_verified": false
+    },
+    {
+      "label": "pick_and_pop",
+      "title": "掩护后外弹",
+      "source_id": "wabc-l1",
+      "locator": "2.2.6",
+      "annotation_guidance": "先确认掩护，再确认后续外弹。",
+      "video_time_window": null,
+      "visually_verified": false
+    },
+    {
+      "label": "on_ball_screen",
+      "title": "持球掩护选择",
+      "source_id": "wabc-l1",
+      "locator": "2.2.10",
+      "annotation_guidance": "掩护动作与持球者后续决策分开。",
+      "video_time_window": null,
+      "visually_verified": false
+    },
+    {
+      "label": "transition",
+      "title": "攻防转换",
+      "source_id": "wabc-l1",
+      "locator": "2.3",
+      "annotation_guidance": "记录转换起点、推进、传球与落位。",
+      "video_time_window": null,
+      "visually_verified": false
+    },
+    {
+      "label": "handoff_action",
+      "title": "手递手配合",
+      "source_id": "wabc-l2",
+      "locator": "2.1.1",
+      "annotation_guidance": "交接球和跑动关系一起核验。",
+      "video_time_window": null,
+      "visually_verified": false
+    },
+    {
+      "label": "pick_and_roll",
+      "title": "中路挡拆",
+      "source_id": "wabc-l2",
+      "locator": "2.2.1",
+      "annotation_guidance": "掩护、持球推进与顺下分别标注并关联。",
+      "video_time_window": null,
+      "visually_verified": false
+    }
+  ]
+}

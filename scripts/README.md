@@ -42,3 +42,5 @@
 按需远程控制：`review_remote.py start|stop|status`；仓库根目录三个中文.command文件可在Finder双击。当前默认不用登录自启动工具。
 
 本地统一入口：双击根目录“开启本地审核.command”，或运行 `python3 scripts/local_review.py`。自动打开127.0.0.1:8015，集中进入个人复盘、独立二审、主库和外部来源审核；不会启动公网隧道。
+
+外部片段：`collect_public_pilot.py`实际分段获取作者公开样例，`review_acquired.py`提供多标签审核，独立库acquired-review.db。见 [接收与边界](../docs/external-clip-intake.md)。

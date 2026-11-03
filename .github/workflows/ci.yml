@@ -39,6 +39,8 @@ jobs:
           python3 scripts/test_player_workbench.py
           python3 scripts/test_shot_evaluation.py
           python3 scripts/test_review_gateway.py
+          mkdir -p data
+          python3 scripts/test_acquired_review.py
 
       # 单元测试通过但契约样例漂移，是最容易被忽略的一种失败：
       # 代码改了、样例没重生成，前端照着旧样例开发。

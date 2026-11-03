@@ -12,6 +12,8 @@ python3 scripts/test_training_export.py
 python3 scripts/test_player_workbench.py
 python3 scripts/test_shot_evaluation.py
 python3 scripts/test_review_gateway.py
+mkdir -p data
+python3 scripts/test_acquired_review.py
 if [[ -f data/library/library.db && -f data/public-sources/pl-nba-audit/samples.json ]]; then
   python3 scripts/test_review_workbench.py
   python3 scripts/test_external_audit.py
